@@ -1,13 +1,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use std::f32::consts::PI;
-
-use egui::{Layout, Pos2, Rect, Response};
 // hide console window on Windows in release
 // use egui_miniquad as egui_mq;
 use miniquad as mq;
 use miniquad::*;
 
 use glam::{Mat4, Vec2, Vec3, vec2, vec3};
+
+use std::time::Instant;
 
 mod cube;
 use cube::*;
@@ -16,7 +16,7 @@ use cube::*;
 #[derive(Debug)]
 struct Vertex {
     pos: [f32; 3],
-    color: [f32; 4],
+    rat: f32
 }
 
 struct Camera {
@@ -35,6 +35,9 @@ struct MyMiniquadApp {
     ic: u16,
 
     prev_pos: Vec2,
+    last_frame_t: Instant,
+    holding_mouse: bool,
+    kb_motion: Vec2,
 }
 
 impl MyMiniquadApp {
@@ -43,10 +46,10 @@ impl MyMiniquadApp {
 
         let (width, height) = window::screen_size();
         let projection =
-            Mat4::perspective_rh_gl(120.0f32.to_radians(), width / height, 0.001, 100.0);
+            Mat4::perspective_rh_gl(120.0f32.to_radians(), width / height, 0.001, 100000.0);
         let camera: Camera = Camera {
             projection: projection,
-            position: vec3(0., 0., 0.),
+            position: vec3(0., 0., -30.),
             orientation: vec2(0., 0.),
         };
 
@@ -55,10 +58,18 @@ impl MyMiniquadApp {
         let mut v: Vec<Vertex> = Vec::new();
         let mut i: Vec<u16> = Vec::new();
 
-        gen_cube!(v, i, ic, vc, -1., -1., -1., 1., 1., 1.);
-        gen_cube!(v, i, ic, vc, 0., 0., -1., 1., 1., 1.);
+        //
+        //
+        // ------- [ gen geometry ] --------
+        //
+        //
 
-        println!("{:#?}", v);
+        gen_cube!(v, i, ic, vc, -20., -6., -30., 40., 6., 60.);
+
+        //
+        //
+
+        // println!("{:#?}", v);
 
         #[rustfmt::skip]
         // let vertices: &[Vertex] = &[
@@ -112,11 +123,13 @@ impl MyMiniquadApp {
             ],
             &[
                 VertexAttribute::new("in_pos", VertexFormat::Float3),
-                VertexAttribute::new("in_color", VertexFormat::Float4),
+                VertexAttribute::new("rat", VertexFormat::Float1),
             ],
             shader,
             PipelineParams {
-                cull_face: CullFace::Nothing,
+                cull_face: CullFace::Back,
+                depth_test: Comparison::LessOrEqual,
+                depth_write: true,
                 ..Default::default()
             },
         );
@@ -131,6 +144,9 @@ impl MyMiniquadApp {
             ic,
 
             prev_pos: vec2(0., 0.),
+            last_frame_t: Instant::now(),
+            holding_mouse: false,
+            kb_motion: vec2(0.0, 0.0)
         }
     }
 }
@@ -151,7 +167,7 @@ mod shader {
 
     pub const VERTEX: &str = r#"#version 100
     attribute vec3 in_pos;
-    attribute vec4 in_color;
+    attribute float rat;
 
     varying lowp vec4 color;
 
@@ -159,8 +175,12 @@ mod shader {
 
     void main()
     {
-        gl_Position = mpv * vec4(in_pos, 1.0);
-        color = in_color;
+        gl_Position = mpv * vec4(in_pos * vec3(1.0, 1.0, -1.0), 1.0);;
+        color = mix(
+            vec4(0.1, 0.0, 0.05, 1.0),
+            mix(vec4(0.3, 0.6, 0.5, 1.0), vec4(0.2, 0.4, 0.6, 1.0), rat),
+            1.0 / clamp(gl_Position.z, 10.0, 10000.0) * 10.0
+        );
     }"#;
 
     pub const FRAGMENT: &str = r#"#version 100
@@ -189,12 +209,28 @@ impl mq::EventHandler for MyMiniquadApp {
     fn update(&mut self) {}
 
     fn draw(&mut self) {
-        let view = Mat4::look_at_rh(self.camera.position, vec3(0., 0., 0.), vec3(0., 1., 0.));
+        let rot = self.camera.orientation;
+        let forward: Vec3 = vec3(
+            rot.x.sin() * rot.y.cos(),
+            rot.y.sin(),
+            rot.x.cos() * rot.y.cos(),
+        );
+
+        let right = Vec3::cross(forward, vec3(0., 1., 0.));
+        let up = Vec3::cross(right, forward);
+
+        //quick cam movement
+        let now = Instant::now();
+        let deltatime: f32 = now.duration_since(self.last_frame_t).as_secs_f32();
+        self.last_frame_t = now;
+        self.camera.position = self.camera.position + 20. * deltatime * ( forward * self.kb_motion.y + right * self.kb_motion.x );
+
+        let view = Mat4::look_at_rh(self.camera.position, self.camera.position + forward, up);
         let vs_params = shader::Uniforms {
             mpv: self.camera.projection
                 * view
-                * (Mat4::from_rotation_y(self.camera.orientation.x)
-                    * Mat4::from_rotation_x(self.camera.orientation.y)),
+                // * (Mat4::from_rotation_y(self.camera.orientation.x)
+                //     * Mat4::from_rotation_x(self.camera.orientation.y)),
         };
 
         self.ctx
@@ -212,11 +248,31 @@ impl mq::EventHandler for MyMiniquadApp {
             //     ui.heading("Hello World!");
             // });
             egui::SidePanel::right("my_right_panel").show(egui_ctx, |ui| {
-                ui.horizontal(|ui| {
-                    ui.heading(format!(
-                        "rotat: {}{}",
-                        self.camera.orientation.x, self.camera.orientation.y
-                    ))
+                ui.vertical(|ui| {
+                    ui.horizontal(|ui| {
+                        ui.heading(format!(
+                            "rotat: {} {}",
+                            self.camera.orientation.x, self.camera.orientation.y
+                        ))
+                    });
+                    ui.horizontal(|ui| {
+                        ui.heading(format!(
+                            "forward: {}",
+                            forward
+                        ))
+                    });
+                    ui.horizontal(|ui| {
+                        ui.heading(format!(
+                            "up: {}",
+                            up
+                        ))
+                    });
+                    ui.horizontal(|ui| {
+                        ui.heading(format!(
+                            "kb_motion: {}",
+                            self.kb_motion
+                        ))
+                    });
                 })
             });
         });
@@ -233,7 +289,10 @@ impl mq::EventHandler for MyMiniquadApp {
     fn mouse_motion_event(&mut self, x: f32, y: f32) {
         self.egui_mq.mouse_motion_event(x, y);
         let vek = vec2(x, y);
-        self.camera.orientation += ((vek - self.prev_pos) / -180.) * PI;
+        if self.holding_mouse {
+            self.camera.orientation += ((vek - self.prev_pos) / -180.) * PI;
+            self.camera.orientation = vec2(self.camera.orientation.x % (2. * PI), self.camera.orientation.y % (2. * PI));
+        }
         self.prev_pos = vek;
     }
 
@@ -243,10 +302,16 @@ impl mq::EventHandler for MyMiniquadApp {
 
     fn mouse_button_down_event(&mut self, mb: mq::MouseButton, x: f32, y: f32) {
         self.egui_mq.mouse_button_down_event(mb, x, y);
+        if mb == mq::MouseButton::Right {
+            self.holding_mouse = true;
+        }
     }
 
     fn mouse_button_up_event(&mut self, mb: mq::MouseButton, x: f32, y: f32) {
         self.egui_mq.mouse_button_up_event(mb, x, y);
+        if mb == mq::MouseButton::Right {
+            self.holding_mouse = false;
+        }
     }
 
     fn char_event(&mut self, character: char, _keymods: mq::KeyMods, _repeat: bool) {
@@ -257,17 +322,42 @@ impl mq::EventHandler for MyMiniquadApp {
         self.egui_mq.key_down_event(keycode, keymods);
         match keycode {
             mq::KeyCode::W => {
-                self.camera.position.z -= 1.;
+                self.kb_motion.y += 1.;
             }
             mq::KeyCode::S => {
-                self.camera.position.z += 1.;
+                self.kb_motion.y -= 1.;
+            }
+            mq::KeyCode::A => {
+                self.kb_motion.x -= 1.;
+            }
+            mq::KeyCode::D => {
+                self.kb_motion.x += 1.;
             }
             _ => return,
         }
+        self.kb_motion.x = self.kb_motion.x.clamp(-1., 1.);
+        self.kb_motion.y = self.kb_motion.y.clamp(-1., 1.);
     }
 
     fn key_up_event(&mut self, keycode: mq::KeyCode, keymods: mq::KeyMods) {
         self.egui_mq.key_up_event(keycode, keymods);
+        match keycode {
+            mq::KeyCode::W => {
+                self.kb_motion.y -= 1.;
+            }
+            mq::KeyCode::S => {
+                self.kb_motion.y += 1.;
+            }
+            mq::KeyCode::A => {
+                self.kb_motion.x += 1.;
+            }
+            mq::KeyCode::D => {
+                self.kb_motion.x -= 1.;
+            }
+            _ => return,
+        }
+        self.kb_motion.x = self.kb_motion.x.clamp(-1., 1.);
+        self.kb_motion.y = self.kb_motion.y.clamp(-1., 1.);
     }
 }
 
