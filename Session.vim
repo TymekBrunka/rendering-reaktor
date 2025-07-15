@@ -18,8 +18,27 @@ badd +24 ~/Documents/rendering-reaktor/src/cube.rs
 badd +10 ~/Documents/rendering-reaktor/Cargo.toml
 argglobal
 %argdel
-edit ~/Documents/rendering-reaktor/src/main.rs
+edit ~/Documents/rendering-reaktor/src/cube.rs
+let s:save_splitbelow = &splitbelow
+let s:save_splitright = &splitright
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+let &splitbelow = s:save_splitbelow
+let &splitright = s:save_splitright
+wincmd t
+let s:save_winminheight = &winminheight
+let s:save_winminwidth = &winminwidth
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 42 + 29) / 58)
+exe '2resize ' . ((&lines * 12 + 29) / 58)
 argglobal
+balt ~/Documents/rendering-reaktor/src/main.rs
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -30,12 +49,37 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 215 - ((27 * winheight(0) + 27) / 55)
+let s:l = 24 - ((17 * winheight(0) + 21) / 42)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 215
-normal! 036|
+keepjumps 24
+normal! 0
+wincmd w
+argglobal
+if bufexists(fnamemodify("term://~/Documents/rendering-reaktor//136178:/usr/bin/zsh;\#toggleterm\#1", ":p")) | buffer term://~/Documents/rendering-reaktor//136178:/usr/bin/zsh;\#toggleterm\#1 | else | edit term://~/Documents/rendering-reaktor//136178:/usr/bin/zsh;\#toggleterm\#1 | endif
+if &buftype ==# 'terminal'
+  silent file term://~/Documents/rendering-reaktor//136178:/usr/bin/zsh;\#toggleterm\#1
+endif
+balt ~/Documents/rendering-reaktor/src/cube.rs
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+let s:l = 255 - ((11 * winheight(0) + 6) / 12)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 255
+normal! 04|
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 42 + 29) / 58)
+exe '2resize ' . ((&lines * 12 + 29) / 58)
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
@@ -43,6 +87,8 @@ endif
 unlet! s:wipebuf
 set winheight=1 winwidth=20
 let &shortmess = s:shortmess_save
+let &winminheight = s:save_winminheight
+let &winminwidth = s:save_winminwidth
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)

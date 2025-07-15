@@ -68,7 +68,7 @@ impl MyMiniquadApp {
         //
         //
 
-        gen_cube!(v, i, ic, vc, -20., -6., -30., 40., 6., 60.);
+        gen_cube!(v, i, ic, vc, -20., -3., -30., 40., 6., 60.);
         gen_point!(v, i, ic, vc, 0., 0., 0.);
 
         //
@@ -210,13 +210,13 @@ mod shader {
             // gl_Position.xyz /= gl_Position.w;
             gl_Position.w = 1.0;
             if (rat == 0.0) {
-                gl_Position.xy += vec2(-0.01, 0.02);
+                gl_Position.xy += vec2(-0.5, 1.0) * unit_size * 20.0;
                 point_cord = vec2(-1.0, 2.0);
             } else if (rat == 1.0) {
-                gl_Position.xy += vec2(-0.01, -0.01);
+                gl_Position.xy += vec2(-0.5, -0.5) * unit_size * 30.0;
                 point_cord = vec2(-1.0, -1.0);
             } else {
-                gl_Position.xy += vec2(0.02, -0.01);
+                gl_Position.xy += vec2(1.0, -0.5) * unit_size * 30.0;
                 point_cord = vec2(2.0, -1.0);
             }
         }
@@ -338,12 +338,17 @@ impl mq::EventHandler for MyMiniquadApp {
         self.ctx.commit_frame();
     }
 
+    fn resize_event(&mut self, width: f32, height: f32) {
+        self.camera.projection = Mat4::perspective_rh_gl(120.0f32.to_radians(), width / height, 0.001, 100000.0);
+        self.screen_size = vec2(width, height);
+    }
+
     fn mouse_motion_event(&mut self, x: f32, y: f32) {
         self.egui_mq.mouse_motion_event(x, y);
         let vek = vec2(x, y);
         if self.holding_mouse {
             self.camera.orientation += ((vek - self.prev_pos) / -180.) * PI;
-            self.camera.orientation = vec2(self.camera.orientation.x % (2. * PI), self.camera.orientation.y % (2. * PI));
+            self.camera.orientation = vec2(self.camera.orientation.x % (2. * PI), self.camera.orientation.y.clamp((-0.5 * PI) + 0.0001, (0.5 * PI) + 0.0001));
         }
         self.prev_pos = vek;
     }
