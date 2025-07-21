@@ -17,7 +17,11 @@ use util::*;
 struct Vertex {
     pos: [f32; 3],
     typ: f32,
-    rat: f32
+    rat: f32,
+
+    //for text rendering
+    char_index: f32,
+    strip_offset: f32,
 }
 
 struct Camera {
@@ -41,11 +45,16 @@ struct MyMiniquadApp {
     kb_motion: Vec2,
 
     screen_size: Vec2,
+    tx_id: TextureId
 }
 
 impl MyMiniquadApp {
     fn new() -> Self {
-        let mut ctx: Box<dyn RenderingBackend> = window::new_rendering_backend();
+        let mut ctx: Box<dyn RenderingBackend> = Box::new(GlContext::new());
+
+        let (header, image_data) = png_decoder::decode(include_bytes!("strip.png")).unwrap();
+
+        let tx_id = ctx.new_texture_from_rgba8(header.width as u16, header.height as u16, image_data.as_slice());
 
         let (width, height) = window::screen_size();
         let screen_size = vec2(width, height);
@@ -69,13 +78,14 @@ impl MyMiniquadApp {
         //
 
         gen_cube!(v, i, ic, vc, -20., -3., -30., 40., 6., 60.);
-        gen_point!(v, i, ic, vc, 0., 0., 0.);
+
+        gen_point!(v, i, ic, vc, -17.5, 0., 0.);
+        gen_right_side_text!(v, i, ic, vc, 0., 0., 0., 12, "\u{0002}0069,90mg/l".as_bytes());
 
         //
         //
 
         // println!("{:#?}", v);
-        println!("{:b}", 0x00000001 as u32);
 
         #[rustfmt::skip]
         // let vertices: &[Vertex] = &[
@@ -106,7 +116,7 @@ impl MyMiniquadApp {
         let bindings = Bindings {
             vertex_buffers: vec![vertex_buffer],
             index_buffer: index_buffer,
-            images: vec![],
+            images: vec![tx_id],
         };
 
         let shader = ctx
@@ -131,6 +141,8 @@ impl MyMiniquadApp {
                 VertexAttribute::new("in_pos", VertexFormat::Float3),
                 VertexAttribute::new("typ", VertexFormat::Float1),
                 VertexAttribute::new("rat", VertexFormat::Float1),
+                VertexAttribute::new("char_index", VertexFormat::Float1),
+                VertexAttribute::new("strip_offset", VertexFormat::Float1),
             ],
             shader,
             PipelineParams {
@@ -161,7 +173,8 @@ impl MyMiniquadApp {
             holding_mouse: false,
             kb_motion: vec2(0.0, 0.0),
 
-            screen_size
+            screen_size,
+            tx_id
         }
     }
 }
@@ -184,6 +197,8 @@ mod shader {
     attribute vec3 in_pos;
     attribute float typ;
     attribute float rat;
+    attribute float char_index;
+    attribute float strip_offset;
 
     varying lowp vec4 color;
     varying mediump float typp;
@@ -213,11 +228,29 @@ mod shader {
                 gl_Position.xy += vec2(-0.5, 1.0) * unit_size * 20.0;
                 point_cord = vec2(-1.0, 2.0);
             } else if (rat == 1.0) {
-                gl_Position.xy += vec2(-0.5, -0.5) * unit_size * 30.0;
+                gl_Position.xy += vec2(-0.5, -0.5) * unit_size * 20.0;
                 point_cord = vec2(-1.0, -1.0);
             } else {
-                gl_Position.xy += vec2(1.0, -0.5) * unit_size * 30.0;
+                gl_Position.xy += vec2(1.0, -0.5) * unit_size * 20.0;
                 point_cord = vec2(2.0, -1.0);
+            }
+        } else if (typ == 3.0) {
+            gl_Position.xyz /= gl_Position.w;
+            gl_Position.z = -clamp(gl_Position.z, -1.0, 5.0);
+            // gl_Position.xyz /= gl_Position.w;
+            gl_Position.w = 1.0;
+            if (rat == 0.0) {
+                gl_Position.xy += vec2(3.5 + (3.5 * char_index), 4.5) * unit_size * 3.5;
+                point_cord = vec2(0.0 + strip_offset, 0.0);
+            } else if (rat == 1.0) {
+                gl_Position.xy += vec2(3.5 + (3.5 * char_index), -4.5) * unit_size * 3.5;
+                point_cord = vec2(0.0 + strip_offset, 1.0);
+            } else if (rat == 2.0) {
+                gl_Position.xy += vec2(7.0 + (3.5 * char_index), -4.5) * unit_size * 3.5;
+                point_cord = vec2((1.0 / 128.0) + strip_offset, 1.0);
+            } else {
+                gl_Position.xy += vec2(7.0 + (3.5 * char_index), 4.5) * unit_size * 3.5;
+                point_cord = vec2((1.0 / 128.0) + strip_offset, 0.0);
             }
         }
     }"#;
@@ -230,7 +263,7 @@ mod shader {
 
     lowp float a;
 
-    uniform mediump mat4 mpv;
+    uniform sampler2D tex;
 
     void main() {
         gl_FragColor = color;
@@ -238,12 +271,14 @@ mod shader {
             a = 1.0 - length(point_cord);
             gl_FragColor = mix(vec4(0.0), vec4(1.0), a * 2.0);
             // gl_FragColor = vec4(1.0, 0.0, 0.0, 0.0);
+        } else if (typp == 3.0) {
+            gl_FragColor = texture2D(tex, point_cord);
         }
     }"#;
 
     pub fn meta() -> ShaderMeta {
         ShaderMeta {
-            images: vec![],
+            images: vec!["tex".to_string()],
             uniforms: UniformBlockLayout {
                 uniforms: vec![UniformDesc::new("mpv", UniformType::Mat4), UniformDesc::new("unit_size", UniformType::Float2)],
             },
