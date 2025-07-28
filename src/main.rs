@@ -5,6 +5,19 @@ use std::f32::consts::PI;
 use miniquad as mq;
 use miniquad::*;
 
+use rfd::FileDialog;
+use calamine::{Reader, open_workbook, Xlsx, DataType};
+
+//IOEXCEL DESER
+#[derive(Debug)]
+struct Row {
+    // #[column(name = "I21_RB1KO_PO4.Wartosc")]
+    rb1ko_po4: String,
+    // #[column(name = "I21_RB1KO_NH4.Wartosc")]
+    rb1ko_nh4: String,
+
+}
+
 use glam::{Mat4, Vec2, Vec3, vec2, vec3};
 
 use std::time::Instant;
@@ -13,7 +26,7 @@ mod util;
 use util::*;
 
 #[repr(C)]
-#[derive(Debug)]
+// #[derive(Debug)]
 struct Vertex {
     pos: [f32; 3],
     typ: f32,
@@ -79,8 +92,71 @@ impl MyMiniquadApp {
 
         gen_cube!(v, i, ic, vc, -20., -3., -30., 40., 6., 60.);
 
-        gen_point!(v, i, ic, vc, -17.5, 0., 0.);
-        gen_right_side_text!(v, i, ic, vc, 0., 0., 0., 12, "\u{0002}0069,90mg/l".as_bytes());
+        gen_point!(v, i, ic, vc, -17.5, 0., -22.5);
+        gen_right_side_text!(v, i, ic, vc, -17.5, 0., -22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, -12.5, 0., -22.5);
+        gen_right_side_text!(v, i, ic, vc, -12.5, 0., -22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, -7.5, 0., -22.5);
+        gen_right_side_text!(v, i, ic, vc, -7.5, 0., -22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, -2.5, 0., -22.5);
+        gen_right_side_text!(v, i, ic, vc, -2.5, 0., -22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+
+
+        gen_point!(v, i, ic, vc, -17.5, 0., -7.5);
+        gen_right_side_text!(v, i, ic, vc, -17.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, -12.5, 0., -7.5);
+        gen_right_side_text!(v, i, ic, vc, -12.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, -7.5, 0., -7.5);
+        gen_right_side_text!(v, i, ic, vc, -7.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, -2.5, 0., -7.5);
+        gen_right_side_text!(v, i, ic, vc, -2.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, 2.5, 0., -7.5);
+        gen_right_side_text!(v, i, ic, vc, 2.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, 7.5, 0., -7.5);
+        gen_right_side_text!(v, i, ic, vc, 7.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, 12.5, 0., -7.5);
+        gen_right_side_text!(v, i, ic, vc, 12.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, 17.5, 0., -7.5);
+        gen_right_side_text!(v, i, ic, vc, 17.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+
+
+        gen_point!(v, i, ic, vc, -12.5, 0., 22.5);
+        gen_right_side_text!(v, i, ic, vc, -12.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, -7.5, 0., 22.5);
+        gen_right_side_text!(v, i, ic, vc, -7.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, -2.5, 0., 22.5);
+        gen_right_side_text!(v, i, ic, vc, -2.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, 2.5, 0., 22.5);
+        gen_right_side_text!(v, i, ic, vc, 2.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, 7.5, 0., 22.5);
+        gen_right_side_text!(v, i, ic, vc, 7.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, 12.5, 0., 22.5);
+        gen_right_side_text!(v, i, ic, vc, 12.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(v, i, ic, vc, 17.5, 0., 22.5);
+        gen_right_side_text!(v, i, ic, vc, 17.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+
+
+        gen_point!(v, i, ic, vc, -17.5, 0., 7.5);
+        gen_right_side_text!(v, i, ic, vc, -17.5, 0., 7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
 
         //
         //
@@ -221,7 +297,7 @@ mod shader {
             );
         } else if (typ == 2.0) {
             gl_Position.xyz /= gl_Position.w;
-            gl_Position.z = -clamp(gl_Position.z, -1.0, 5.0);
+            gl_Position.z = clamp(gl_Position.z, -5.0, -1.0);
             // gl_Position.xyz /= gl_Position.w;
             gl_Position.w = 1.0;
             if (rat == 0.0) {
@@ -236,7 +312,7 @@ mod shader {
             }
         } else if (typ == 3.0) {
             gl_Position.xyz /= gl_Position.w;
-            gl_Position.z = -clamp(gl_Position.z, -1.0, 5.0);
+            gl_Position.z = clamp(gl_Position.z, -5.0, -1.0);
             // gl_Position.xyz /= gl_Position.w;
             gl_Position.w = 1.0;
             if (rat == 0.0) {
@@ -335,31 +411,25 @@ impl mq::EventHandler for MyMiniquadApp {
             //     ui.heading("Hello World!");
             // });
             egui::SidePanel::right("my_right_panel").show(egui_ctx, |ui| {
-                ui.vertical(|ui| {
-                    ui.horizontal(|ui| {
-                        ui.heading(format!(
-                            "rotat: {} {}",
-                            self.camera.orientation.x, self.camera.orientation.y
-                        ))
-                    });
-                    ui.horizontal(|ui| {
-                        ui.heading(format!(
-                            "forward: {}",
-                            forward
-                        ))
-                    });
-                    ui.horizontal(|ui| {
-                        ui.heading(format!(
-                            "up: {}",
-                            up
-                        ))
-                    });
-                    ui.horizontal(|ui| {
-                        ui.heading(format!(
-                            "kb_motion: {}",
-                            self.kb_motion
-                        ))
-                    });
+                ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center), |ui| {
+                    ui.heading("Reaktory");
+                    if ui.button("załaduj plik ze skoroszytem").clicked() {
+                        let file = FileDialog::new()
+                        .add_filter("excel", &["xlsx", "xls"])
+                        .set_directory("/")
+                        .pick_file();
+
+                        if file.is_some() {
+                            let file = file.unwrap();
+                            let filepath = file.as_path().to_str().unwrap();
+                            let mut workbook: Xlsx<_> = open_workbook(filepath).expect("Nie można otworzyć pliku.");
+                            if let Ok(r) = workbook.worksheet_range("Arkusz1") {
+                                for row in r.rows() {
+                                    println!("row={:?}, row[0]={:?}", row, row[0]);
+                                }
+                            }
+                        }
+                    }
                 })
             });
         });
