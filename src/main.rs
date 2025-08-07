@@ -177,7 +177,7 @@ impl ApplicationContext for Application {
     }
     fn update(&mut self) { }
     fn handle_window_event(&mut self, event: &glium::winit::event::WindowEvent, _window: &glium::winit::window::Window) {
-        match &event {
+        match event {
             WindowEvent::KeyboardInput { device_id, event, is_synthetic } => {
                 if event.state.is_pressed() {
                     if event.logical_key == "w" {
@@ -205,8 +205,8 @@ impl ApplicationContext for Application {
             }
 
             WindowEvent::MouseInput { device_id, state, button } => {
-                if button == MouseButton::Right {
-                    if state == ElementState::Pressed {
+                if button == &MouseButton::Right {
+                    if state == &ElementState::Pressed {
                         self.input.holding_rmb = true;
                     } else {
                         self.input.holding_rmb = false;
