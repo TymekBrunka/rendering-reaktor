@@ -13,16 +13,18 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +20 ~/Documents/rendering-reaktor/src/main.rs
-badd +1 ~/Documents/rendering-reaktor/src/cube.rs
-badd +9 ~/Documents/rendering-reaktor/Cargo.toml
-badd +23 ~/Documents/rendering-reaktor/src/glium_util.rs
-badd +39 ~/Documents/rendering-reaktor/src/types.rs
+badd +16 ~/Documents/rendering-reaktor/Cargo.toml
+badd +99 ~/Documents/rendering-reaktor/src/glium_util.rs
+badd +20 ~/Documents/rendering-reaktor/src/types.rs
+badd +16 ~/Documents/rendering-reaktor/src/shaders/3d_vertex.glsl
+badd +5 ~/Documents/rendering-reaktor/src/shaders/3d_fragment.glsl
+badd +76 ~/Documents/rendering-reaktor/src/util.rs
+badd +45 ~/Documents/rendering-reaktor/src/main.rs
 argglobal
 %argdel
-edit ~/Documents/rendering-reaktor/src/main.rs
+edit ~/Documents/rendering-reaktor/src/glium_util.rs
 argglobal
-balt ~/Documents/rendering-reaktor/src/types.rs
+balt ~/Documents/rendering-reaktor/src/main.rs
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -33,12 +35,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 16 - ((15 * winheight(0) + 27) / 55)
+let s:l = 99 - ((27 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 16
-normal! 0
+keepjumps 99
+normal! 059|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

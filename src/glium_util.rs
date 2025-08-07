@@ -1,35 +1,36 @@
-use std::num::NonZeroU32;
+use egui_glium::EguiGlium;
 use glium::Display;
-use glium::glutin::{
-    self,
-    surface::WindowSurface,
-    display::GetGlDisplay,
-};
+use glium::glutin::{self, display::GetGlDisplay, surface::WindowSurface};
+use std::num::NonZeroU32;
 use winit::{
     application::ApplicationHandler,
-    event::{WindowEvent, KeyEvent, ElementState},
+    event::{ElementState, KeyEvent, WindowEvent},
     event_loop::ActiveEventLoop,
-    window::{Window, WindowId},
     keyboard::{Key, NamedKey},
-
+    window::{Window, WindowId},
 };
 
 use glutin::prelude::*;
 use winit::raw_window_handle::HasWindowHandle;
 
-
 pub trait ApplicationContext {
-    fn draw_frame(&mut self, _display: &Display<WindowSurface>) { }
-    fn resize_window(&mut self, _new_size: (u32, u32)) { }
+    fn draw_frame(&mut self, _display: &Display<WindowSurface>, _egui: &EguiGlium) {}
+    fn resize_window(&mut self, _new_size: (u32, u32)) {}
     fn new(display: &Display<WindowSurface>) -> Self;
-    fn update(&mut self) { }
-    fn handle_window_event(&mut self, _event: &glium::winit::event::WindowEvent, _window: &glium::winit::window::Window) { }
-    const WINDOW_TITLE:&'static str;
+    fn update(&mut self) {}
+    fn handle_window_event(
+        &mut self,
+        _event: &glium::winit::event::WindowEvent,
+        _window: &glium::winit::window::Window,
+    ) {
+    }
+    const WINDOW_TITLE: &'static str;
 }
 
 pub struct State<T> {
     pub display: glium::Display<WindowSurface>,
     pub window: Window,
+    pub egui: EguiGlium,
     pub context: T,
 }
 
@@ -52,43 +53,53 @@ impl<T: ApplicationContext + 'static> ApplicationHandler<()> for App<T> {
         self.state = None;
     }
 
-    fn window_event(&mut self,
+    fn window_event(
+        &mut self,
         event_loop: &ActiveEventLoop,
         _window_id: WindowId,
         event: WindowEvent,
     ) {
-        match event {
+        match &event {
             WindowEvent::Resized(new_size) => {
                 if let Some(state) = &mut self.state {
-                    state.display.resize(new_size.into());
-                    state.context.resize_window(new_size.into());
+                    state.display.resize((*new_size).into());
+                    state.context.resize_window((*new_size).into());
                 }
-            },
+            }
             WindowEvent::RedrawRequested => {
                 if let Some(state) = &mut self.state {
                     state.context.update();
-                    state.context.draw_frame(&state.display);
+                    state.context.draw_frame(&state.display, &state.egui);
                     if self.close_promptly {
                         event_loop.exit();
                     }
                 }
-            },
+            }
             // Exit the event loop when requested (by closing the window for example) or when
             // pressing the Esc key.
             WindowEvent::CloseRequested
-            | WindowEvent::KeyboardInput { event: KeyEvent {
-                state: ElementState::Pressed,
-                logical_key: Key::Named(NamedKey::Escape),
+            | WindowEvent::KeyboardInput {
+                event:
+                    KeyEvent {
+                        state: ElementState::Pressed,
+                        logical_key: Key::Named(NamedKey::Escape),
+                        ..
+                    },
                 ..
-            }, ..} => {
-                event_loop.exit()
-            },
+            } => event_loop.exit(),
+
             // Every other event
             ev => {
                 if let Some(state) = &mut self.state {
+                    let event_response = state.egui.on_event(&state.window, &event);
+
+                    if event_response.repaint {
+                        state.window.request_redraw();
+                    }
+
                     state.context.handle_window_event(&ev, &state.window);
                 }
-            },
+            }
         }
     }
 
@@ -100,14 +111,13 @@ impl<T: ApplicationContext + 'static> ApplicationHandler<()> for App<T> {
 }
 
 impl<T: ApplicationContext + 'static> State<T> {
-    pub fn new(
-        event_loop: &ActiveEventLoop,
-        visible: bool,
-    ) -> Self {
+    pub fn new(event_loop: &ActiveEventLoop, visible: bool) -> Self {
         let window_attributes = Window::default_attributes()
-            .with_title(T::WINDOW_TITLE).with_visible(visible);
+            .with_title(T::WINDOW_TITLE)
+            .with_visible(visible);
         let config_template_builder = glutin::config::ConfigTemplateBuilder::new();
-        let display_builder = glutin_winit::DisplayBuilder::new().with_window_attributes(Some(window_attributes));
+        let display_builder =
+            glutin_winit::DisplayBuilder::new().with_window_attributes(Some(window_attributes));
 
         // First we create a window
         let (window, gl_config) = display_builder
@@ -121,51 +131,71 @@ impl<T: ApplicationContext + 'static> State<T> {
         // Then the configuration which decides which OpenGL version we'll end up using, here we just use the default which is currently 3.3 core
         // When this fails we'll try and create an ES context, this is mainly used on mobile devices or various ARM SBC's
         // If you depend on features available in modern OpenGL Versions you need to request a specific, modern, version. Otherwise things will very likely fail.
-        let window_handle = window.window_handle().expect("couldn't obtain window handle");
-        let context_attributes = glutin::context::ContextAttributesBuilder::new().build(Some(window_handle.into()));
+        let window_handle = window
+            .window_handle()
+            .expect("couldn't obtain window handle");
+        let context_attributes =
+            glutin::context::ContextAttributesBuilder::new().build(Some(window_handle.into()));
         let fallback_context_attributes = glutin::context::ContextAttributesBuilder::new()
             .with_context_api(glutin::context::ContextApi::Gles(
                 //change version here
-                Some(glutin::context::Version {
-                    major: 3,
-                    minor: 3
-                })
-                //
+                Some(glutin::context::Version { major: 3, minor: 3 }), //
             ))
             .build(Some(window_handle.into()));
 
         let not_current_gl_context = Some(unsafe {
-            gl_config.display().create_context(&gl_config, &context_attributes).unwrap_or_else(|_| {
-                gl_config.display()
-                    .create_context(&gl_config, &fallback_context_attributes)
-                    .expect("failed to create context")
-            })
+            gl_config
+                .display()
+                .create_context(&gl_config, &context_attributes)
+                .unwrap_or_else(|_| {
+                    gl_config
+                        .display()
+                        .create_context(&gl_config, &fallback_context_attributes)
+                        .expect("failed to create context")
+                })
         });
 
         // Determine our framebuffer size based on the window size, or default to 800x600 if it's invisible
-        let (width, height): (u32, u32) = if visible { window.inner_size().into() } else { (800, 600) };
+        let (width, height): (u32, u32) = if visible {
+            window.inner_size().into()
+        } else {
+            (800, 600)
+        };
         let attrs = glutin::surface::SurfaceAttributesBuilder::<WindowSurface>::new().build(
             window_handle.into(),
             NonZeroU32::new(width).unwrap(),
             NonZeroU32::new(height).unwrap(),
         );
         // Now we can create our surface, use it to make our context current and finally create our display
-        let surface = unsafe { gl_config.display().create_window_surface(&gl_config, &attrs).unwrap() };
-        let current_context = not_current_gl_context.unwrap().make_current(&surface).unwrap();
+        let surface = unsafe {
+            gl_config
+                .display()
+                .create_window_surface(&gl_config, &attrs)
+                .unwrap()
+        };
+        let current_context = not_current_gl_context
+            .unwrap()
+            .make_current(&surface)
+            .unwrap();
         let display = glium::Display::from_context_surface(current_context, surface).unwrap();
 
-        Self::from_display_window(display, window)
+        let egui_glium =
+            egui_glium::EguiGlium::new(egui::ViewportId::ROOT, &display, &window, &event_loop);
+
+        Self::from_display_window(display, window, egui_glium)
     }
 
     pub fn from_display_window(
         display: glium::Display<WindowSurface>,
         window: Window,
+        egui: EguiGlium,
     ) -> Self {
         let context = T::new(&display);
         Self {
             display,
             window,
             context,
+            egui,
         }
     }
 
