@@ -35,5 +35,6 @@ pub struct Camera {
 
 pub struct InputData {
     pub motion: Vec2,
-    pub holding_rmb: bool
+    pub holding_rmb: bool,
+    pub last_mouse_position: Vec2
 }

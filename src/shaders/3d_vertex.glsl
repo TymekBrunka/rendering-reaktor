@@ -8,7 +8,7 @@ in float color_ratio;
 out vec4 color;
 
 void main() {
-    gl_Position = vec4(position, 1.0) * pv_matrix;
+    gl_Position = pv_matrix * vec4(position, 1.0);
     color = mix(
         vec4(0.1, 0.0, 0.05, 1.0),
         mix(vec4(0.3, 0.6, 0.5, 1.0), vec4(0.2, 0.4, 0.6, 1.0), color_ratio),

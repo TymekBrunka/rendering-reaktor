@@ -14,17 +14,19 @@ else
   set shortmess=aoO
 endif
 badd +16 ~/Documents/rendering-reaktor/Cargo.toml
-badd +99 ~/Documents/rendering-reaktor/src/glium_util.rs
+badd +110 ~/Documents/rendering-reaktor/src/glium_util.rs
 badd +20 ~/Documents/rendering-reaktor/src/types.rs
-badd +16 ~/Documents/rendering-reaktor/src/shaders/3d_vertex.glsl
-badd +5 ~/Documents/rendering-reaktor/src/shaders/3d_fragment.glsl
-badd +76 ~/Documents/rendering-reaktor/src/util.rs
-badd +45 ~/Documents/rendering-reaktor/src/main.rs
+badd +11 ~/Documents/rendering-reaktor/src/shaders/3d_vertex.glsl
+badd +3 ~/Documents/rendering-reaktor/src/shaders/3d_fragment.glsl
+badd +17 ~/Documents/rendering-reaktor/src/util.rs
+badd +112 ~/Documents/rendering-reaktor/src/main.rs
 argglobal
 %argdel
-edit ~/Documents/rendering-reaktor/src/glium_util.rs
+tabnew +setlocal\ bufhidden=wipe
+tabrewind
+edit ~/Documents/rendering-reaktor/src/main.rs
 argglobal
-balt ~/Documents/rendering-reaktor/src/main.rs
+balt ~/Documents/rendering-reaktor/src/util.rs
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -35,13 +37,32 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 99 - ((27 * winheight(0) + 27) / 55)
+let s:l = 112 - ((9 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 99
-normal! 059|
-tabnext 1
+keepjumps 112
+normal! 022|
+tabnext
+edit ~/Documents/rendering-reaktor/src/types.rs
+argglobal
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal nofoldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 29 - ((27 * winheight(0) + 27) / 55)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 29
+normal! 0
+tabnext 2
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif

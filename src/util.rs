@@ -16,9 +16,46 @@ macro_rules! gen_cube {
         $indiecies_vec.push($verticies_count + 1);
         $indiecies_vec.push($verticies_count + 2);
         $indiecies_vec.push($verticies_count + 3);
+        $indiecies_vec.push($verticies_count);
+        $indiecies_vec.push($verticies_count + 2);
+
+        $indiecies_vec.push($verticies_count + 4);
+        $indiecies_vec.push($verticies_count + 6);
+        $indiecies_vec.push($verticies_count + 5);
+        $indiecies_vec.push($verticies_count + 7);
+        $indiecies_vec.push($verticies_count + 6);
+        $indiecies_vec.push($verticies_count + 4);
+
+        $indiecies_vec.push($verticies_count + 4);
+        $indiecies_vec.push($verticies_count + 5);
+        $indiecies_vec.push($verticies_count + 1);
+        $indiecies_vec.push($verticies_count + 4);
+        $indiecies_vec.push($verticies_count + 1);
+        $indiecies_vec.push($verticies_count + 0);
+
+        $indiecies_vec.push($verticies_count + 7);
+        $indiecies_vec.push($verticies_count + 2);
+        $indiecies_vec.push($verticies_count + 6);
+        $indiecies_vec.push($verticies_count + 7);
+        $indiecies_vec.push($verticies_count + 3);
+        $indiecies_vec.push($verticies_count + 2);
+
+        $indiecies_vec.push($verticies_count + 4);
+        $indiecies_vec.push($verticies_count);
+        $indiecies_vec.push($verticies_count + 3);
+        $indiecies_vec.push($verticies_count + 4);
+        $indiecies_vec.push($verticies_count + 3);
+        $indiecies_vec.push($verticies_count + 7);
+
+        $indiecies_vec.push($verticies_count + 5);
+        $indiecies_vec.push($verticies_count + 6);
+        $indiecies_vec.push($verticies_count + 1);
+        $indiecies_vec.push($verticies_count + 6);
+        $indiecies_vec.push($verticies_count + 2);
+        $indiecies_vec.push($verticies_count + 1);
 
         $verticies_count += 8;
-        $indieciec_count += 4;
+        $indieciec_count += 36;
     };
 }
 
