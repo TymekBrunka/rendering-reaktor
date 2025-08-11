@@ -1,20 +1,24 @@
 use glam::{Vec2, Vec3, Mat4};
 use std::time::Instant;
 
-#[derive(Copy, Clone)]
+// #[derive(Copy, Clone)]
 pub struct Vertex3D {
     pub position: [f32; 3],
     pub color_ratio: f32
 }
 
-#[derive(Copy, Clone)]
+// #[derive(Copy, Clone)]
 pub struct VertexUi {
     pub position: [f32; 3],
     pub element_type: u8,
     pub vertex_type: u8,
 
-    pub char_offset: i32,
+    pub char_offset: u16,
     pub char_index: u8
+}
+
+pub struct VertexComposite {
+    pub uv: [f32; 2]
 }
 
 pub struct Camera {

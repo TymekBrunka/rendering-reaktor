@@ -1,6 +1,6 @@
 macro_rules! gen_cube {
     ($vertex_vec:tt, $indiecies_vec:tt, $indieciec_count:tt, $verticies_count:tt, $x:expr, $y:expr, $z:expr, $width:expr, $height:expr, $length:expr) => {
-        $vertex_vec.reserve(4);
+        $vertex_vec.reserve(8);
         $indiecies_vec.reserve(36);
         $vertex_vec.push( Vertex3D { position : [ $x, $y + $height, $z ], color_ratio: 1.});
         $vertex_vec.push( Vertex3D { position : [ $x, $y, $z ], color_ratio: 0.});
@@ -63,9 +63,9 @@ macro_rules! gen_point {
     ($vertex_vec:tt, $indiecies_vec:tt, $indieciec_count:tt, $verticies_count:tt, $x:expr, $y:expr, $z:expr) => {
         $vertex_vec.reserve(3);
         $indiecies_vec.reserve(3);
-        $vertex_vec.push( Vertex3D { pos : [ $x, $y, $z ], typ: 2.0, color_ratio: 0., char_index: 0., strip_offset: 0. });
-        $vertex_vec.push( Vertex3D { pos : [ $x, $y, $z ], typ: 2.0, color_ratio: 1., char_index: 0., strip_offset: 0. });
-        $vertex_vec.push( Vertex3D { pos : [ $x, $y, $z ], typ: 2.0, color_ratio: 2., char_index: 0., strip_offset: 0. });
+        $vertex_vec.push( VertexUi {position: [$x, $y, $z], element_type: 1, vertex_type: 1, char_offset: 0, char_index: 0});
+        $vertex_vec.push( VertexUi {position: [$x, $y, $z], element_type: 1, vertex_type: 2, char_offset: 0, char_index: 0});
+        $vertex_vec.push( VertexUi {position: [$x, $y, $z], element_type: 1, vertex_type: 3, char_offset: 0, char_index: 0});
 
         $indiecies_vec.push($verticies_count);
         $indiecies_vec.push($verticies_count + 1);
@@ -92,11 +92,12 @@ macro_rules! gen_right_side_text {
             $indiecies_vec.push($verticies_count + (i * 4) + 2);
             $indiecies_vec.push($verticies_count + (i * 4));
             $indiecies_vec.push($verticies_count + (i * 4) + 2);
-            $indiecies_vec.push($verticies_count + (i * 4) + 3);        }
+            $indiecies_vec.push($verticies_count + (i * 4) + 3);
+        }
 
         $verticies_count += 4 * $length;
         $indieciec_count += 6 * $length;
     }
 }
 
-pub(crate) use {gen_cube};
+pub(crate) use {gen_cube, gen_point};
