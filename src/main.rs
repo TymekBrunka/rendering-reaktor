@@ -24,6 +24,8 @@ use std::time::Instant;
 
 mod util;
 mod types;
+// mod gl_version_fix;
+// use gl_version_fix::new_gl_context;
 use util::*;
 use types::*;
 
@@ -47,7 +49,7 @@ struct MyMiniquadApp {
 
     indices_3d_count: u16,
     indices_ui_count: u16,
-    // tx_id: TextureId
+    tx_id: TextureId
 }
 
 impl MyMiniquadApp {
@@ -97,73 +99,11 @@ impl MyMiniquadApp {
         //
         //
 
-        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -30., 40., 6., 60.);
-
-        gen_point!(vui, iui, icui, vcui, -17.5, 0., -22.5);
-        // gen_right_side_text!(v, i, ic, vc, -17.5, 0., -22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, -12.5, 0., -22.5);
-        // gen_right_side_text!(v, i, ic, vc, -12.5, 0., -22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, -7.5, 0., -22.5);
-        // gen_right_side_text!(v, i, ic, vc, -7.5, 0., -22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, -2.5, 0., -22.5);
-        // gen_right_side_text!(v, i, ic, vc, -2.5, 0., -22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-
-
-        // gen_point!(v, i, ic, vc, -17.5, 0., -7.5);
-        // gen_right_side_text!(v, i, ic, vc, -17.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, -12.5, 0., -7.5);
-        // gen_right_side_text!(v, i, ic, vc, -12.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, -7.5, 0., -7.5);
-        // gen_right_side_text!(v, i, ic, vc, -7.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, -2.5, 0., -7.5);
-        // gen_right_side_text!(v, i, ic, vc, -2.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, 2.5, 0., -7.5);
-        // gen_right_side_text!(v, i, ic, vc, 2.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, 7.5, 0., -7.5);
-        // gen_right_side_text!(v, i, ic, vc, 7.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, 12.5, 0., -7.5);
-        // gen_right_side_text!(v, i, ic, vc, 12.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, 17.5, 0., -7.5);
-        // gen_right_side_text!(v, i, ic, vc, 17.5, 0., -7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-
-
-        // gen_point!(v, i, ic, vc, -12.5, 0., 22.5);
-        // gen_right_side_text!(v, i, ic, vc, -12.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, -7.5, 0., 22.5);
-        // gen_right_side_text!(v, i, ic, vc, -7.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, -2.5, 0., 22.5);
-        // gen_right_side_text!(v, i, ic, vc, -2.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, 2.5, 0., 22.5);
-        // gen_right_side_text!(v, i, ic, vc, 2.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, 7.5, 0., 22.5);
-        // gen_right_side_text!(v, i, ic, vc, 7.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, 12.5, 0., 22.5);
-        // gen_right_side_text!(v, i, ic, vc, 12.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        // gen_point!(v, i, ic, vc, 17.5, 0., 22.5);
-        // gen_right_side_text!(v, i, ic, vc, 17.5, 0., 22.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-
-
-        // gen_point!(v, i, ic, vc, -17.5, 0., 7.5);
-        // gen_right_side_text!(v, i, ic, vc, -17.5, 0., 7.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -30.,  40., 6., 60., [0.3, 0.6, 0.5], [0.2, 0.4, 0.6]);
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -30.,  40., 6., 9., [0.2, 0.6, 0.3], [0.5, 0.4, 0.2]);
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -21.,  40., 6., 9., [0.4, 0.8, 0.3], [0.2, 0.8, 0.5]);
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -12.,  20., 6., 9., [1.0, 0.6, 0.5], [1.0, 0.4, 0.6]);
+        gen_cube!(v3d, i3d, ic3d, vc3d,   0., -3., -12.,  20., 6., 9., [0.1, 0.3, 0.8], [0.4, 0.2, 0.8]);
 
         //
         //
@@ -182,13 +122,13 @@ impl MyMiniquadApp {
         let vertex_ui_buffer = ctx.new_buffer(
             BufferType::VertexBuffer,
             BufferUsage::Dynamic,
-            BufferSource::slice(v3d.as_slice()),
+            BufferSource::slice(vui.as_slice()),
         );
 
         let index_ui_buffer = ctx.new_buffer(
             BufferType::IndexBuffer,
             BufferUsage::Immutable,
-            BufferSource::slice(i3d.as_slice()),
+            BufferSource::slice(iui.as_slice()),
         );
 
         let deffered_ui_bindings = Bindings {
@@ -217,10 +157,10 @@ impl MyMiniquadApp {
             ],
             &[
                 VertexAttribute::new("position", VertexFormat::Float3),
-                VertexAttribute::new("element_type", VertexFormat::Byte1),
-                VertexAttribute::new("vertex_type", VertexFormat::Byte1),
-                VertexAttribute::new("char_offset", VertexFormat::Short1),
-                VertexAttribute::new("char_index", VertexFormat::Byte1)
+                VertexAttribute::new("element_type", VertexFormat::Float1),
+                VertexAttribute::new("vertex_type", VertexFormat::Float1),
+                VertexAttribute::new("char_offset", VertexFormat::Float1),
+                VertexAttribute::new("char_index", VertexFormat::Float1)
             ],
             shader_ui,
             PipelineParams {
@@ -245,7 +185,7 @@ impl MyMiniquadApp {
             ..Default::default()
         });
 
-        let deffered_3d_pass = ctx.new_render_pass(ui_rendering_texture, None);
+        let deffered_3d_pass = ctx.new_render_pass(rendering_3d_texture, None);
 
         let vertex_3d_buffer = ctx.new_buffer(
             BufferType::VertexBuffer,
@@ -285,7 +225,7 @@ impl MyMiniquadApp {
             ],
             &[
                 VertexAttribute::new("position", VertexFormat::Float3),
-                VertexAttribute::new("color_ratio", VertexFormat::Float1),
+                VertexAttribute::new("color", VertexFormat::Float3),
             ],
             shader_3d,
             PipelineParams {
@@ -293,11 +233,11 @@ impl MyMiniquadApp {
                 depth_test: Comparison::LessOrEqual,
                 depth_write: true,
 
-                color_blend: Some(BlendState::new(
-                    Equation::Add,
-                    BlendFactor::Value(BlendValue::SourceAlpha),
-                    BlendFactor::OneMinusValue(BlendValue::SourceAlpha))
-                ),
+                // color_blend: Some(BlendState::new(
+                //     Equation::Add,
+                //     BlendFactor::Value(BlendValue::SourceAlpha),
+                //     BlendFactor::OneMinusValue(BlendValue::SourceAlpha))
+                // ),
                 ..Default::default()
             },
         );
@@ -307,10 +247,10 @@ impl MyMiniquadApp {
             BufferType::VertexBuffer,
             BufferUsage::Immutable,
             BufferSource::slice(&[
-                    VertexComposite { uv: [-1.0,  1.0] },
-                    VertexComposite { uv: [-1.0, -1.0] },
-                    VertexComposite { uv: [ 1.0, -1.0] },
-                    VertexComposite { uv: [ 1.0,  1.0] },
+                    VertexComposite { position: [-1.0,  1.0] },
+                    VertexComposite { position: [-1.0, -1.0] },
+                    VertexComposite { position: [ 1.0, -1.0] },
+                    VertexComposite { position: [ 1.0,  1.0] },
                 ])
         );
 
@@ -347,11 +287,11 @@ impl MyMiniquadApp {
             &[
                 VertexAttribute::new("uv", VertexFormat::Float2),
             ],
-            shader_3d,
+            shader_composite,
             PipelineParams {
-                cull_face: CullFace::Back,
-                depth_test: Comparison::LessOrEqual,
-                depth_write: true,
+                // cull_face: CullFace::Back,
+                // depth_test: Comparison::LessOrEqual,
+                // depth_write: true,
 
                 color_blend: Some(BlendState::new(
                     Equation::Add,
@@ -380,7 +320,7 @@ impl MyMiniquadApp {
             input,
             indices_3d_count: ic3d,
             indices_ui_count: icui,
-            // tx_id
+            tx_id
         }
     }
 }
@@ -530,7 +470,7 @@ mod shaderComposite {
 
     pub fn meta() -> ShaderMeta {
         ShaderMeta {
-            images: vec!["tex_3d".to_string(), "tex_ui".to_string()],
+            images: vec!["tex_ui".to_string(), "tex_3d".to_string()],
             uniforms: UniformBlockLayout {
                 uniforms: vec![],
             },
@@ -587,7 +527,7 @@ impl mq::EventHandler for MyMiniquadApp {
         //deffered
         self.ctx.begin_pass(
             Some(self.deffered_3d_pass),
-            PassAction::clear_color(1.0, 1.0, 1.0, 1.0),
+            PassAction::clear_color(0.0, 0.0, 0.0, 0.0),
         );
         self.ctx.apply_pipeline(&self.deffered_3d_pipeline);
         self.ctx.apply_bindings(&self.deffered_3d_bindings);
@@ -597,7 +537,7 @@ impl mq::EventHandler for MyMiniquadApp {
 
         self.ctx.begin_pass(
             Some(self.deffered_ui_pass),
-            PassAction::clear_color(1.0, 1.0, 1.0, 1.0)
+            PassAction::clear_color(0.0, 0.0, 0.0, 0.0),
         );
         self.ctx.apply_pipeline(&self.deffered_ui_pipeline);
         self.ctx.apply_bindings(&self.deffered_ui_bindings);

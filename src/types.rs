@@ -4,21 +4,21 @@ use std::time::Instant;
 // #[derive(Copy, Clone)]
 pub struct Vertex3D {
     pub position: [f32; 3],
-    pub color_ratio: f32
+    pub color: [f32; 3],
 }
 
 // #[derive(Copy, Clone)]
 pub struct VertexUi {
     pub position: [f32; 3],
-    pub element_type: u8,
-    pub vertex_type: u8,
+    pub element_type: f32,
+    pub vertex_type: f32,
 
-    pub char_offset: u16,
-    pub char_index: u8
+    pub char_offset: f32,
+    pub char_index: f32
 }
 
 pub struct VertexComposite {
-    pub uv: [f32; 2]
+    pub position: [f32; 2]
 }
 
 pub struct Camera {

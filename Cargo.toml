@@ -14,3 +14,7 @@ serde = { version = "1.0", features = ["derive"] }
 calamine = "0.26.1"
 
 rfd = "0.15.4"
+
+# [patch.crates-io.miniquad]
+# version = "0.4.8"
+# patch = "miniquad"
