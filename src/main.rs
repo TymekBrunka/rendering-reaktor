@@ -5,29 +5,30 @@ use std::f32::consts::PI;
 use miniquad as mq;
 use miniquad::*;
 
-use rfd::FileDialog;
-use calamine::{Reader, open_workbook, Xlsx, DataType};
 
-//IOEXCEL DESER
-#[derive(Debug)]
-struct Row {
-    // #[column(name = "I21_RB1KO_PO4.Wartosc")]
-    rb1ko_po4: String,
-    // #[column(name = "I21_RB1KO_NH4.Wartosc")]
-    rb1ko_nh4: String,
+// //IOEXCEL DESER
+// #[derive(Debug)]
+// struct Row {
+//     // #[column(name = "I21_RB1KO_PO4.Wartosc")]
+//     rb1ko_po4: String,
+//     // #[column(name = "I21_RB1KO_NH4.Wartosc")]
+//     rb1ko_nh4: String,
 
-}
+// }
 
-use glam::{Mat4, Vec2, Vec3, vec2, vec3};
+use glam::{Mat4, Vec3, vec2, vec3};
+use egui::Color32;
 
 use std::time::Instant;
 
 mod util;
 mod types;
+mod excel_handler;
 // mod gl_version_fix;
 // use gl_version_fix::new_gl_context;
 use util::*;
 use types::*;
+use excel_handler::click_action;
 
 struct MyMiniquadApp {
     display_pipeline: Pipeline,
@@ -46,6 +47,15 @@ struct MyMiniquadApp {
     egui_mq: egui_miniquad::EguiMq,
     camera: Camera,
     input: InputData,
+    rows: Vec<Row>,
+
+    v3d: BufferId,
+    i3d: BufferId,
+    vui: BufferId,
+    iui: BufferId,
+
+    vc: BufferId,
+    ic: BufferId,
 
     indices_3d_count: u16,
     indices_ui_count: u16,
@@ -100,10 +110,35 @@ impl MyMiniquadApp {
         //
 
         gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -30.,  40., 6., 60., [0.3, 0.6, 0.5], [0.2, 0.4, 0.6]);
-        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -30.,  40., 6., 9., [0.2, 0.6, 0.3], [0.5, 0.4, 0.2]);
+
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -30.,  40., 6., 4.5, [0.2, 0.6, 0.3], [0.5, 0.4, 0.2]);
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -25.5, 35., 6., 4.5, [0.2, 0.6, 0.3], [0.5, 0.4, 0.2]);
+        gen_cube!(v3d, i3d, ic3d, vc3d,  15., -3., -25.5,  5., 6., 4.5, [0.5, 0.5, 0.6], [0.5, 0.5, 0.8]);
+
         gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -21.,  40., 6., 9., [0.4, 0.8, 0.3], [0.2, 0.8, 0.5]);
         gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -12.,  20., 6., 9., [1.0, 0.6, 0.5], [1.0, 0.4, 0.6]);
         gen_cube!(v3d, i3d, ic3d, vc3d,   0., -3., -12.,  20., 6., 9., [0.1, 0.3, 0.8], [0.4, 0.2, 0.8]);
+
+        for i in FloatIter(-17.5, 12.5, 5.) {
+            gen_point!(vui, iui, icui, vcui, i, 0.0, -29.);
+            gen_right_side_text!(vui, iui, icui, vcui, i, 0.0, -29., 12, "\u{0002}0000,00mg/l".as_bytes());
+        }
+
+        gen_point!(vui, iui, icui, vcui, 17.5, 0.0, -24.5);
+        gen_right_side_text!(vui, iui, icui, vcui, 17.5, 0.0, -24.5, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        gen_point!(vui, iui, icui, vcui, 19., 0.0, -18.75);
+        gen_right_side_text!(vui, iui, icui, vcui, 19., 0.0, -18.75, 12, "\u{0002}0000,00mg/l".as_bytes());
+
+        for i in FloatIter(-17.5, 12.5, 5.) {
+            gen_point!(vui, iui, icui, vcui, i, 0.0, -13.);
+            gen_right_side_text!(vui, iui, icui, vcui, i, 0.0, -13., 12, "\u{0002}0000,00mg/l".as_bytes());
+        }
+
+        for i in FloatIter(2.5, 17.5, 5.) {
+            gen_point!(vui, iui, icui, vcui, i, 0.0, -4.);
+            gen_right_side_text!(vui, iui, icui, vcui, i, 0.0, -4., 12, "\u{0002}0000,00mg/l".as_bytes());
+        }
 
         //
         //
@@ -318,9 +353,20 @@ impl MyMiniquadApp {
             ctx,
             camera,
             input,
+            rows: vec![],
+
+
             indices_3d_count: ic3d,
             indices_ui_count: icui,
-            tx_id
+            tx_id,
+
+            v3d: vertex_3d_buffer,
+            i3d: index_3d_buffer,
+            vui: vertex_ui_buffer,
+            iui: index_ui_buffer,
+
+            vc: vertex_composite_buffer,
+            ic: index_composite_buffer,
         }
     }
 }
@@ -328,102 +374,8 @@ impl MyMiniquadApp {
 mod shader3D {
     use miniquad::*;
 
-    // pub const VERTEX: &str = r#"#version 100
-    // attribute vec3 in_pos;
-    // attribute vec4 in_color;
-    //
-    // varying lowp vec4 color;
-    //
-    // void main() {
-    //     gl_Position = vec4(in_pos, 1);
-    //     color = in_color;
-    // }"#;
-
     pub const VERTEX: &str = include_str!("shaders/vertex_3d.glsl");
-
-    // r#"#version 320
-    // attribute vec3 in_pos;
-    // attribute float typ;
-    // attribute float rat;
-    // attribute float char_index;
-    // attribute float strip_offset;
-
-    // varying lowp vec4 color;
-    // varying mediump float typp;
-    // varying mediump float ratt;
-    // varying lowp vec2 point_cord;
-
-    // uniform mediump mat4 mpv;
-    // uniform mediump vec2 unit_size;
-
-    // void main()
-    // {
-    //     typp = typ;
-    //     gl_Position = mpv * vec4(in_pos * vec3(1.0, 1.0, -1.0), 1.0);
-    //     if (typ == 1.0) {
-    //         color = mix(
-    //             vec4(0.1, 0.0, 0.05, 1.0),
-    //             mix(vec4(0.3, 0.6, 0.5, 1.0), vec4(0.2, 0.4, 0.6, 1.0), rat),
-    //             1.0 / clamp(gl_Position.z, 10.0, 10000.0) * 10.0
-    //             // typ
-    //         );
-    //     } else if (typ == 2.0) {
-    //         gl_Position.xyz /= gl_Position.w;
-    //         gl_Position.z = clamp(gl_Position.z, -5.0, -1.0);
-    //         // gl_Position.xyz /= gl_Position.w;
-    //         gl_Position.w = 1.0;
-    //         if (rat == 0.0) {
-    //             gl_Position.xy += vec2(-0.5, 1.0) * unit_size * 20.0;
-    //             point_cord = vec2(-1.0, 2.0);
-    //         } else if (rat == 1.0) {
-    //             gl_Position.xy += vec2(-0.5, -0.5) * unit_size * 20.0;
-    //             point_cord = vec2(-1.0, -1.0);
-    //         } else {
-    //             gl_Position.xy += vec2(1.0, -0.5) * unit_size * 20.0;
-    //             point_cord = vec2(2.0, -1.0);
-    //         }
-    //     } else if (typ == 3.0) {
-    //         gl_Position.xyz /= gl_Position.w;
-    //         gl_Position.z = clamp(gl_Position.z, -5.0, -1.0);
-    //         // gl_Position.xyz /= gl_Position.w;
-    //         gl_Position.w = 1.0;
-    //         if (rat == 0.0) {
-    //             gl_Position.xy += vec2(3.5 + (3.5 * char_index), 4.5) * unit_size * 3.5;
-    //             point_cord = vec2(0.0 + strip_offset, 0.0);
-    //         } else if (rat == 1.0) {
-    //             gl_Position.xy += vec2(3.5 + (3.5 * char_index), -4.5) * unit_size * 3.5;
-    //             point_cord = vec2(0.0 + strip_offset, 1.0);
-    //         } else if (rat == 2.0) {
-    //             gl_Position.xy += vec2(7.0 + (3.5 * char_index), -4.5) * unit_size * 3.5;
-    //             point_cord = vec2((1.0 / 128.0) + strip_offset, 1.0);
-    //         } else {
-    //             gl_Position.xy += vec2(7.0 + (3.5 * char_index), 4.5) * unit_size * 3.5;
-    //             point_cord = vec2((1.0 / 128.0) + strip_offset, 0.0);
-    //         }
-    //     }
-    // }"#;
-
     pub const FRAGMENT: &str = include_str!("shaders/fragment_3d.glsl");
-    // r#"#version 320
-    // varying lowp vec4 color;
-    // varying mediump float typp;
-    // varying mediump float ratt;
-    // varying lowp vec2 point_cord;
-
-    // lowp float a;
-
-    // uniform sampler2D tex;
-
-    // void main() {
-    //     gl_FragColor = color;
-    //     if (typp == 2.0) {
-    //         a = 1.0 - length(point_cord);
-    //         gl_FragColor = mix(vec4(0.0), vec4(1.0), a * 2.0);
-    //         // gl_FragColor = vec4(1.0, 0.0, 0.0, 0.0);
-    //     } else if (typp == 3.0) {
-    //         gl_FragColor = texture2D(tex, point_cord);
-    //     }
-    // }"#;
 
     pub fn meta() -> ShaderMeta {
         ShaderMeta {
@@ -511,14 +463,10 @@ impl mq::EventHandler for MyMiniquadApp {
         let view = Mat4::look_at_rh(self.camera.position, self.camera.position + forward, up);
         let vs_3d_params = shader3D::Uniforms {
             mpv: self.camera.projection * view,
-                // * (Mat4::from_rotation_y(self.camera.orientation.x)
-                //     * Mat4::from_rotation_x(self.camera.orientation.y)),
         };
 
         let vs_ui_params = shaderUi::Uniforms {
             mpv: self.camera.projection * view,
-                // * (Mat4::from_rotation_y(self.camera.orientation.x)
-                //     * Mat4::from_rotation_x(self.camera.orientation.y)),
             unit_size: self.camera.unit_size
         };
 
@@ -563,22 +511,20 @@ impl mq::EventHandler for MyMiniquadApp {
                 ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center), |ui| {
                     ui.heading("Reaktory");
                     if ui.button("załaduj plik ze skoroszytem").clicked() {
-                        let file = FileDialog::new()
-                        .add_filter("excel", &["xlsx", "xls"])
-                        .set_directory("/")
-                        .pick_file();
-
-                        if file.is_some() {
-                            let file = file.unwrap();
-                            let filepath = file.as_path().to_str().unwrap();
-                            let mut workbook: Xlsx<_> = open_workbook(filepath).expect("Nie można otworzyć pliku.");
-                            if let Ok(r) = workbook.worksheet_range("Arkusz1") {
-                                for row in r.rows() {
-                                    println!("row={:?}, row[0]={:?}", row, row[0]);
-                                }
-                            }
-                        }
+                        self.rows = click_action();
                     }
+                    egui::ScrollArea::both().show(ui, |ui| {
+                        egui::Grid::new("some_unique_id").show(ui, |ui| {
+                            ui.colored_label(Color32::GREEN, "DataCzas");
+                            ui.colored_label(Color32::LIGHT_BLUE, "RB1KO_PO4");
+                            ui.colored_label(Color32::LIGHT_BLUE, "RB1KO_NH4");
+                            ui.colored_label(Color32::LIGHT_BLUE, "RB2KO_PO4");
+                            ui.colored_label(Color32::LIGHT_BLUE, "RB2KO_NH4");
+                            ui.end_row();
+
+
+                        });
+                    });
                 })
             });
         });
@@ -595,6 +541,47 @@ impl mq::EventHandler for MyMiniquadApp {
     fn resize_event(&mut self, width: f32, height: f32) {
         self.camera.projection = Mat4::perspective_rh_gl(120.0f32.to_radians(), width / height, 0.001, 100000.0);
         self.camera.screen_size = vec2(width, height);
+
+        //update texture size
+        let ui_rendering_texture = self.ctx.new_render_texture(TextureParams {
+            width: width as u32,
+            height: height as u32,
+            format: TextureFormat::RGBA8,
+            ..Default::default()
+        });
+
+        let deffered_ui_pass = self.ctx.new_render_pass(ui_rendering_texture, None);
+        let deffered_ui_bindings = Bindings {
+            vertex_buffers: vec![self.vui],
+            index_buffer: self.iui,
+            images: vec![self.tx_id],
+        };
+
+        let rendering_3d_texture = self.ctx.new_render_texture(TextureParams {
+            width: width as u32,
+            height: height as u32,
+            format: TextureFormat::RGBA8,
+            ..Default::default()
+        });
+
+        let deffered_3d_pass = self.ctx.new_render_pass(rendering_3d_texture, None);
+        let deffered_3d_bindings = Bindings {
+            vertex_buffers: vec![self.v3d],
+            index_buffer: self.i3d,
+            images: vec![],
+        };
+
+        let display_bindings = Bindings {
+            vertex_buffers: vec![self.vc],
+            index_buffer: self.ic,
+            images: vec![ui_rendering_texture, rendering_3d_texture],
+        };
+
+        self.deffered_ui_pass = deffered_ui_pass;
+        self.deffered_ui_bindings = deffered_ui_bindings;
+        self.deffered_3d_pass = deffered_3d_pass;
+        self.deffered_3d_bindings = deffered_3d_bindings;
+        self.display_bindings = display_bindings;
     }
 
     fn mouse_motion_event(&mut self, x: f32, y: f32) {

@@ -1,5 +1,6 @@
 use glam::{Vec2, Vec3, Mat4};
 use std::time::Instant;
+use egui::Ui;
 
 // #[derive(Copy, Clone)]
 pub struct Vertex3D {
@@ -35,4 +36,38 @@ pub struct InputData {
     pub motion: Vec2,
     pub holding_rmb: bool,
     pub last_mouse_position: Vec2
+}
+
+#[derive(Default)]
+pub struct Row {
+    rb1ko_po4: f64,
+    rb1ko_nh4: f64,
+    rb2ko_po4: f64,
+    rb2ko_nh4: f64,
+}
+
+impl Row {
+    pub fn draw(self, ui: &mut Ui, index: i32) {
+        if ui.button("clik me").clicked() {
+            println!("{}", index);
+        }
+        ui.end_row();
+    }
+}
+
+pub struct FloatIter(pub f32, pub f32, pub f32);  // start, end, and step
+
+impl Iterator for FloatIter {
+    type Item = f32;
+
+    #[inline]
+    fn next(&mut self) -> Option<f32> {
+        if self.0 <= self.1 {
+            let v = self.0;
+            self.0 = v + self.2;
+            Some(v)
+        } else {
+            None
+        }
+    }
 }

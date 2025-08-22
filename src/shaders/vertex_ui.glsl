@@ -16,8 +16,8 @@ float dist;
 
 void main() {
 	gl_Position = mpv * vec4(position * vec3(1.0, 1.0, -1.0), 1.0);
-    dist = 4.0 / sqrt(gl_Position.w);
     gl_Position.xyz /= gl_Position.w;
+    dist = 4.0 / sqrt(gl_Position.w);
     gl_Position.w = 1.0;
 	typ = element_type;
 	if (element_type == 1.0) {
