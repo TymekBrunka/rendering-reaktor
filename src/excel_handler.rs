@@ -1,5 +1,5 @@
 use rfd::FileDialog;
-use calamine::{Reader, open_workbook, Xlsx, DataType, Data};
+use calamine::{Reader, open_workbook, Xlsx, DataType, Data, ExcelDateTime};
 
 use crate::types::Row;
 #[derive(Default)]
@@ -32,7 +32,8 @@ pub fn click_action() -> Vec<Row> {
 
         	//finding header row
         	let mut it: Data;
-            for (i, row) in r.rows().enumerate() {
+        	let mut iter = r.rows().enumerate().into_iter();
+            while let Some((i, row)) = iter.next() {
                 if row.len() > 0 {
                 	// println!("row={:?}, row[0]={:?}", row, row[0]);
                 	//checking if it has DataCzas column
@@ -60,6 +61,20 @@ pub fn click_action() -> Vec<Row> {
                 }
 
                 if found_header_row { break; }
+            }
+
+            let mut row_to_be_added: Row = Default::default();
+
+            while let Some((_, row)) = iter.next() {
+            	if let Data::DateTime(dataczas) = row[colstart] {
+            		row_to_be_added = Row {
+            			dataczas: row_to_be_added.dataczas,
+            			..Default::default()
+            		};
+            		row_to_be_added.dataczas = dataczas.as_datetime().unwrap();
+
+            		println!("{:?}", row);
+            	}
             }
         }
     }

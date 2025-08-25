@@ -40,10 +40,11 @@ pub struct InputData {
 
 #[derive(Default)]
 pub struct Row {
-    rb1ko_po4: f64,
-    rb1ko_nh4: f64,
-    rb2ko_po4: f64,
-    rb2ko_nh4: f64,
+    pub dataczas: String,
+    pub rb1ko_po4: f64,
+    pub rb1ko_nh4: f64,
+    pub rb2ko_po4: f64,
+    pub rb2ko_nh4: f64,
 }
 
 impl Row {
