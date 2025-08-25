@@ -11,7 +11,7 @@ glam = { version = "0.30.4", default-features = false, features = ["libm"] }
 png-decoder = "0.1.1"
 
 serde = { version = "1.0", features = ["derive"] }
-calamine = "0.30.0"
+calamine = { version = "0.30.0", features = ["dates"] }
 
 rfd = "0.15.4"
 

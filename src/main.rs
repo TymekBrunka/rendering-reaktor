@@ -522,7 +522,9 @@ impl mq::EventHandler for MyMiniquadApp {
                             ui.colored_label(Color32::LIGHT_BLUE, "RB2KO_NH4");
                             ui.end_row();
 
-
+                            for (i, row) in self.rows.iter().enumerate() {
+                                row.draw(ui, i);
+                            }
                         });
                     });
                 })

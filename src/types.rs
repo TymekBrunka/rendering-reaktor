@@ -38,7 +38,7 @@ pub struct InputData {
     pub last_mouse_position: Vec2
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Row {
     pub dataczas: String,
     pub rb1ko_po4: f64,
@@ -48,8 +48,8 @@ pub struct Row {
 }
 
 impl Row {
-    pub fn draw(self, ui: &mut Ui, index: i32) {
-        if ui.button("clik me").clicked() {
+    pub fn draw(&self, ui: &mut Ui, index: usize) {
+        if ui.button(&self.dataczas).clicked() {
             println!("{}", index);
         }
         ui.end_row();

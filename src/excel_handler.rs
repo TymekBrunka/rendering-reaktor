@@ -67,13 +67,17 @@ pub fn click_action() -> Vec<Row> {
 
             while let Some((_, row)) = iter.next() {
             	if let Data::DateTime(dataczas) = row[colstart] {
+            		if row.len() < colend { continue; }
+            		
             		row_to_be_added = Row {
             			dataczas: row_to_be_added.dataczas,
             			..Default::default()
             		};
-            		row_to_be_added.dataczas = dataczas.as_datetime().unwrap();
+            		row_to_be_added.dataczas = dataczas.as_datetime().unwrap().to_string();
 
-            		println!("{:?}", row);
+            		rows.push(row_to_be_added.clone());
+
+            		// println!("{:?}", row);
             	}
             }
         }
