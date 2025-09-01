@@ -504,23 +504,28 @@ impl mq::EventHandler for MyMiniquadApp {
                 ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center), |ui| {
                     ui.heading("Reaktory");
                     if ui.button("załaduj plik ze skoroszytem").clicked() {
-                        self.rows = click_action();
+                        if let Ok(rows) = click_action() {
+                            self.rows = rows;
+                        }
                     }
                     egui::ScrollArea::both().show(ui, |ui| {
                         TableBuilder::new(ui)
                         .column(Column::initial(150.0))
-                        .column(Column::auto())
-                        .column(Column::auto())
-                        .column(Column::auto())
-                        .column(Column::auto())
+                        .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) // not sure if there is better way to do that
+                        .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0))
+                        .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0))
+                        .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0))
+                        .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0))
+                        
                         .header(20.0, |mut header| {
                             header.col(|ui| {ui.label("DataCzas");});
-                            header.col(|ui| {ui.label("RB1KO_PO4");});
-                            header.col(|ui| {ui.label("RB1KO_NH4");});
-                            header.col(|ui| {ui.label("RB2KO_PO4");});
-                            header.col(|ui| {ui.label("RB2KO_NH4");});
+                            header.col(|ui| {ui.label("1");}); header.col(|ui| {ui.label("2");}); header.col(|ui| {ui.label("3");}); header.col(|ui| {ui.label("4");}); // ugly but most efescient for computer since there is no need to parse numbers to strings
+                            header.col(|ui| {ui.label("5");}); header.col(|ui| {ui.label("6");}); header.col(|ui| {ui.label("7");}); header.col(|ui| {ui.label("8");});
+                            header.col(|ui| {ui.label("9");}); header.col(|ui| {ui.label("10");}); header.col(|ui| {ui.label("11");}); header.col(|ui| {ui.label("12");});
+                            header.col(|ui| {ui.label("13");}); header.col(|ui| {ui.label("14");}); header.col(|ui| {ui.label("15");}); header.col(|ui| {ui.label("16");});
+                            header.col(|ui| {ui.label("17");}); header.col(|ui| {ui.label("18");}); header.col(|ui| {ui.label("19");}); header.col(|ui| {ui.label("20");});
                         })
-                        .body(|mut body| {
+                        .body(|body| {
                             body.rows(18.0, self.rows.len(), |mut row| {
                                 let index = row.index();
                                 self.rows[index].draw(&mut row, index);

@@ -40,17 +40,27 @@ pub struct InputData {
     pub last_mouse_position: Vec2
 }
 
-#[derive(Default, Clone)]
+#[derive(Clone)]
 pub struct Row {
     pub dataczas: String,
-    pub rb1ko_po4: f64,
-    pub rb1ko_nh4: f64,
-    pub rb2ko_po4: f64,
-    pub rb2ko_nh4: f64,
-    pub rb1kopo4s: String,
-    pub rb1konh4s: String,
-    pub rb2kopo4s: String,
-    pub rb2konh4s: String,
+    pub KNKD: [f64; 20],
+    pub KNKDs: [String; 20]
+}
+
+impl Default for Row {
+    fn default() -> Self {
+        Self {
+            dataczas: Default::default(),
+            KNKD: [0.0; 20],
+            KNKDs: [
+                String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
+                String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
+                String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
+                String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
+                String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
+            ]
+        }
+    }
 }
 
 impl Row {
@@ -60,10 +70,9 @@ impl Row {
                 println!("{}", index);
             }
         });
-        row.col(|ui| {ui.label(&self.rb1kopo4s);});
-        row.col(|ui| {ui.label(&self.rb1konh4s);});
-        row.col(|ui| {ui.label(&self.rb2kopo4s);});
-        row.col(|ui| {ui.label(&self.rb2konh4s);});
+        for i in &self.KNKDs {
+            row.col(|ui| {ui.label(i);});
+        }
     }
 }
 

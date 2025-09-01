@@ -2,15 +2,13 @@ use rfd::FileDialog;
 use calamine::{Reader, open_workbook, Xlsx, DataType, Data, ExcelDateTime};
 
 use crate::types::Row;
+
 #[derive(Default)]
 struct ColumnMapping {
-	rb1ko_po4: usize,
-	rb1ko_nh4: usize,
-	rb2ko_po4: usize,
-	rb2ko_nh4: usize,
+	KNKD: [usize; 20]
 }
 
-pub fn click_action() -> Vec<Row> {
+pub fn click_action() -> Result<Vec<Row>, ()> {
 	let mut colstart = 0;
 	let mut colend = 0;
 	let mut rowstart = 0;
@@ -47,12 +45,23 @@ pub fn click_action() -> Vec<Row> {
 		                				colstart = j;
 		                				found_header_row = true;
 		                			}
-		                			"I21_RB1KO_PO4.Wartosc" => {colmap.rb1ko_po4 = j;}
-		                			"I21_RB1KO_NH4.Wartosc" => {colmap.rb1ko_nh4 = j;}
-		                			"I21_RB2KO_PO4.Wartosc" => {colmap.rb2ko_po4 = j;}
-		                			"I21_RB2KO_NH4.Wartosc" => {colmap.rb2ko_nh4 = j;}
 		                			"wwRetrievalMode" => {colend = j;}
-		                			_ => {}
+		                			string => {
+		                				if string.ends_with("KNKD") {
+		                					let mut iserr = false;
+		                					let col: usize = match string[0..string.len() - 5].parse() {
+		                						Ok(x) => x,
+		                						Err(_) => {
+		                							iserr = true;
+		                							0
+		                						}
+		                					};
+
+		                					colmap.KNKD[col] = j;
+
+		                					if iserr { return Err(()); }
+		                				}
+		                			}
 		                		}
                 			},
                 			_ => {}
@@ -84,32 +93,17 @@ pub fn click_action() -> Vec<Row> {
             		// println!("{:?}", row);
             	}
 
-            	if let Data::Float(rb1kopo4) = row[colmap.rb1ko_po4] {
-            		row_to_be_added.rb1ko_po4 = rb1kopo4;
-            		let len = rows.len();
-            		rows[len - 1].rb1kopo4s = format!("{:.2} mg/l", rb1kopo4);
+            	for i in 0..20 {
+            		if let Data::Float(f) = row[colmap.KNKD[i]] {
+            			let len = rows.len() - 1;
+            			rows[len].KNKD[i] = f;
+            			rows[len].KNKDs[i] = format!("{:.2}mg/l", f);
+            		}
             	}
-
-            	if let Data::Float(rb1konh4) = row[colmap.rb1ko_nh4] {
-            		row_to_be_added.rb1ko_nh4 = rb1konh4;
-            		let len = rows.len();
-            		rows[len - 1].rb1konh4s = format!("{:.2} mg/l", rb1konh4);
-            	}
-
-            	if let Data::Float(rb2kopo4) = row[colmap.rb1ko_po4] {
-            		row_to_be_added.rb1ko_po4 = rb2kopo4;
-            		let len = rows.len();
-            		rows[len - 1].rb2kopo4s = format!("{:.2} mg/l", rb2kopo4);
-            	}
-
-            	if let Data::Float(rb2konh4) = row[colmap.rb2ko_nh4] {
-            		row_to_be_added.rb2ko_nh4 = rb2konh4;
-            		let len = rows.len();
-            		rows[len - 1].rb2konh4s = format!("{:.2} mg/l", rb2konh4);
-            	}
+            	
             }
         }
     }
 
-    rows
+    Ok(rows)
 }

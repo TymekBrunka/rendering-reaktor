@@ -3,6 +3,9 @@ use crate::types::*;
 use crate::util::{gen_point, gen_right_side_text};
 use miniquad::{
 	GlContext,
+	BufferId,
+	BufferSource,
+	RenderingBackend
 };
 
 pub fn gen_arrays(texts: &[String]) -> (Vec<VertexUi>, Vec<u16>, u16, u16) {
@@ -42,7 +45,11 @@ pub fn gen_arrays(texts: &[String]) -> (Vec<VertexUi>, Vec<u16>, u16, u16) {
     (vui, iui, _icui, vcui)
 }
 
-pub fn update_buffer(ctx: &GlContext, row: &Row) -> () {
-
-
+pub fn update_buffer(ctx: &mut GlContext, row: &Row, buffer: BufferId) -> () {
+	let a = row.KNKDs.clone().map(|x| {format!("{:012}", x)});
+	let (vui, iui, icui, vcui) = gen_arrays(&a);
+	ctx.buffer_update(
+        buffer,
+        BufferSource::slice(&vui),
+    );
 }
