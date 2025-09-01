@@ -12,6 +12,7 @@ png-decoder = "0.1.1"
 
 serde = { version = "1.0", features = ["derive"] }
 calamine = { version = "0.30.0", features = ["dates"] }
+egui_extras = { version = "0.31.1", default-features = false }
 
 rfd = "0.15.4"
 

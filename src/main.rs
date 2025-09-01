@@ -19,16 +19,20 @@ use miniquad::*;
 use glam::{Mat4, Vec3, vec2, vec3};
 use egui::Color32;
 
+use egui_extras::{TableBuilder, Column};
+
 use std::time::Instant;
 
 mod util;
 mod types;
 mod excel_handler;
+mod buffer_updater;
 // mod gl_version_fix;
 // use gl_version_fix::new_gl_context;
 use util::*;
 use types::*;
 use excel_handler::click_action;
+use buffer_updater::{update_buffer, gen_arrays};
 
 struct MyMiniquadApp {
     display_pipeline: Pipeline,
@@ -98,10 +102,10 @@ impl MyMiniquadApp {
         let mut v3d: Vec<Vertex3D> = Vec::new();
         let mut i3d: Vec<u16> = Vec::new();
 
-        let mut icui: u16 = 0;
-        let mut vcui: u16 = 0;
-        let mut vui: Vec<VertexUi> = Vec::new();
-        let mut iui: Vec<u16> = Vec::new();
+        // let mut icui: u16 = 0;
+        // let mut vcui: u16 = 0;
+        // let mut vui: Vec<VertexUi> = Vec::new();
+        // let mut iui: Vec<u16> = Vec::new();
 
         //
         //
@@ -119,26 +123,15 @@ impl MyMiniquadApp {
         gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -12.,  20., 6., 9., [1.0, 0.6, 0.5], [1.0, 0.4, 0.6]);
         gen_cube!(v3d, i3d, ic3d, vc3d,   0., -3., -12.,  20., 6., 9., [0.1, 0.3, 0.8], [0.4, 0.2, 0.8]);
 
-        for i in FloatIter(-17.5, 12.5, 5.) {
-            gen_point!(vui, iui, icui, vcui, i, 0.0, -29.);
-            gen_right_side_text!(vui, iui, icui, vcui, i, 0.0, -29., 12, "\u{0002}0000,00mg/l".as_bytes());
-        }
 
-        gen_point!(vui, iui, icui, vcui, 17.5, 0.0, -24.5);
-        gen_right_side_text!(vui, iui, icui, vcui, 17.5, 0.0, -24.5, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        gen_point!(vui, iui, icui, vcui, 19., 0.0, -18.75);
-        gen_right_side_text!(vui, iui, icui, vcui, 19., 0.0, -18.75, 12, "\u{0002}0000,00mg/l".as_bytes());
-
-        for i in FloatIter(-17.5, 12.5, 5.) {
-            gen_point!(vui, iui, icui, vcui, i, 0.0, -13.);
-            gen_right_side_text!(vui, iui, icui, vcui, i, 0.0, -13., 12, "\u{0002}0000,00mg/l".as_bytes());
-        }
-
-        for i in FloatIter(2.5, 17.5, 5.) {
-            gen_point!(vui, iui, icui, vcui, i, 0.0, -4.);
-            gen_right_side_text!(vui, iui, icui, vcui, i, 0.0, -4., 12, "\u{0002}0000,00mg/l".as_bytes());
-        }
+        // if only String implemented copy to do that in [string; 20] way instead of this block
+        let (vui, iui, icui, _vcui) = gen_arrays(&[
+            String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
+            String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
+            String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
+            String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
+            String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
+        ]);
 
         //
         //
@@ -514,17 +507,24 @@ impl mq::EventHandler for MyMiniquadApp {
                         self.rows = click_action();
                     }
                     egui::ScrollArea::both().show(ui, |ui| {
-                        egui::Grid::new("some_unique_id").show(ui, |ui| {
-                            ui.colored_label(Color32::GREEN, "DataCzas");
-                            ui.colored_label(Color32::LIGHT_BLUE, "RB1KO_PO4");
-                            ui.colored_label(Color32::LIGHT_BLUE, "RB1KO_NH4");
-                            ui.colored_label(Color32::LIGHT_BLUE, "RB2KO_PO4");
-                            ui.colored_label(Color32::LIGHT_BLUE, "RB2KO_NH4");
-                            ui.end_row();
-
-                            for (i, row) in self.rows.iter().enumerate() {
-                                row.draw(ui, i);
-                            }
+                        TableBuilder::new(ui)
+                        .column(Column::initial(150.0))
+                        .column(Column::auto())
+                        .column(Column::auto())
+                        .column(Column::auto())
+                        .column(Column::auto())
+                        .header(20.0, |mut header| {
+                            header.col(|ui| {ui.label("DataCzas");});
+                            header.col(|ui| {ui.label("RB1KO_PO4");});
+                            header.col(|ui| {ui.label("RB1KO_NH4");});
+                            header.col(|ui| {ui.label("RB2KO_PO4");});
+                            header.col(|ui| {ui.label("RB2KO_NH4");});
+                        })
+                        .body(|mut body| {
+                            body.rows(18.0, self.rows.len(), |mut row| {
+                                let index = row.index();
+                                self.rows[index].draw(&mut row, index);
+                            })
                         });
                     });
                 })

@@ -42,7 +42,7 @@ pub fn click_action() -> Vec<Row> {
                 			Data::String(name) => {
                 				match name.as_str() {
                 					"DataCzas" => {
-		                				println!("i={}, j={}", i, j);
+		                				// println!("i={}, j={}", i, j);
 		                				rowstart = i;
 		                				colstart = j;
 		                				found_header_row = true;
@@ -66,6 +66,10 @@ pub fn click_action() -> Vec<Row> {
             let mut row_to_be_added: Row = Default::default();
 
             while let Some((_, row)) = iter.next() {
+            	//
+            	// filling row data
+            	//
+
             	if let Data::DateTime(dataczas) = row[colstart] {
             		if row.len() < colend { continue; }
             		
@@ -78,6 +82,30 @@ pub fn click_action() -> Vec<Row> {
             		rows.push(row_to_be_added.clone());
 
             		// println!("{:?}", row);
+            	}
+
+            	if let Data::Float(rb1kopo4) = row[colmap.rb1ko_po4] {
+            		row_to_be_added.rb1ko_po4 = rb1kopo4;
+            		let len = rows.len();
+            		rows[len - 1].rb1kopo4s = format!("{:.2} mg/l", rb1kopo4);
+            	}
+
+            	if let Data::Float(rb1konh4) = row[colmap.rb1ko_nh4] {
+            		row_to_be_added.rb1ko_nh4 = rb1konh4;
+            		let len = rows.len();
+            		rows[len - 1].rb1konh4s = format!("{:.2} mg/l", rb1konh4);
+            	}
+
+            	if let Data::Float(rb2kopo4) = row[colmap.rb1ko_po4] {
+            		row_to_be_added.rb1ko_po4 = rb2kopo4;
+            		let len = rows.len();
+            		rows[len - 1].rb2kopo4s = format!("{:.2} mg/l", rb2kopo4);
+            	}
+
+            	if let Data::Float(rb2konh4) = row[colmap.rb2ko_nh4] {
+            		row_to_be_added.rb2ko_nh4 = rb2konh4;
+            		let len = rows.len();
+            		rows[len - 1].rb2konh4s = format!("{:.2} mg/l", rb2konh4);
             	}
             }
         }

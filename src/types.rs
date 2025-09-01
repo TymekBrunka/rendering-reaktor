@@ -2,6 +2,8 @@ use glam::{Vec2, Vec3, Mat4};
 use std::time::Instant;
 use egui::Ui;
 
+use egui_extras::TableRow;
+
 // #[derive(Copy, Clone)]
 pub struct Vertex3D {
     pub position: [f32; 3],
@@ -45,14 +47,23 @@ pub struct Row {
     pub rb1ko_nh4: f64,
     pub rb2ko_po4: f64,
     pub rb2ko_nh4: f64,
+    pub rb1kopo4s: String,
+    pub rb1konh4s: String,
+    pub rb2kopo4s: String,
+    pub rb2konh4s: String,
 }
 
 impl Row {
-    pub fn draw(&self, ui: &mut Ui, index: usize) {
-        if ui.button(&self.dataczas).clicked() {
-            println!("{}", index);
-        }
-        ui.end_row();
+    pub fn draw(&self, row: &mut TableRow<'_, '_>, index: usize) {
+        row.col(|ui| {
+            if ui.button(&self.dataczas).clicked() {
+                println!("{}", index);
+            }
+        });
+        row.col(|ui| {ui.label(&self.rb1kopo4s);});
+        row.col(|ui| {ui.label(&self.rb1konh4s);});
+        row.col(|ui| {ui.label(&self.rb2kopo4s);});
+        row.col(|ui| {ui.label(&self.rb2konh4s);});
     }
 }
 
