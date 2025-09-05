@@ -1,8 +1,11 @@
 use glam::{Vec2, Vec3, Mat4};
 use std::time::Instant;
-use egui::Ui;
+// use egui::Ui;
 
 use egui_extras::TableRow;
+
+use miniquad::{BufferId, RenderingBackend};
+use crate::buffer_updater::update_buffer;
 
 // #[derive(Copy, Clone)]
 pub struct Vertex3D {
@@ -64,10 +67,10 @@ impl Default for Row {
 }
 
 impl Row {
-    pub fn draw(&self, row: &mut TableRow<'_, '_>, index: usize) {
+    pub fn draw(&self, row: &mut TableRow<'_, '_>, ctx: &mut dyn RenderingBackend, buffer: BufferId) {
         row.col(|ui| {
             if ui.button(&self.dataczas).clicked() {
-                println!("{}", index);
+                update_buffer(ctx, self, buffer)
             }
         });
         for i in &self.KNKDs {

@@ -16,6 +16,21 @@ pub fn gen_arrays(texts: &[String]) -> (Vec<VertexUi>, Vec<u16>, u16, u16) {
 
     let mut j: usize = 0;
 
+    for i in FloatIter(2.5, 17.5, 5.) {
+        gen_point!(vui, iui, _icui, vcui, i, 0.0, -4.);
+        gen_right_side_text!(vui, iui, _icui, vcui, i, 0.0, -4., 12, texts[3 - j][..].as_bytes());
+        j += 1;
+    }
+
+    // gen_point!(vui, iui, _icui, vcui, 19., 0.0, -18.75);
+    // gen_right_side_text!(vui, iui, _icui, vcui, 19., 0.0, -18.75, 12, texts[j][..].as_bytes());
+    // j += 1;
+
+    for i in FloatIter(-17.5, 17.5, 5.) {
+        gen_point!(vui, iui, _icui, vcui, i, 0.0, -13.);
+        gen_right_side_text!(vui, iui, _icui, vcui, i, 0.0, -13., 12, texts[15 - j][..].as_bytes());
+        j += 1;
+    }
 
 	for i in FloatIter(-17.5, 12.5, 5.) {
         gen_point!(vui, iui, _icui, vcui, i, 0.0, -29.);
@@ -25,29 +40,14 @@ pub fn gen_arrays(texts: &[String]) -> (Vec<VertexUi>, Vec<u16>, u16, u16) {
 
     gen_point!(vui, iui, _icui, vcui, 17.5, 0.0, -24.5);
     gen_right_side_text!(vui, iui, _icui, vcui, 17.5, 0.0, -24.5, 12, texts[j][..].as_bytes());
-    j += 1;
+    // j += 1;
 
-    gen_point!(vui, iui, _icui, vcui, 19., 0.0, -18.75);
-    gen_right_side_text!(vui, iui, _icui, vcui, 19., 0.0, -18.75, 12, texts[j][..].as_bytes());
-    j += 1;
-
-    for i in FloatIter(-17.5, 12.5, 5.) {
-        gen_point!(vui, iui, _icui, vcui, i, 0.0, -13.);
-        gen_right_side_text!(vui, iui, _icui, vcui, i, 0.0, -13., 12, texts[j][..].as_bytes());
-        j += 1;
-    }
-
-    for i in FloatIter(2.5, 17.5, 5.) {
-        gen_point!(vui, iui, _icui, vcui, i, 0.0, -4.);
-        gen_right_side_text!(vui, iui, _icui, vcui, i, 0.0, -4., 12, texts[j][..].as_bytes());
-        j += 1;
-    }
     (vui, iui, _icui, vcui)
 }
 
-pub fn update_buffer(ctx: &mut GlContext, row: &Row, buffer: BufferId) -> () {
-	let a = row.KNKDs.clone().map(|x| {format!("{:012}", x)});
-	let (vui, iui, icui, vcui) = gen_arrays(&a);
+pub fn update_buffer(ctx: &mut dyn RenderingBackend, row: &Row, buffer: BufferId) -> () {
+	let a = row.KNKDs.clone().map(|x| {format!("{:0>12}", x)});
+	let (vui, _iui, _icui, _vcui) = gen_arrays(&a);
 	ctx.buffer_update(
         buffer,
         BufferSource::slice(&vui),

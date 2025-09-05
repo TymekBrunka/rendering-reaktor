@@ -1,17 +1,17 @@
 use rfd::FileDialog;
-use calamine::{Reader, open_workbook, Xlsx, DataType, Data, ExcelDateTime};
+use calamine::{Reader, open_workbook, Xlsx, Data};
 
 use crate::types::Row;
 
 #[derive(Default)]
 struct ColumnMapping {
-	KNKD: [usize; 20]
+	KNKD: [usize; 21]
 }
 
 pub fn click_action() -> Result<Vec<Row>, ()> {
 	let mut colstart = 0;
 	let mut colend = 0;
-	let mut rowstart = 0;
+	// let mut rowstart = 0;
 	let mut colmap: ColumnMapping = Default::default();
 	let mut found_header_row = false;
 
@@ -29,9 +29,9 @@ pub fn click_action() -> Result<Vec<Row>, ()> {
         if let Ok(r) = workbook.worksheet_range("Arkusz1") {
 
         	//finding header row
-        	let mut it: Data;
+        	// let mut it: Data;
         	let mut iter = r.rows().enumerate().into_iter();
-            while let Some((i, row)) = iter.next() {
+            while let Some((_, row)) = iter.next() {
                 if row.len() > 0 {
                 	// println!("row={:?}, row[0]={:?}", row, row[0]);
                 	//checking if it has DataCzas column
@@ -40,8 +40,7 @@ pub fn click_action() -> Result<Vec<Row>, ()> {
                 			Data::String(name) => {
                 				match name.as_str() {
                 					"DataCzas" => {
-		                				// println!("i={}, j={}", i, j);
-		                				rowstart = i;
+		                				// rowstart = i;
 		                				colstart = j;
 		                				found_header_row = true;
 		                			}
@@ -57,7 +56,7 @@ pub fn click_action() -> Result<Vec<Row>, ()> {
 		                						}
 		                					};
 
-		                					colmap.KNKD[col] = j;
+		                					colmap.KNKD[col - 1] = j;
 
 		                					if iserr { return Err(()); }
 		                				}

@@ -17,7 +17,6 @@ use miniquad::*;
 // }
 
 use glam::{Mat4, Vec3, vec2, vec3};
-use egui::Color32;
 
 use egui_extras::{TableBuilder, Column};
 
@@ -32,7 +31,7 @@ mod buffer_updater;
 use util::*;
 use types::*;
 use excel_handler::click_action;
-use buffer_updater::{update_buffer, gen_arrays};
+use buffer_updater::gen_arrays;
 
 struct MyMiniquadApp {
     display_pipeline: Pipeline,
@@ -526,9 +525,10 @@ impl mq::EventHandler for MyMiniquadApp {
                             header.col(|ui| {ui.label("17");}); header.col(|ui| {ui.label("18");}); header.col(|ui| {ui.label("19");}); header.col(|ui| {ui.label("20");});
                         })
                         .body(|body| {
-                            body.rows(18.0, self.rows.len(), |mut row| {
+                            let len = self.rows.len();
+                            body.rows(18.0, len, |mut row| {
                                 let index = row.index();
-                                self.rows[index].draw(&mut row, index);
+                                self.rows[index].draw(&mut row, _mq_ctx, self.vui);
                             })
                         });
                     });
