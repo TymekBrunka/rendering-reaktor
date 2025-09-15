@@ -3,9 +3,16 @@ use calamine::{Reader, open_workbook, Xlsx, Data};
 
 use crate::types::Row;
 
-#[derive(Default)]
 struct ColumnMapping {
-	KNKD: [usize; 21]
+	KNKD: Box<[Option<usize>; 41]>
+}
+
+impl Default for ColumnMapping {
+	fn default() -> Self {
+		Self {
+			KNKD: Box::new([None; 41])
+		}
+	}
 }
 
 pub fn click_action() -> Result<Vec<Row>, ()> {
@@ -47,18 +54,9 @@ pub fn click_action() -> Result<Vec<Row>, ()> {
 		                			"wwRetrievalMode" => {colend = j;}
 		                			string => {
 		                				if string.ends_with("KNKD") {
-		                					let mut iserr = false;
-		                					let col: usize = match string[0..string.len() - 5].parse() {
-		                						Ok(x) => x,
-		                						Err(_) => {
-		                							iserr = true;
-		                							0
-		                						}
-		                					};
+		                					let col: usize = string[0..string.len() - 5].parse().map_err(|_| ())?;
 
-		                					colmap.KNKD[col - 1] = j;
-
-		                					if iserr { return Err(()); }
+		                					colmap.KNKD[col - 1] = Some(j);
 		                				}
 		                			}
 		                		}
@@ -93,12 +91,14 @@ pub fn click_action() -> Result<Vec<Row>, ()> {
             	}
 
             	for i in 0..20 {
-            		if let Data::Float(f) = row[colmap.KNKD[i]] {
-            			let len = rows.len() - 1;
-            			rows[len].KNKD[i] = f;
-            			rows[len].KNKDs[i] = format!("{:.2}mg/l", f);
-            		}
-            	}
+            		if let Some(j) = colmap.KNKD[i] {
+	            		if let Data::Float(f) = row[j] {
+	            			let len = rows.len() - 1;
+	            			rows[len].KNKD[i] = f;
+	            			rows[len].KNKDs[i] = format!("{:.2}mg/l", f);
+	            		}
+	            	}
+	            }
             	
             }
         }

@@ -50,7 +50,9 @@ struct MyMiniquadApp {
     egui_mq: egui_miniquad::EguiMq,
     camera: Camera,
     input: InputData,
+
     rows: Vec<Row>,
+    mode: ViewMode,
 
     v3d: BufferId,
     i3d: BufferId,
@@ -112,19 +114,37 @@ impl MyMiniquadApp {
         //
         //
 
-        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -30.,  40., 6., 60., [0.3, 0.6, 0.5], [0.2, 0.4, 0.6]);
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -70.,  40., 6., 60., [0.3, 0.6, 0.5], [0.2, 0.4, 0.6]);
 
-        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -30.,  40., 6., 4.5, [0.2, 0.6, 0.3], [0.5, 0.4, 0.2]);
-        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -25.5, 35., 6., 4.5, [0.2, 0.6, 0.3], [0.5, 0.4, 0.2]);
-        gen_cube!(v3d, i3d, ic3d, vc3d,  15., -3., -25.5,  5., 6., 4.5, [0.5, 0.5, 0.6], [0.5, 0.5, 0.8]);
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -70.,  40., 6., 4.5, [0.2, 0.6, 0.3], [0.5, 0.4, 0.2]);
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -65.5, 35., 6., 4.5, [0.2, 0.6, 0.3], [0.5, 0.4, 0.2]);
+        gen_cube!(v3d, i3d, ic3d, vc3d,  15., -3., -65.5,  5., 6., 4.5, [0.5, 0.5, 0.6], [0.5, 0.5, 0.8]);
 
-        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -21.,  40., 6., 9., [0.4, 0.8, 0.3], [0.2, 0.8, 0.5]);
-        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -12.,  20., 6., 9., [1.0, 0.6, 0.5], [1.0, 0.4, 0.6]);
-        gen_cube!(v3d, i3d, ic3d, vc3d,   0., -3., -12.,  20., 6., 9., [0.1, 0.3, 0.8], [0.4, 0.2, 0.8]);
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -61.,  40., 6., 9., [0.4, 0.8, 0.3], [0.2, 0.8, 0.5]);
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -52.,  20., 6., 9., [1.0, 0.6, 0.5], [1.0, 0.4, 0.6]);
+        gen_cube!(v3d, i3d, ic3d, vc3d,   0., -3., -52.,  20., 6., 9., [0.1, 0.3, 0.8], [0.4, 0.2, 0.8]);
+
+        // reaktor 2
+
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., 10.,  40., 6., 60., [0.3, 0.6, 0.5], [0.2, 0.4, 0.6]);
+
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -70.,  40., 6., 4.5, [0.2, 0.6, 0.3], [0.5, 0.4, 0.2]);
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -65.5, 35., 6., 4.5, [0.2, 0.6, 0.3], [0.5, 0.4, 0.2]);
+        gen_cube!(v3d, i3d, ic3d, vc3d,  15., -3., -65.5,  5., 6., 4.5, [0.5, 0.5, 0.6], [0.5, 0.5, 0.8]);
+
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -61.,  40., 6., 9., [0.4, 0.8, 0.3], [0.2, 0.8, 0.5]);
+        gen_cube!(v3d, i3d, ic3d, vc3d, -20., -3., -52.,  20., 6., 9., [1.0, 0.6, 0.5], [1.0, 0.4, 0.6]);
+        gen_cube!(v3d, i3d, ic3d, vc3d,   0., -3., -52.,  20., 6., 9., [0.1, 0.3, 0.8], [0.4, 0.2, 0.8]);
 
 
-        // if only String implemented copy to do that in [string; 20] way instead of this block
+        // if only String implemented copy to do that in [string; 40] way instead of this block
         let (vui, iui, icui, _vcui) = gen_arrays(&[
+            String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
+            String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
+            String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
+            String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
+            String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
+
             String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
             String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
             String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"), String::from("\u{0002}0000,00mg/l"),
@@ -345,8 +365,9 @@ impl MyMiniquadApp {
             ctx,
             camera,
             input,
-            rows: vec![],
 
+            rows: vec![],
+            mode: ViewMode::azotANY,
 
             indices_3d_count: ic3d,
             indices_ui_count: icui,
@@ -450,7 +471,7 @@ impl mq::EventHandler for MyMiniquadApp {
         let now = Instant::now();
         let deltatime: f32 = now.duration_since(self.camera.last_frame_t).as_secs_f32();
         self.camera.last_frame_t = now;
-        self.camera.position = self.camera.position + 20. * deltatime * ( forward * self.input.motion.y + right_movement * self.input.motion.x );
+        self.camera.position = self.camera.position + 40. * deltatime * ( forward * self.input.motion.y + right_movement * self.input.motion.x );
 
         let view = Mat4::look_at_rh(self.camera.position, self.camera.position + forward, up);
         let vs_3d_params = shader3D::Uniforms {
@@ -515,6 +536,12 @@ impl mq::EventHandler for MyMiniquadApp {
                         .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0))
                         .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0))
                         .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0))
+
+                        .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0))
+                        .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0))
+                        .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0))
+                        .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0))
+                        .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0)) .column(Column::initial(80.0))
                         
                         .header(20.0, |mut header| {
                             header.col(|ui| {ui.label("DataCzas");});
@@ -523,6 +550,12 @@ impl mq::EventHandler for MyMiniquadApp {
                             header.col(|ui| {ui.label("9");}); header.col(|ui| {ui.label("10");}); header.col(|ui| {ui.label("11");}); header.col(|ui| {ui.label("12");});
                             header.col(|ui| {ui.label("13");}); header.col(|ui| {ui.label("14");}); header.col(|ui| {ui.label("15");}); header.col(|ui| {ui.label("16");});
                             header.col(|ui| {ui.label("17");}); header.col(|ui| {ui.label("18");}); header.col(|ui| {ui.label("19");}); header.col(|ui| {ui.label("20");});
+
+                            header.col(|ui| {ui.label("21");}); header.col(|ui| {ui.label("22");}); header.col(|ui| {ui.label("23");}); header.col(|ui| {ui.label("24");});
+                            header.col(|ui| {ui.label("25");}); header.col(|ui| {ui.label("26");}); header.col(|ui| {ui.label("27");}); header.col(|ui| {ui.label("28");});
+                            header.col(|ui| {ui.label("29");}); header.col(|ui| {ui.label("30");}); header.col(|ui| {ui.label("31");}); header.col(|ui| {ui.label("32");});
+                            header.col(|ui| {ui.label("33");}); header.col(|ui| {ui.label("34");}); header.col(|ui| {ui.label("35");}); header.col(|ui| {ui.label("36");});
+                            header.col(|ui| {ui.label("37");}); header.col(|ui| {ui.label("38");}); header.col(|ui| {ui.label("39");}); header.col(|ui| {ui.label("40");});
                         })
                         .body(|body| {
                             let len = self.rows.len();

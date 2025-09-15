@@ -7,6 +7,11 @@ use egui_extras::TableRow;
 use miniquad::{BufferId, RenderingBackend};
 use crate::buffer_updater::update_buffer;
 
+pub enum ViewMode {
+    azotANY,
+    azotYNY
+}
+
 // #[derive(Copy, Clone)]
 pub struct Vertex3D {
     pub position: [f32; 3],
@@ -46,16 +51,22 @@ pub struct InputData {
 #[derive(Clone)]
 pub struct Row {
     pub dataczas: String,
-    pub KNKD: [f64; 20],
-    pub KNKDs: [String; 20]
+    pub KNKD: [f64; 40],
+    pub KNKDs: [String; 40]
 }
 
 impl Default for Row {
     fn default() -> Self {
         Self {
             dataczas: Default::default(),
-            KNKD: [0.0; 20],
+            KNKD: [0.0; 40],
             KNKDs: [
+                String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
+                String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
+                String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
+                String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
+                String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
+
                 String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
                 String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
                 String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"), String::from("0,00mg/l"),
