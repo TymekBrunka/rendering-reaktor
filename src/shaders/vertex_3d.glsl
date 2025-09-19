@@ -12,7 +12,7 @@ void main() {
 	out_color = mix(
         vec4(0.1, 0.0, 0.05, 1.0),
         vec4(color, 1.0),
-        1.0 / clamp(gl_Position.z, 10.0, 10000.0) * 10.0
+        1.0 / clamp(gl_Position.z * 0.5, 10.0, 10000.0) * 10.0
         // typ
     );
 }
