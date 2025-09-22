@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
-
 project(reaktory LANGUAGES CXX)
+
+find_package(glfw3 REQUIRED)
+set(GL_INCLUDES
+    glad/include
+)
 
 add_executable(main main.cpp)
 
-#target_link_libraries()
-find_package(glfw REQUIRED)
+target_link_libraries(main glfw) #glfw3 is name OF THE FILE, NOT TARGET
+target_include_directories(main PUBLIC ${GL_INCLUDES})
