@@ -1,12 +1,23 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.23)
 project(reaktory LANGUAGES CXX)
 
+add_subdirectory(nativefiledialog-extended)
+
 find_package(glfw3 REQUIRED)
-set(GL_INCLUDES
+
+set(RENDER_INCLUDES
     glad/include
 )
 
-add_executable(main main.cpp)
+set(RENDER_LIBS
+    glfw
+    rr
+)
 
-target_link_libraries(main glfw) #glfw3 is name OF THE FILE, NOT TARGET
-target_include_directories(main PUBLIC ${GL_INCLUDES})
+add_library(rr OBJECT src/rendering/rr.cpp)
+target_link_libraries(rr glfw)
+target_include_directories(rr PUBLIC glad/include src/rendering)
+
+add_executable(main src/main.cpp)
+target_link_libraries(main glfw nfd rr) #glfw3 is name OF THE FILE, NOT TARGET
+target_include_directories(main PUBLIC ${RENDER_INCLUDES})
