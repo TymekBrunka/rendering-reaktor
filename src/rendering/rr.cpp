@@ -1,8 +1,16 @@
+#include "generators.h"
 #define GLAD_GL_IMPLEMENTATION
 #include "rr.hpp"
 
 #include <stdio.h>
 #include <cstdlib>
+#include <glm/vec2.hpp>
+
+#include 
+
+struct a {
+    glm::vec2 b;
+}
 
 namespace RR {
     void error_callback(int error, const char* description)
@@ -23,6 +31,10 @@ namespace RR {
         }
 
         gladLoadGL(glfwGetProcAddress);
+
+        const GLint gex = glGetUniformLocation(program, "gex");
+        RR_AUTOATTRIB(a, b, gex);
+
     }
 
     GLFWwindow* createWindow(int width, int height, const char* title, int major, int minor) {
