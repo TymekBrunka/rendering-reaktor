@@ -1,16 +1,16 @@
-#include "generators.h"
-#define GLAD_GL_IMPLEMENTATION
 #include "rr.hpp"
 
 #include <stdio.h>
 #include <cstdlib>
 #include <glm/vec2.hpp>
 
-#include 
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 struct a {
     glm::vec2 b;
-}
+};
 
 namespace RR {
     void error_callback(int error, const char* description)
@@ -21,7 +21,7 @@ namespace RR {
     // static const char* description;
 
     void init() {
-        glfwSetErrorCallback(error_callback);
+        glfwSetErrorCallback(RR::error_callback);
 
         if (!glfwInit())
         {
@@ -29,12 +29,6 @@ namespace RR {
         //     printf("Error: %s\n", description);
             exit(-1);
         }
-
-        gladLoadGL(glfwGetProcAddress);
-
-        const GLint gex = glGetUniformLocation(program, "gex");
-        RR_AUTOATTRIB(a, b, gex);
-
     }
 
     GLFWwindow* createWindow(int width, int height, const char* title, int major, int minor) {
@@ -44,5 +38,23 @@ namespace RR {
 
         GLFWwindow* window = glfwCreateWindow(width, height, title, NULL, NULL);
         return window;
+    }
+
+    std::string readFile(const char* filepath){
+        std::ifstream inFile;
+        inFile.open(filepath); //open the input file
+
+        std::stringstream strStream;
+        strStream << inFile.rdbuf(); //read the file
+        std::string str = strStream.str(); //str holds the content of the file
+        return str;
+    }
+
+    const GLuint compileShader(GLenum typ, const char* txt) {
+        const GLuint shader = glCreateShader(typ);
+        glShaderSource(shader, 1, &txt, NULL);
+        glCompileShader(shader);
+
+        return shader;
     }
 }
