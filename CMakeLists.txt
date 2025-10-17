@@ -21,9 +21,9 @@ target_link_libraries(vb ${RENDER_LIBS})
 target_include_directories(vb PUBLIC src/rendering)
 
 add_library(rr OBJECT src/rendering/rr.cpp)
-target_link_libraries(rr ${RENDER_LIBS})
+target_link_libraries(rr vb ${RENDER_LIBS})
 target_include_directories(rr PUBLIC src/rendering)
 
 add_executable(main src/main.cpp)
-target_link_libraries(main PUBLIC nfd rr ${RENDER_LIBS})
+target_link_libraries(main PUBLIC nfd rr vb ${RENDER_LIBS})
 #target_include_directories(main PUBLIC )

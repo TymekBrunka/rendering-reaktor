@@ -11,6 +11,8 @@ namespace RR {
         setup_attributes(program);
     }
 
+    void VertexBuffer::setup_attributes(GLuint program) {};
+
     void VertexBuffer::Apply() {
         glBindVertexArray(this->vertex_array_id);
     }

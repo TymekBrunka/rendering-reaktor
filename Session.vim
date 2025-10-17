@@ -13,17 +13,18 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +1 ~/Documents/rendering-reaktor/src/rendering/rr.cpp
+badd +23 ~/Documents/rendering-reaktor/src/rendering/rr.cpp
 badd +1 ~/Documents/rendering-reaktor/CMakeLists.txt
 badd +1 ~/Documents/rendering-reaktor/src/rendering/rr.hpp
 badd +2 ~/Documents/rendering-reaktor/src/rendering/VertexBuffer.cpp
-badd +8 ~/Documents/rendering-reaktor/src/rendering/generators.h
+badd +9 ~/Documents/rendering-reaktor/src/rendering/generators.h
 badd +5 ~/Documents/rendering-reaktor/src/main.cpp
+badd +12 ~/Documents/rendering-reaktor/conanfile.txt
 argglobal
 %argdel
-edit ~/Documents/rendering-reaktor/src/rendering/rr.cpp
+edit ~/Documents/rendering-reaktor/src/rendering/rr.hpp
 argglobal
-balt ~/Documents/rendering-reaktor/src/rendering/generators.h
+balt ~/Documents/rendering-reaktor/src/rendering/rr.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -39,7 +40,7 @@ if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
 keepjumps 1
-normal! 019|
+normal! 0
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
