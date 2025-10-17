@@ -5,35 +5,39 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
-GLint f__RR_AUTOATTRIB_GL_SIZE(glm::vec2 v) {
-    return 2;
-}
+namespace RR {
+    template<typename T>
+    struct ATTRIB_SPECS {
+        static const GLint size = -2137;
+        static const GLenum type = GL_FLOAT;
+    };
 
-GLint f__RR_AUTOATTRIB_GL_SIZE(glm::vec3 v) {
-    return 3;
-}
+    template<>
+    struct ATTRIB_SPECS<glm::vec2> {
+        static const GLint size = 2;
+        static const GLenum type = GL_FLOAT;
+    };
 
-GLenum f__RR_AUTOATTRIB_GL_TYPE(glm::vec2 v) {
-    return GL_FLOAT;
-}
+    template<>
+    struct ATTRIB_SPECS<glm::vec3> {
+        static const GLint size = 3;
+        static const GLenum type = GL_FLOAT;
+    };
 
-GLenum f__RR_AUTOATTRIB_GL_TYPE(glm::vec3 v) {
-    return GL_FLOAT;
-}
+    #define RR_AUTOATTRIB(Struct, Field, Normalized) RR::f__RR_AUTOATTRIB<decltype(Struct::Field)>(program, Normalized, this->location_##Field, (const char*)#Field, (const void*)offsetof(Struct, Field))
 
-#define RR_AUTOATTRIB(Struct, Field, Normalized) f__RR_AUTOATTRIB(program, &Struct::Field, Normalized, this->location_##Field, #Field, (void*)offsetof(Struct, Field))
-
-template<typename T, typename F>
-void f__RR_AUTOATTRIB(GLuint& program, F T::* Field, GLboolean normalized, GLint& Location, const char* locname, void* offset) {
-    Location = glGetAttribLocation(program, locname);
-    glEnableVertexAttribArray(Location);
-    glVertexAttribPointer(
-        Location,
-        f__RR_AUTOATTRIB_GL_SIZE(*Field),
-        f__RR_AUTOATTRIB_GL_TYPE(*Field),
-        normalized,
-        sizeof(T), offset
-    );
+    template<typename T/*, typename F*/>
+    inline void f__RR_AUTOATTRIB(GLuint& program, /*F T::* T Field,*/ GLboolean normalized, GLint& Location, const char* locname, const void* offset) {
+        Location = glGetAttribLocation(program, locname);
+        glEnableVertexAttribArray(Location);
+        glVertexAttribPointer(
+            Location,
+            RR::ATTRIB_SPECS<T>::size,
+            RR::ATTRIB_SPECS<T>::type,
+            normalized,
+            sizeof(T), offset
+        );
+    }
 }
 
 #endif

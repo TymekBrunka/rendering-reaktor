@@ -10,7 +10,7 @@ class TriangleVertexBuffer : RR::VertexBuffer {
 	GLint location_color;
 
 	void setup_attributes(GLuint program) {
-		RR_AUTOATTRIB(triangle_vertex, pos, GL_FALSE);
-		RR_AUTOATTRIB(triangle_vertex, color, GL_FALSE);
+		RR_AUTOATTRIB(triangle_vertex, pos, GL_TRUE);
+		RR_AUTOATTRIB(triangle_vertex, color, GL_TRUE);
 	}
 };
