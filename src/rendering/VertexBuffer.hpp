@@ -2,7 +2,7 @@
 
 namespace RR {
     class VertexBuffer {
-        void setup_attributes(GLuint program);
+        virtual void setup_attributes(GLuint program);
 
         public:
         GLuint vertex_buffer_id;

@@ -15,12 +15,13 @@ int main() {
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
+
     glfwMakeContextCurrent(window); // context must be set first
 	gladLoadGL(glfwGetProcAddress); // only then we can load
 	glfwSwapInterval(1);
 
-	std::string vertex_text = RR::readFile("shaders/empty.glsl");
-	std::string fragment_text = RR::readFile("shaders/empty.glsl");
+	std::string vertex_text = RR::readFile("shaders/triangle.vertex.glsl");
+	std::string fragment_text = RR::readFile("shaders/triangle.fragm.glsl");
 
 	GLuint vertex_shader = RR::compileShader(GL_VERTEX_SHADER, vertex_text.c_str());
 	GLuint fragment_shader = RR::compileShader(GL_FRAGMENT_SHADER, fragment_text.c_str());
@@ -37,6 +38,7 @@ int main() {
     };
 
     TriangleVertexBuffer vb = TriangleVertexBuffer(program, (void*)verticies, 3, GL_STATIC_DRAW);
+    vb.setup_attributes(program);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -48,6 +50,7 @@ int main() {
 
         glUseProgram(program);
         // glBindVertexArray(vertex_array);
+        vb.Apply();
         glDrawArrays(GL_TRIANGLES, 0, 3);
     }
 }

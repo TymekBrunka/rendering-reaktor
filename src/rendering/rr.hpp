@@ -7,11 +7,11 @@
 #include "generators.h"
 
 namespace RR {
-    extern void error_callback(int error, const char* description);
+    void error_callback(int error, const char* description);
 
     // static const char* description;
 
-    extern void init();
+    void init();
 
     GLFWwindow* createWindow(int width, int height, const char* title, int major, int minor);
 
