@@ -52,6 +52,7 @@ namespace RR {
 
     const GLuint compileShader(GLenum typ, const char* txt) {
         const GLuint shader = glCreateShader(typ);
+        std::cout << txt << "\n\n";
         glShaderSource(shader, 1, &txt, NULL);
         glCompileShader(shader);
 

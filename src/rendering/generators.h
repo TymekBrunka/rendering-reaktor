@@ -2,10 +2,13 @@
 #define _RR_DENINED_GENERATORS
 
 #include <glad/gl.h>
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
+// #include <glm/vec2.hpp>
+// #include <glm/vec3.hpp>
 
 namespace RR {
+    typedef float vec2[2];
+    typedef float vec3[3];
+
     template<typename T>
     struct ATTRIB_SPECS {
         static const GLint size = -2137;
@@ -13,13 +16,13 @@ namespace RR {
     };
 
     template<>
-    struct ATTRIB_SPECS<glm::vec2> {
+    struct ATTRIB_SPECS<vec2> {
         static const GLint size = 2;
         static const GLenum type = GL_FLOAT;
     };
 
     template<>
-    struct ATTRIB_SPECS<glm::vec3> {
+    struct ATTRIB_SPECS<vec3> {
         static const GLint size = 3;
         static const GLenum type = GL_FLOAT;
     };
