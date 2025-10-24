@@ -15,7 +15,9 @@ namespace RR {
 
     GLFWwindow* createWindow(int width, int height, const char* title, int major, int minor);
 
-    const GLuint compileShader(GLenum typ, const char* txt);
+    GLuint createVertexArray();
 
     std::string readFile(const char* filepath);
+
+    const GLuint compileShader(GLenum typ, const char* txt);
 }

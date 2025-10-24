@@ -34,28 +34,28 @@ int main() {
 	GLuint vertex_shader = RR::compileShader(GL_VERTEX_SHADER, vertex_text.c_str());
 	GLuint fragment_shader = RR::compileShader(GL_FRAGMENT_SHADER, fragment_text.c_str());
 
-    // int compilation_status;
-    // glGetShaderiv(vertex_shader, GL_LINK_STATUS, &compilation_status);
-    // if (compilation_status != GL_TRUE) {
-    //     GLsizei message_length;
-    //     glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &message_length);
-    //     char* message_buffer = new char[message_length];
-    //     glGetShaderInfoLog(vertex_shader, message_length, NULL, message_buffer);
-    //     std::cout << "Shader linking error: " << message_buffer << "\n";
-    //     glDeleteShader(vertex_shader);
-    //     delete[] message_buffer;
-    // }
+    int compilation_status;
+    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &compilation_status);
+    if (compilation_status != GL_TRUE) {
+        GLsizei message_length;
+        glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &message_length);
+        char* message_buffer = new char[message_length];
+        glGetShaderInfoLog(vertex_shader, message_length, NULL, message_buffer);
+        std::cout << "Shader linking error: " << message_buffer << "\n";
+        glDeleteShader(vertex_shader);
+        delete[] message_buffer;
+    }
 
-    // glGetShaderiv(fragment_shader, GL_LINK_STATUS, &compilation_status);
-    // if (compilation_status != GL_TRUE) {
-    //     GLsizei message_length;
-    //     glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &message_length);
-    //     char* message_buffer = new char[message_length];
-    //     glGetShaderInfoLog(fragment_shader, message_length, NULL, message_buffer);
-    //     std::cout << "Shader linking error: " << message_buffer << "\n";
-    //     glDeleteShader(fragment_shader);
-    //     delete[] message_buffer;
-    // }
+    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &compilation_status);
+    if (compilation_status != GL_TRUE) {
+        GLsizei message_length;
+        glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &message_length);
+        char* message_buffer = new char[message_length];
+        glGetShaderInfoLog(fragment_shader, message_length, NULL, message_buffer);
+        std::cout << "Shader linking error: " << message_buffer << "\n";
+        glDeleteShader(fragment_shader);
+        delete[] message_buffer;
+    }
 
 	const GLuint program = glCreateProgram();
     glAttachShader(program, vertex_shader);
@@ -82,8 +82,9 @@ int main() {
         { {   0.f,  0.6f }, { 0.f, 0.f, 1.f } }
     };
 
-    TriangleVertexBuffer vb = TriangleVertexBuffer(program, (void*)verticies, 3, GL_STATIC_DRAW);
-    vb.setup_attributes(program);
+    RR::VertexBuffer<triangle_vertex> vb = RR::VertexBuffer(program, verticies, 3, GL_STATIC_DRAW);
+    GLuint vertex_array = RR::createVertexArray();
+    setup_triangle_vertex_array_attribs(program);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -94,8 +95,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(program);
-        // glBindVertexArray(vertex_array);
-        vb.Apply();
+        glBindVertexArray(vertex_array);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);
@@ -105,5 +105,5 @@ int main() {
     glfwDestroyWindow(window);
 
     glfwTerminate();
-    exit(EXIT_SUCCESS);
+    // exit(EXIT_SUCCESS);
 }

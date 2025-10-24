@@ -27,12 +27,13 @@ namespace RR {
         static const GLenum type = GL_FLOAT;
     };
 
-    #define RR_AUTOATTRIB(Struct, Field, Normalized) RR::f__RR_AUTOATTRIB<decltype(Struct::Field)>(program, Normalized, this->location_##Field, (const char*)#Field, (const void*)offsetof(Struct, Field))
+    #define RR_AUTOATTRIB(Struct, Field, Normalized) RR::f__RR_AUTOATTRIB<decltype(Struct::Field)>(program, Normalized, location_##Field, (const char*)#Field, (const void*)offsetof(Struct, Field))
 
     template<typename T/*, typename F*/>
-    inline void f__RR_AUTOATTRIB(GLuint& program, /*F T::* T Field,*/ GLboolean normalized, GLint& Location, const char* locname, const void* offset) {
+    inline void f__RR_AUTOATTRIB(const GLuint& program, /*F T::* T Field,*/ GLboolean normalized, GLint& Location, const char* locname, const void* offset) {
         Location = glGetAttribLocation(program, locname);
         glEnableVertexAttribArray(Location);
+        std::cout << locname << " size is " << RR::ATTRIB_SPECS<T>::size << " and type is " << RR::ATTRIB_SPECS<T>::type << " and offset is " << offset << "\n";
         glVertexAttribPointer(
             Location,
             RR::ATTRIB_SPECS<T>::size,

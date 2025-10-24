@@ -1,15 +1,17 @@
 #include <glad/gl.h>
 
 namespace RR {
+    template<typename T>
     class VertexBuffer {
-        virtual void setup_attributes(GLuint program);
-
         public:
         GLuint vertex_buffer_id;
-        GLuint vertex_array_id;
-        const GLsizeiptr length;
+        GLsizeiptr length;
 
-        VertexBuffer(GLuint program, const void* data, GLsizeiptr n, GLenum usage);
-        void Apply();
+        VertexBuffer(GLuint program, const T data[], GLsizeiptr n, GLenum usage) {
+            glGenBuffers(1, &this->vertex_buffer_id);
+            glBindBuffer(GL_ARRAY_BUFFER, this->vertex_buffer_id);
+            glBufferData(GL_ARRAY_BUFFER, n, data, usage);
+            this->length = n;
+        }
     };
 }

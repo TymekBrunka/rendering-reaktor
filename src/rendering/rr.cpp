@@ -40,6 +40,13 @@ namespace RR {
         return window;
     }
 
+    GLuint createVertexArray() {
+        GLuint va;
+        glGenVertexArrays(1, &va);
+        glBindVertexArray(va);
+        return va;
+    }
+
     std::string readFile(const char* filepath){
         std::ifstream inFile;
         inFile.open(filepath); //open the input file
