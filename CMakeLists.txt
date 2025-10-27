@@ -22,8 +22,12 @@ target_include_directories(glad PUBLIC glad/include)
 #target_link_libraries(vb ${RENDER_LIBS})
 #target_include_directories(vb PUBLIC src/rendering)
 
+add_library(fb OBJECT src/rendering/FrameBuffer.cpp)
+target_link_libraries(fb ${RENDER_LIBS})
+target_include_directories(fb PUBLIC src/rendering)
+
 add_library(rr OBJECT src/rendering/rr.cpp)
-target_link_libraries(rr ${RENDER_LIBS})
+target_link_libraries(rr ${RENDER_LIBS} fb)
 target_include_directories(rr PUBLIC src/rendering)
 
 add_executable(main src/main.cpp)

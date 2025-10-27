@@ -1,4 +1,5 @@
 // #define GLAD_GL_IMPLEMENTATION
+#include <cstdlib>
 #include <glad/gl.h>
 // #include <GLFW/glfw3.h>
 #include <nfd.h>
@@ -34,29 +35,6 @@ int main() {
 	GLuint vertex_shader = RR::compileShader(GL_VERTEX_SHADER, vertex_text.c_str());
 	GLuint fragment_shader = RR::compileShader(GL_FRAGMENT_SHADER, fragment_text.c_str());
 
-    int compilation_status;
-    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &compilation_status);
-    if (compilation_status != GL_TRUE) {
-        GLsizei message_length;
-        glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &message_length);
-        char* message_buffer = new char[message_length];
-        glGetShaderInfoLog(vertex_shader, message_length, NULL, message_buffer);
-        std::cout << "Shader linking error: " << message_buffer << "\n";
-        glDeleteShader(vertex_shader);
-        delete[] message_buffer;
-    }
-
-    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &compilation_status);
-    if (compilation_status != GL_TRUE) {
-        GLsizei message_length;
-        glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &message_length);
-        char* message_buffer = new char[message_length];
-        glGetShaderInfoLog(fragment_shader, message_length, NULL, message_buffer);
-        std::cout << "Shader linking error: " << message_buffer << "\n";
-        glDeleteShader(fragment_shader);
-        delete[] message_buffer;
-    }
-
 	const GLuint program = glCreateProgram();
     glAttachShader(program, vertex_shader);
     glAttachShader(program, fragment_shader);
@@ -84,6 +62,7 @@ int main() {
 
     RR::VertexBuffer<triangle_vertex> vb = RR::VertexBuffer(program, verticies, 3, GL_STATIC_DRAW);
     GLuint vertex_array = RR::createVertexArray();
+    glBindVertexArray(vertex_array);
     setup_triangle_vertex_array_attribs(program);
 
     while (!glfwWindowShouldClose(window))

@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "VertexBuffer.hpp"
+#include "FrameBuffer.hpp"
 #include "generators.h"
 
 namespace RR {
