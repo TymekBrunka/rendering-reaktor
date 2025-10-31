@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include "Shader.hpp"
 #include "VertexBuffer.hpp"
 #include "FrameBuffer.hpp"
 #include "generators.h"
@@ -19,6 +20,4 @@ namespace RR {
     GLuint createVertexArray();
 
     std::string readFile(const char* filepath);
-
-    const GLuint compileShader(GLenum typ, const char* txt);
 }

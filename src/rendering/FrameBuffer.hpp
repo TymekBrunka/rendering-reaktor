@@ -1,11 +1,13 @@
+#pragma once
 #include <glad/gl.h>
 
 namespace RR {
 	class FrameBuffer {
-		GLuint framebuffer;
+	public:
+		GLuint id;
 		GLuint texture;
 		GLuint depth_texture;
-	public:
-		FrameBuffer(GLsizei width, GLsizei height);
+
+		FrameBuffer(int width, int height);
 	};
 }

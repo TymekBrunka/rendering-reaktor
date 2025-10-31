@@ -1,8 +1,6 @@
 #include "rr.hpp"
 
 #include <stdio.h>
-#include <cstdlib>
-#include <glm/vec2.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -51,27 +49,5 @@ namespace RR {
         strStream << inFile.rdbuf(); //read the file
         std::string str = strStream.str(); //str holds the content of the file
         return str;
-    }
-
-    const GLuint compileShader(GLenum typ, const char* txt) {
-        const GLuint shader = glCreateShader(typ);
-        // std::cout << txt << "\n\n";
-        glShaderSource(shader, 1, &txt, NULL);
-        glCompileShader(shader);
-
-        int compilation_status;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &compilation_status);
-        if (compilation_status != GL_TRUE) {
-            GLsizei message_length;
-            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &message_length);
-            char* message_buffer = new char[message_length];
-            glGetShaderInfoLog(shader, message_length, NULL, message_buffer);
-            std::cout << "Shader linking error: \x1b[31m" << message_buffer << "\x1b[0m\n";
-            glDeleteShader(shader);
-            delete[] message_buffer;
-            exit(EXIT_FAILURE);
-        }
-
-        return shader;
     }
 }

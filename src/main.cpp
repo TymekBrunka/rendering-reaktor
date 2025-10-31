@@ -3,6 +3,8 @@
 #include <glad/gl.h>
 // #include <GLFW/glfw3.h>
 #include <nfd.h>
+#include "rendering/Shader.hpp"
+#include "rendering/rr.hpp"
 #include "rr.hpp"
 
 #include <iostream>
@@ -32,12 +34,15 @@ int main() {
 	std::string vertex_text = RR::readFile("src/shaders/triangle.vertex.glsl");
 	std::string fragment_text = RR::readFile("src/shaders/triangle.frag.glsl");
 
-	GLuint vertex_shader = RR::compileShader(GL_VERTEX_SHADER, vertex_text.c_str());
-	GLuint fragment_shader = RR::compileShader(GL_FRAGMENT_SHADER, fragment_text.c_str());
+	RR::Shader vertex_shader = RR::Shader(GL_VERTEX_SHADER, vertex_text.c_str());
+	RR::Shader fragment_shader = RR::Shader(GL_FRAGMENT_SHADER, fragment_text.c_str());
+
+    vertex_shader.errorCheck(true, true);
+    fragment_shader.errorCheck(true, true);
 
 	const GLuint program = glCreateProgram();
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
+    glAttachShader(program, vertex_shader.id);
+    glAttachShader(program, fragment_shader.id);
     glLinkProgram(program);
 
 
@@ -64,7 +69,9 @@ int main() {
     GLuint vertex_array = RR::createVertexArray();
     glBindVertexArray(vertex_array);
     setup_triangle_vertex_array_attribs(program);
+    // RR::FrameBuffer fb(300,100);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     while (!glfwWindowShouldClose(window))
     {
         int width, height;

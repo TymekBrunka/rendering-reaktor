@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
 project(reaktory LANGUAGES C CXX)
-
 set (CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(nativefiledialog-extended) #refuses to work normaly with find_package()
@@ -9,27 +8,8 @@ find_package(glfw3 REQUIRED) #glfw3 is name OF THE FILE, NOT TARGET
 
 add_subdirectory(glm) #refuses to work normaly with find_package()
 
-set(RENDER_LIBS
-    glad
-    glfw
-    glm::glm-header-only
-)
-
-add_library(glad OBJECT glad/src/gl.c)
-target_include_directories(glad PUBLIC glad/include)
-
-#add_library(vb OBJECT src/rendering/VertexBuffer.cpp)
-#target_link_libraries(vb ${RENDER_LIBS})
-#target_include_directories(vb PUBLIC src/rendering)
-
-add_library(fb OBJECT src/rendering/FrameBuffer.cpp)
-target_link_libraries(fb ${RENDER_LIBS})
-target_include_directories(fb PUBLIC src/rendering)
-
-add_library(rr OBJECT src/rendering/rr.cpp)
-target_link_libraries(rr ${RENDER_LIBS} fb)
-target_include_directories(rr PUBLIC src/rendering)
+add_subdirectory(src/rendering)
 
 add_executable(main src/main.cpp)
-target_link_libraries(main PUBLIC nfd rr ${RENDER_LIBS})
+target_link_libraries(main nfd rr glad glm::glm-header-only)
 #target_include_directories(main PUBLIC )
