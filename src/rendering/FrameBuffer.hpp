@@ -8,6 +8,7 @@ namespace RR {
 		GLuint texture;
 		GLuint depth_texture;
 
-		FrameBuffer(int width, int height);
+		FrameBuffer(int width, int height, bool printOnErr = false);
+		~FrameBuffer();
 	};
 }

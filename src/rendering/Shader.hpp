@@ -7,6 +7,7 @@ namespace RR {
 		GLuint id;
 
 		Shader(GLenum typ, const char* txt);
+		~Shader();
 
 		bool errorCheck(bool doPrint, bool doExit);
 	};

@@ -27,7 +27,7 @@ namespace RR {
         static const GLenum type = GL_FLOAT;
     };
 
-    #define RR_AUTOATTRIB(Struct, Field, Normalized) RR::f__RR_AUTOATTRIB<decltype(Struct::Field)>(program, Normalized, location_##Field, (const char*)#Field, (void*)offsetof(Struct, Field), sizeof(Struct))
+    #define RR_AUTOATTRIB(Struct, Field, Normalized) RR::f__RR_AUTOATTRIB<decltype(Struct::Field)>(program.id, Normalized, location_##Field, (const char*)#Field, (void*)offsetof(Struct, Field), sizeof(Struct))
 
     template<typename T/*, typename F*/>
     inline void f__RR_AUTOATTRIB(GLuint program, /*F T::* T Field,*/ GLboolean normalized, GLint& Location, const char* locname, const void* offset, GLsizei stride) {

@@ -10,6 +10,10 @@ namespace RR {
         this->id = shader;
 	}
 
+    Shader::~Shader() {
+        glDeleteShader(this->id);
+    }
+
 	bool Shader::errorCheck(bool doPrint, bool doExit) {
 		int compilation_status;
         glGetShaderiv(this->id, GL_COMPILE_STATUS, &compilation_status);
@@ -18,7 +22,9 @@ namespace RR {
             glGetShaderiv(this->id, GL_INFO_LOG_LENGTH, &message_length);
             char* message_buffer = new char[message_length];
             glGetShaderInfoLog(this->id, message_length, NULL, message_buffer);
-            std::cout << "Shader linking error: \x1b[31m" << message_buffer << "\x1b[0m\n";
+            if (doPrint) {
+                std::cout << "Shader linking error: \x1b[31m" << message_buffer << "\x1b[0m\n";
+            };
             glDeleteShader(this->id);
             delete[] message_buffer;
             if (doExit)

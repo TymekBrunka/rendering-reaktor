@@ -4,18 +4,26 @@ set (CMAKE_CXX_STANDARD 20)
 
 include_directories(.)
 
-add_library(glad OBJECT glad/src/gl.c)
-target_include_directories(glad PUBLIC glad/include)
-
-add_library(shader OBJECT Shader.cpp)
-target_link_libraries(shader glad)
-
+#add_library(glad OBJECT glad/src/gl.c)
+#target_include_directories(glad PUBLIC glad/include)
+#
+#add_library(shader OBJECT Shader.cpp)
+#target_link_libraries(shader glad)
+#
 #add_library(vb OBJECT VertexBuffer.cpp)
 #target_link_libraries(vb glad)
+#
+#add_library(fb OBJECT FrameBuffer.cpp)
+#target_link_libraries(fb glad)
 
-add_library(fb OBJECT FrameBuffer.cpp)
-target_link_libraries(fb glad)
+add_library(rr OBJECT rr.cpp
+	glad/src/gl.c
+	Shader.cpp
+	Program.cpp
+	#VertexBuffer.cpp
+	FrameBuffer.cpp
+)
+target_link_libraries(rr PUBLIC glfw)
 
-add_library(rr OBJECT rr.cpp)
-target_link_libraries(rr glad glfw shader fb)
+target_include_directories(rr PUBLIC glad/include)
 target_include_directories(rr PUBLIC .)

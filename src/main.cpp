@@ -3,6 +3,7 @@
 #include <glad/gl.h>
 // #include <GLFW/glfw3.h>
 #include <nfd.h>
+#include "rendering/Program.hpp"
 #include "rendering/Shader.hpp"
 #include "rendering/rr.hpp"
 #include "rr.hpp"
@@ -40,24 +41,11 @@ int main() {
     vertex_shader.errorCheck(true, true);
     fragment_shader.errorCheck(true, true);
 
-	const GLuint program = glCreateProgram();
-    glAttachShader(program, vertex_shader.id);
-    glAttachShader(program, fragment_shader.id);
-    glLinkProgram(program);
+	const RR::Program program = RR::Program()
+        .attachShader(vertex_shader)
+        .attachShader(fragment_shader);
 
-
-    int linkStatus;
-    glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
-    if (linkStatus != GL_TRUE) {
-        GLsizei message_length;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &message_length);
-        char* message_buffer = new char[message_length];
-        glGetProgramInfoLog(program, message_length, NULL, message_buffer);
-        std::cout << "Shader linking error: " << message_buffer << "\n";
-        glDeleteProgram(program);
-        delete[] message_buffer;
-    }
-
+    program.link(true, true);
 
     triangle_vertex verticies[] = { 
         { { -0.6f, -0.4f }, { 1.f, 0.f, 0.f } },
@@ -65,7 +53,7 @@ int main() {
         { {   0.f,  0.6f }, { 0.f, 0.f, 1.f } }
     };
 
-    RR::VertexBuffer<triangle_vertex> vb = RR::VertexBuffer(program, verticies, 3, GL_STATIC_DRAW);
+    RR::VertexBuffer<triangle_vertex> vb = RR::VertexBuffer(verticies, 3, GL_STATIC_DRAW);
     GLuint vertex_array = RR::createVertexArray();
     glBindVertexArray(vertex_array);
     setup_triangle_vertex_array_attribs(program);
@@ -80,7 +68,7 @@ int main() {
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(program);
+        glUseProgram(program.id);
         glBindVertexArray(vertex_array);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
