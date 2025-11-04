@@ -17,7 +17,7 @@ namespace RR {
 	bool Shader::errorCheck(bool doPrint, bool doExit) {
 		int compilation_status;
         glGetShaderiv(this->id, GL_COMPILE_STATUS, &compilation_status);
-        if (compilation_status != GL_TRUE) {
+        if (!compilation_status) {
             GLsizei message_length;
             glGetShaderiv(this->id, GL_INFO_LOG_LENGTH, &message_length);
             char* message_buffer = new char[message_length];

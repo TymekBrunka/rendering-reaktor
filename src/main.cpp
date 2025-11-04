@@ -41,7 +41,7 @@ int main() {
     vertex_shader.errorCheck(true, true);
     fragment_shader.errorCheck(true, true);
 
-	const RR::Program program = RR::Program()
+	RR::Program program = RR::Program()
         .attachShader(vertex_shader)
         .attachShader(fragment_shader);
 
@@ -56,7 +56,7 @@ int main() {
     RR::VertexBuffer<triangle_vertex> vb = RR::VertexBuffer(verticies, 3, GL_STATIC_DRAW);
     GLuint vertex_array = RR::createVertexArray();
     glBindVertexArray(vertex_array);
-    setup_triangle_vertex_array_attribs(program);
+    setup_triangle_vertex_array_attribs(program.id);
     // RR::FrameBuffer fb(300,100);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

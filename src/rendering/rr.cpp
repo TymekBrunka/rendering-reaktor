@@ -29,6 +29,9 @@ namespace RR {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        // #ifndef NDEBUG
+            glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); 
+        // #endif
 
         GLFWwindow* window = glfwCreateWindow(width, height, title, NULL, NULL);
         return window;
