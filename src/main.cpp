@@ -41,7 +41,8 @@ int main() {
     vertex_shader.errorCheck(true, true);
     fragment_shader.errorCheck(true, true);
 
-	RR::Program program = RR::Program()
+	RR::Program program = RR::Program();
+    program
         .attachShader(vertex_shader)
         .attachShader(fragment_shader);
 

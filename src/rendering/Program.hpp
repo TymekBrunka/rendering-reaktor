@@ -1,5 +1,6 @@
 #pragma once
 #include <glad/gl.h>
+#include "Errors.hpp"
 #include "Shader.hpp"
 
 namespace RR {
@@ -9,7 +10,7 @@ namespace RR {
 
 		Program();
 		~Program();
-		Program& attachShader(RR::Shader shader);
-		bool link(bool doPrint, bool doExit);
+		Program& attachShader(RR::Shader& shader);
+		RR::result link(bool doPrint, bool doExit);
 	};
 }

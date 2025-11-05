@@ -1,5 +1,6 @@
 #pragma once
 #include <glad/gl.h>
+#include "Errors.hpp"
 
 namespace RR {
 	class Shader {
@@ -9,6 +10,6 @@ namespace RR {
 		Shader(GLenum typ, const char* txt);
 		~Shader();
 
-		bool errorCheck(bool doPrint, bool doExit);
+		RR::result errorCheck(bool doPrint, bool doExit);
 	};
 }
