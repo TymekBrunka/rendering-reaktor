@@ -16,14 +16,17 @@ include_directories(.)
 #add_library(fb OBJECT FrameBuffer.cpp)
 #target_link_libraries(fb glad)
 
+add_library(stb_image stb_image.cpp)
+
 add_library(rr OBJECT rr.cpp
 	glad/src/gl.c
 	Shader.cpp
 	Program.cpp
 	#VertexBuffer.cpp
 	FrameBuffer.cpp
+	Texture2d.cpp
 )
-target_link_libraries(rr PUBLIC glfw)
+target_link_libraries(rr PUBLIC glfw stb_image)
 
 target_include_directories(rr PUBLIC glad/include)
 target_include_directories(rr PUBLIC .)

@@ -3,10 +3,9 @@
 #include <glad/gl.h>
 // #include <GLFW/glfw3.h>
 #include <nfd.h>
-#include "rendering/Program.hpp"
-#include "rendering/Shader.hpp"
-#include "rendering/rr.hpp"
 #include "rr.hpp"
+
+#include "stb_image.h"
 
 #include <iostream>
 #include "triangleVB.cpp"
@@ -48,6 +47,13 @@ int main() {
 
     program.link(true, true);
 
+    stbi_set_flip_vertically_on_load(true);
+    RR::image_data img = RR::readImage("sheet.png");
+    std::cout << (img.data ? 1 : 0) << "\n";
+    std::cout << img.width << "\n";
+    RR::Texture2d texture = RR::Texture2d(img);
+    texture.bindToSlotAndName(program, 0, "tex");
+
     triangle_vertex verticies[] = { 
         { { -0.6f, -0.4f }, { 1.f, 0.f, 0.f } },
         { {  0.6f, -0.4f }, { 0.f, 1.f, 0.f } },
@@ -70,6 +76,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(program.id);
+        // texture.bindToSlot(0);
         glBindVertexArray(vertex_array);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 

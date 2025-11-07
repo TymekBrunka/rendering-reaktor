@@ -23,7 +23,6 @@ namespace RR {
 		if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE && printOnErr) {
 			std::cout << "Framebuffer error: \x1b[31m" << framebuffer_status << "\x1b[0m\n";
 		}
-		// return ret;
 
 		this->id = framebuffer;
 		this->texture = texture;

@@ -8,9 +8,12 @@
 #include "Program.hpp"
 #include "VertexBuffer.hpp"
 #include "FrameBuffer.hpp"
+#include "Texture2d.hpp"
+
 #include "generators.h"
 
 namespace RR {
+
     void error_callback(int error, const char* description);
 
     // static const char* description;
