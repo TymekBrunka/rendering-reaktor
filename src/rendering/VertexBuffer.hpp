@@ -5,7 +5,7 @@ namespace RR {
     template<typename T>
     class VertexBuffer {
     public:
-        GLuint id;
+        GLuint id = -1;
         GLsizeiptr length;
 
         VertexBuffer(const T data[], GLsizeiptr n, GLenum usage) {
@@ -16,7 +16,22 @@ namespace RR {
         }
 
         ~VertexBuffer() {
-            glDeleteBuffers(1, &this->id);
+            if (this->id != -1) glDeleteBuffers(1, &this->id);
+        }
+
+        VertexBuffer(VertexBuffer&& other) noexcept {
+            this->id = other.id;
+            this->length = other.length;
+            other.id = -1;
+        }
+
+        VertexBuffer& operator=(VertexBuffer&& other) noexcept {
+            if (this != &other) {
+                this->id = other.id;
+                this->length = other.length;
+                other.id = -1;
+            }
+            return *this;
         }
     };
 }

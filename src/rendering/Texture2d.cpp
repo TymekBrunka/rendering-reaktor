@@ -25,8 +25,21 @@ namespace RR {
 	}
 
 	Texture2d::~Texture2d() {
-		glDeleteTextures(1, &this->id);
+		if (this->id != -1) glDeleteTextures(1, &this->id);
 	}
+
+	Texture2d::Texture2d(Texture2d&& other) noexcept {
+		this->id = other.id;
+		other.id = -1;
+	}
+
+	Texture2d& Texture2d::operator=(Texture2d&& other) noexcept {
+		if (this != &other) {
+			this->id = other.id;
+			other.id = -1;
+		}
+		return *this;
+	};
 
 	void Texture2d::bindToSlot(int slot) {
 		glActiveTexture(GL_TEXTURE0 + slot); // activate the texture unit first before binding texture

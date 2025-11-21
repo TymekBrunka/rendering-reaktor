@@ -14,10 +14,12 @@ namespace RR {
 
 	class Texture2d {
 	public:
-		GLuint id;
+		GLuint id = -1;
 		
 		Texture2d(image_data& data);
 		~Texture2d();
+		Texture2d(Texture2d&& other) noexcept;
+		Texture2d& operator=(Texture2d&& other) noexcept;
 
 		void bindToSlot(int slot);
 		void bindToSlotAndName(Program& program, int slot, const char* uniformName);
