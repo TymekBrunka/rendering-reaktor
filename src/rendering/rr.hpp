@@ -3,7 +3,6 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-#include "Errors.hpp"
 #include "Shader.hpp"
 #include "Program.hpp"
 #include "VertexBuffer.hpp"

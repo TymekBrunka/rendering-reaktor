@@ -10,5 +10,7 @@ namespace RR {
 
 		FrameBuffer(int width, int height, bool printOnErr = false);
 		~FrameBuffer();
+		FrameBuffer(FrameBuffer&& other) noexcept;
+		FrameBuffer& operator=(FrameBuffer&& other) noexcept;
 	};
 }

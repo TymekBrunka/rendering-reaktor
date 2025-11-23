@@ -9,7 +9,7 @@ namespace RR {
 	}
 
 	Program::~Program() {
-		glDeleteProgram(this->id);
+        if (this->id != -1) glDeleteProgram(this->id);
 	}
 
 	Program& Program::attachShader(RR::Shader& shader) {
@@ -17,32 +17,35 @@ namespace RR {
         return *this;
 	}
 
-	RR::result Program::link(bool doPrint, bool doExit) {
+	Program& Program::link() {
     	glLinkProgram(this->id);
-
-    	RR::result ret = { 0, std::string() };
 
 		int linkStatus;
 	    glGetProgramiv(this->id, GL_LINK_STATUS, &linkStatus);
 	    if (!linkStatus) {
-	    	ret.id = linkStatus;
 	        // GLsizei message_length;
 	        // glGetProgramiv(this->id, GL_INFO_LOG_LENGTH, &message_length);
 	        // char* message_buffer = new char[message_length];
             char message_buffer[512] = {0};
 	        glGetProgramInfoLog(this->id, 512, NULL, message_buffer);
-	        if (doPrint) {
-	        	std::cout << "Shader linking error: " << message_buffer << "\n";
-	        } else {
-	        	ret.message = std::string(message_buffer);
-	        }
+			throw ("Shader linking error: " + std::string(message_buffer));
 	        glDeleteProgram(this->id);
 	        // delete[] message_buffer;
-			if (doExit) {
-            	exit(EXIT_FAILURE);
-			}
-            return ret;
+			return *this;
 	    }
-	    return ret;
+		return *this;
+	}
+
+	Program::Program(Program&& other) noexcept {
+		this->id = other.id;
+		other.id = -1;
+	}
+
+	Program& Program::operator=(Program&& other) noexcept {
+		if (this != &other) {
+			this->id = other.id;
+			other.id = -1;
+		}
+		return *this;
 	}
 }

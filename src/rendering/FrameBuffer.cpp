@@ -22,6 +22,7 @@ namespace RR {
 		GLenum framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE && printOnErr) {
 			std::cout << "Framebuffer error: \x1b[31m" << framebuffer_status << "\x1b[0m\n";
+			throw 1;
 		}
 
 		this->id = framebuffer;
@@ -30,7 +31,19 @@ namespace RR {
 	}
 
 	FrameBuffer::~FrameBuffer() {
-		glDeleteFramebuffers(1, &this->id);
+        if (this->id != -1) glDeleteFramebuffers(1, &this->id);
 		// glBindFramebuffer(0); // bind it yourself
 	}
+
+    FrameBuffer::FrameBuffer(FrameBuffer&& other) noexcept {
+		this->id = other.id;
+		other.id = -1;
+    }
+    FrameBuffer& FrameBuffer::operator=(FrameBuffer&& other) noexcept {
+		if (this != &other) {
+			this->id = other.id;
+			other.id = -1;
+		}
+		return *this;
+    }
 }

@@ -1,15 +1,14 @@
 #pragma once
 #include <glad/gl.h>
-#include "Errors.hpp"
 
 namespace RR {
 	class Shader {
 	public:
-		GLuint id;
+		GLuint id = -1;
 
 		Shader(GLenum typ, const char* txt);
 		~Shader();
-
-		RR::result errorCheck(bool doPrint, bool doExit);
+		Shader(Shader&& other) noexcept;
+		Shader& operator=(Shader&& other) noexcept;
 	};
 }
