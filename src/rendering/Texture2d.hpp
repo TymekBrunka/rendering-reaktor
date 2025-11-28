@@ -17,6 +17,7 @@ namespace RR {
 		GLuint id = -1;
 		
 		Texture2d(image_data& data);
+		Texture2d(GLuint id);
 		~Texture2d();
 		Texture2d(Texture2d&& other) noexcept;
 		Texture2d& operator=(Texture2d&& other) noexcept;

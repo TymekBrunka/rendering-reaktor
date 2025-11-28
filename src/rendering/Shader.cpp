@@ -17,8 +17,11 @@ namespace RR {
             // char* message_buffer = new char[message_length];
             char message_buffer[512] = {0};
             glGetShaderInfoLog(this->id, 512, NULL, message_buffer);
-            throw ("Shader linking error: " + std::string(message_buffer));
+            char message[580] = {0};
+            std::snprintf(message, 256, "Shader linking error: %s", message_buffer);
             glDeleteShader(this->id);
+
+            throw std::string(message);
             // delete[] message_buffer;
         }
 	}

@@ -24,6 +24,10 @@ namespace RR {
 		this->id = texture;
 	}
 
+	Texture2d::Texture2d(GLuint id) {
+		this->id = id;
+	}
+
 	Texture2d::~Texture2d() {
 		if (this->id != -1) glDeleteTextures(1, &this->id);
 	}
