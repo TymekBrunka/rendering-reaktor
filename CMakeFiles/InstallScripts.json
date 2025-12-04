@@ -1,0 +1,12 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/tymek/Documents/kody/rendering-reaktor/cmake_install.cmake",
+		"/home/tymek/Documents/kody/rendering-reaktor/nativefiledialog-extended/cmake_install.cmake",
+		"/home/tymek/Documents/kody/rendering-reaktor/nativefiledialog-extended/src/cmake_install.cmake",
+		"/home/tymek/Documents/kody/rendering-reaktor/glm/cmake_install.cmake",
+		"/home/tymek/Documents/kody/rendering-reaktor/glm/glm/cmake_install.cmake",
+		"/home/tymek/Documents/kody/rendering-reaktor/src/rendering/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

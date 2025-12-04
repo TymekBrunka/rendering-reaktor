@@ -3,6 +3,7 @@
 
 #include <glad/gl.h>
 #include "glMathTypes.hpp"
+#include "Program.hpp"
 // #include <glm/vec2.hpp>
 // #include <glm/vec3.hpp>
 
@@ -34,8 +35,8 @@ namespace RR {
     #define RR_AUTOATTRIB(Struct, Field, Normalized) RR::f__RR_AUTOATTRIB<decltype(Struct::Field)>(program, Normalized, location_##Field, (const char*)#Field, (void*)offsetof(Struct, Field), sizeof(Struct))
 
     template<typename T/*, typename F*/>
-    inline void f__RR_AUTOATTRIB(GLuint program, /*F T::* T Field,*/ GLboolean normalized, GLint& Location, const char* locname, const void* offset, GLsizei stride) {
-        Location = glGetAttribLocation(program, locname);
+    inline void f__RR_AUTOATTRIB(Program& program, /*F T::* T Field,*/ GLboolean normalized, GLint& Location, const char* locname, const void* offset, GLsizei stride) {
+        Location = glGetAttribLocation(program.id, locname);
         glEnableVertexAttribArray(Location);
         glVertexAttribPointer(
             Location,

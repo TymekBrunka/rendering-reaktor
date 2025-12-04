@@ -1,0 +1,10 @@
+#version 150 core
+
+in vec2 out_uv;
+out vec4 frag_color;
+
+uniform sampler2D skybox;
+
+void main() {
+    frag_color = texture(skybox, out_uv);
+}
