@@ -25,6 +25,7 @@ add_library(rr OBJECT rr.cpp
 	#VertexBuffer.cpp
 	FrameBuffer.cpp
 	Texture2d.cpp
+	IndexBuffer.cpp
 )
 target_link_libraries(rr PUBLIC glfw stb_image)
 

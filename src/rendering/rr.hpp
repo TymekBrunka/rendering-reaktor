@@ -6,6 +6,7 @@
 #include "Shader.hpp"
 #include "Program.hpp"
 #include "VertexBuffer.hpp"
+#include "IndexBuffer.hpp"
 #include "FrameBuffer.hpp"
 #include "Texture2d.hpp"
 
