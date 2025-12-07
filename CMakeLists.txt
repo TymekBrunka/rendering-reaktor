@@ -10,6 +10,10 @@ add_subdirectory(glm) #refuses to work normaly with find_package()
 
 add_subdirectory(src/rendering)
 
-add_executable(main src/main.cpp)
+add_executable(main
+  src/main.cpp
+  src/EditorClasses/Camera.cpp
+)
+target_include_directories(main PUBLIC src/EditorClasses/)
 target_link_libraries(main PUBLIC nfd rr glm::glm-header-only)
 #target_include_directories(main PUBLIC )

@@ -168,6 +168,30 @@ FrameBuffer.cpp.s:
 	cd /home/tymek/Documents/kody/rendering-reaktor && $(MAKE) $(MAKESILENT) -f src/rendering/CMakeFiles/rr.dir/build.make src/rendering/CMakeFiles/rr.dir/FrameBuffer.cpp.s
 .PHONY : FrameBuffer.cpp.s
 
+IndexBuffer.o: IndexBuffer.cpp.o
+.PHONY : IndexBuffer.o
+
+# target to build an object file
+IndexBuffer.cpp.o:
+	cd /home/tymek/Documents/kody/rendering-reaktor && $(MAKE) $(MAKESILENT) -f src/rendering/CMakeFiles/rr.dir/build.make src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.o
+.PHONY : IndexBuffer.cpp.o
+
+IndexBuffer.i: IndexBuffer.cpp.i
+.PHONY : IndexBuffer.i
+
+# target to preprocess a source file
+IndexBuffer.cpp.i:
+	cd /home/tymek/Documents/kody/rendering-reaktor && $(MAKE) $(MAKESILENT) -f src/rendering/CMakeFiles/rr.dir/build.make src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.i
+.PHONY : IndexBuffer.cpp.i
+
+IndexBuffer.s: IndexBuffer.cpp.s
+.PHONY : IndexBuffer.s
+
+# target to generate assembly for a file
+IndexBuffer.cpp.s:
+	cd /home/tymek/Documents/kody/rendering-reaktor && $(MAKE) $(MAKESILENT) -f src/rendering/CMakeFiles/rr.dir/build.make src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.s
+.PHONY : IndexBuffer.cpp.s
+
 Program.o: Program.cpp.o
 .PHONY : Program.o
 
@@ -325,6 +349,9 @@ help:
 	@echo "... FrameBuffer.o"
 	@echo "... FrameBuffer.i"
 	@echo "... FrameBuffer.s"
+	@echo "... IndexBuffer.o"
+	@echo "... IndexBuffer.i"
+	@echo "... IndexBuffer.s"
 	@echo "... Program.o"
 	@echo "... Program.i"
 	@echo "... Program.s"

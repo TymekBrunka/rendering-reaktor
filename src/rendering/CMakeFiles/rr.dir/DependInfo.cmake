@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/tymek/Documents/kody/rendering-reaktor/src/rendering/glad/src/gl.c" "src/rendering/CMakeFiles/rr.dir/glad/src/gl.c.o" "gcc" "src/rendering/CMakeFiles/rr.dir/glad/src/gl.c.o.d"
   "/home/tymek/Documents/kody/rendering-reaktor/src/rendering/FrameBuffer.cpp" "src/rendering/CMakeFiles/rr.dir/FrameBuffer.cpp.o" "gcc" "src/rendering/CMakeFiles/rr.dir/FrameBuffer.cpp.o.d"
+  "/home/tymek/Documents/kody/rendering-reaktor/src/rendering/IndexBuffer.cpp" "src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.o" "gcc" "src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.o.d"
   "/home/tymek/Documents/kody/rendering-reaktor/src/rendering/Program.cpp" "src/rendering/CMakeFiles/rr.dir/Program.cpp.o" "gcc" "src/rendering/CMakeFiles/rr.dir/Program.cpp.o.d"
   "/home/tymek/Documents/kody/rendering-reaktor/src/rendering/Shader.cpp" "src/rendering/CMakeFiles/rr.dir/Shader.cpp.o" "gcc" "src/rendering/CMakeFiles/rr.dir/Shader.cpp.o.d"
   "/home/tymek/Documents/kody/rendering-reaktor/src/rendering/Texture2d.cpp" "src/rendering/CMakeFiles/rr.dir/Texture2d.cpp.o" "gcc" "src/rendering/CMakeFiles/rr.dir/Texture2d.cpp.o.d"

@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/rr.dir/FrameBuffer.cpp.o"
   "CMakeFiles/rr.dir/FrameBuffer.cpp.o.d"
+  "CMakeFiles/rr.dir/IndexBuffer.cpp.o"
+  "CMakeFiles/rr.dir/IndexBuffer.cpp.o.d"
   "CMakeFiles/rr.dir/Program.cpp.o"
   "CMakeFiles/rr.dir/Program.cpp.o.d"
   "CMakeFiles/rr.dir/Shader.cpp.o"

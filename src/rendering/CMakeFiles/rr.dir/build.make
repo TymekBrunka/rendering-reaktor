@@ -156,12 +156,27 @@ src/rendering/CMakeFiles/rr.dir/Texture2d.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/rr.dir/Texture2d.cpp.s"
 	cd /home/tymek/Documents/kody/rendering-reaktor/src/rendering && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tymek/Documents/kody/rendering-reaktor/src/rendering/Texture2d.cpp -o CMakeFiles/rr.dir/Texture2d.cpp.s
 
+src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.o: src/rendering/CMakeFiles/rr.dir/flags.make
+src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.o: src/rendering/IndexBuffer.cpp
+src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.o: src/rendering/CMakeFiles/rr.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.o"
+	cd /home/tymek/Documents/kody/rendering-reaktor/src/rendering && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.o -MF CMakeFiles/rr.dir/IndexBuffer.cpp.o.d -o CMakeFiles/rr.dir/IndexBuffer.cpp.o -c /home/tymek/Documents/kody/rendering-reaktor/src/rendering/IndexBuffer.cpp
+
+src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/rr.dir/IndexBuffer.cpp.i"
+	cd /home/tymek/Documents/kody/rendering-reaktor/src/rendering && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/tymek/Documents/kody/rendering-reaktor/src/rendering/IndexBuffer.cpp > CMakeFiles/rr.dir/IndexBuffer.cpp.i
+
+src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/rr.dir/IndexBuffer.cpp.s"
+	cd /home/tymek/Documents/kody/rendering-reaktor/src/rendering && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tymek/Documents/kody/rendering-reaktor/src/rendering/IndexBuffer.cpp -o CMakeFiles/rr.dir/IndexBuffer.cpp.s
+
 rr: src/rendering/CMakeFiles/rr.dir/rr.cpp.o
 rr: src/rendering/CMakeFiles/rr.dir/glad/src/gl.c.o
 rr: src/rendering/CMakeFiles/rr.dir/Shader.cpp.o
 rr: src/rendering/CMakeFiles/rr.dir/Program.cpp.o
 rr: src/rendering/CMakeFiles/rr.dir/FrameBuffer.cpp.o
 rr: src/rendering/CMakeFiles/rr.dir/Texture2d.cpp.o
+rr: src/rendering/CMakeFiles/rr.dir/IndexBuffer.cpp.o
 rr: src/rendering/CMakeFiles/rr.dir/build.make
 .PHONY : rr
 

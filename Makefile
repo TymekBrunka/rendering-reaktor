@@ -181,6 +181,30 @@ rr/fast:
 	$(MAKE) $(MAKESILENT) -f src/rendering/CMakeFiles/rr.dir/build.make src/rendering/CMakeFiles/rr.dir/build
 .PHONY : rr/fast
 
+src/EditorClasses/Camera.o: src/EditorClasses/Camera.cpp.o
+.PHONY : src/EditorClasses/Camera.o
+
+# target to build an object file
+src/EditorClasses/Camera.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/EditorClasses/Camera.cpp.o
+.PHONY : src/EditorClasses/Camera.cpp.o
+
+src/EditorClasses/Camera.i: src/EditorClasses/Camera.cpp.i
+.PHONY : src/EditorClasses/Camera.i
+
+# target to preprocess a source file
+src/EditorClasses/Camera.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/EditorClasses/Camera.cpp.i
+.PHONY : src/EditorClasses/Camera.cpp.i
+
+src/EditorClasses/Camera.s: src/EditorClasses/Camera.cpp.s
+.PHONY : src/EditorClasses/Camera.s
+
+# target to generate assembly for a file
+src/EditorClasses/Camera.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/EditorClasses/Camera.cpp.s
+.PHONY : src/EditorClasses/Camera.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -218,6 +242,9 @@ help:
 	@echo "... nfd"
 	@echo "... rr"
 	@echo "... stb_image"
+	@echo "... src/EditorClasses/Camera.o"
+	@echo "... src/EditorClasses/Camera.i"
+	@echo "... src/EditorClasses/Camera.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

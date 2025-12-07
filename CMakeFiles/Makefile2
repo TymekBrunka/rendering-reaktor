@@ -191,17 +191,17 @@ src/rendering/clean: src/rendering/CMakeFiles/rr.dir/clean
 # Target rules for target CMakeFiles/main.dir
 
 # All Build rule for target.
-CMakeFiles/main.dir/all: src/rendering/CMakeFiles/stb_image.dir/all
 CMakeFiles/main.dir/all: nativefiledialog-extended/src/CMakeFiles/nfd.dir/all
+CMakeFiles/main.dir/all: src/rendering/CMakeFiles/stb_image.dir/all
 CMakeFiles/main.dir/all: src/rendering/CMakeFiles/rr.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=3,4 "Built target main"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=3,4,5 "Built target main"
 .PHONY : CMakeFiles/main.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/main.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tymek/Documents/kody/rendering-reaktor/CMakeFiles 12
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tymek/Documents/kody/rendering-reaktor/CMakeFiles 14
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/main.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tymek/Documents/kody/rendering-reaktor/CMakeFiles 0
 .PHONY : CMakeFiles/main.dir/rule
@@ -213,7 +213,7 @@ main: CMakeFiles/main.dir/rule
 # codegen rule for target.
 CMakeFiles/main.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=3,4 "Finished codegen for target main"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=3,4,5 "Finished codegen for target main"
 .PHONY : CMakeFiles/main.dir/codegen
 
 # clean rule for target.
@@ -228,7 +228,7 @@ CMakeFiles/main.dir/clean:
 nativefiledialog-extended/src/CMakeFiles/nfd.dir/all:
 	$(MAKE) $(MAKESILENT) -f nativefiledialog-extended/src/CMakeFiles/nfd.dir/build.make nativefiledialog-extended/src/CMakeFiles/nfd.dir/depend
 	$(MAKE) $(MAKESILENT) -f nativefiledialog-extended/src/CMakeFiles/nfd.dir/build.make nativefiledialog-extended/src/CMakeFiles/nfd.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=5,6 "Built target nfd"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=6,7 "Built target nfd"
 .PHONY : nativefiledialog-extended/src/CMakeFiles/nfd.dir/all
 
 # Build rule for subdir invocation for target.
@@ -245,7 +245,7 @@ nfd: nativefiledialog-extended/src/CMakeFiles/nfd.dir/rule
 # codegen rule for target.
 nativefiledialog-extended/src/CMakeFiles/nfd.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f nativefiledialog-extended/src/CMakeFiles/nfd.dir/build.make nativefiledialog-extended/src/CMakeFiles/nfd.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=5,6 "Finished codegen for target nfd"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=6,7 "Finished codegen for target nfd"
 .PHONY : nativefiledialog-extended/src/CMakeFiles/nfd.dir/codegen
 
 # clean rule for target.
@@ -292,7 +292,7 @@ glm/glm/CMakeFiles/glm.dir/clean:
 src/rendering/CMakeFiles/stb_image.dir/all:
 	$(MAKE) $(MAKESILENT) -f src/rendering/CMakeFiles/stb_image.dir/build.make src/rendering/CMakeFiles/stb_image.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/rendering/CMakeFiles/stb_image.dir/build.make src/rendering/CMakeFiles/stb_image.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=13,14 "Built target stb_image"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=15,16 "Built target stb_image"
 .PHONY : src/rendering/CMakeFiles/stb_image.dir/all
 
 # Build rule for subdir invocation for target.
@@ -309,7 +309,7 @@ stb_image: src/rendering/CMakeFiles/stb_image.dir/rule
 # codegen rule for target.
 src/rendering/CMakeFiles/stb_image.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f src/rendering/CMakeFiles/stb_image.dir/build.make src/rendering/CMakeFiles/stb_image.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=13,14 "Finished codegen for target stb_image"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=15,16 "Finished codegen for target stb_image"
 .PHONY : src/rendering/CMakeFiles/stb_image.dir/codegen
 
 # clean rule for target.
@@ -324,12 +324,12 @@ src/rendering/CMakeFiles/stb_image.dir/clean:
 src/rendering/CMakeFiles/rr.dir/all: src/rendering/CMakeFiles/stb_image.dir/all
 	$(MAKE) $(MAKESILENT) -f src/rendering/CMakeFiles/rr.dir/build.make src/rendering/CMakeFiles/rr.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/rendering/CMakeFiles/rr.dir/build.make src/rendering/CMakeFiles/rr.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=7,8,9,10,11,12 "Built target rr"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=8,9,10,11,12,13,14 "Built target rr"
 .PHONY : src/rendering/CMakeFiles/rr.dir/all
 
 # Build rule for subdir invocation for target.
 src/rendering/CMakeFiles/rr.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tymek/Documents/kody/rendering-reaktor/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tymek/Documents/kody/rendering-reaktor/CMakeFiles 9
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/rendering/CMakeFiles/rr.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tymek/Documents/kody/rendering-reaktor/CMakeFiles 0
 .PHONY : src/rendering/CMakeFiles/rr.dir/rule
@@ -341,7 +341,7 @@ rr: src/rendering/CMakeFiles/rr.dir/rule
 # codegen rule for target.
 src/rendering/CMakeFiles/rr.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f src/rendering/CMakeFiles/rr.dir/build.make src/rendering/CMakeFiles/rr.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=7,8,9,10,11,12 "Finished codegen for target rr"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tymek/Documents/kody/rendering-reaktor/CMakeFiles --progress-num=8,9,10,11,12,13,14 "Finished codegen for target rr"
 .PHONY : src/rendering/CMakeFiles/rr.dir/codegen
 
 # clean rule for target.

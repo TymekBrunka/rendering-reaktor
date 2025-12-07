@@ -5,13 +5,13 @@
 # compile CXX with /usr/bin/c++
 C_DEFINES = 
 
-C_INCLUDES = -I/home/tymek/Documents/kody/rendering-reaktor/nativefiledialog-extended/src/include -I/home/tymek/Documents/kody/rendering-reaktor/src/rendering/glad/include -I/home/tymek/Documents/kody/rendering-reaktor/src/rendering/. -I/home/tymek/Documents/kody/rendering-reaktor/glm
+C_INCLUDES = -I/home/tymek/Documents/kody/rendering-reaktor/src/EditorClasses -I/home/tymek/Documents/kody/rendering-reaktor/nativefiledialog-extended/src/include -I/home/tymek/Documents/kody/rendering-reaktor/src/rendering/glad/include -I/home/tymek/Documents/kody/rendering-reaktor/src/rendering/. -I/home/tymek/Documents/kody/rendering-reaktor/glm
 
 C_FLAGS = 
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/tymek/Documents/kody/rendering-reaktor/nativefiledialog-extended/src/include -I/home/tymek/Documents/kody/rendering-reaktor/src/rendering/glad/include -I/home/tymek/Documents/kody/rendering-reaktor/src/rendering/. -I/home/tymek/Documents/kody/rendering-reaktor/glm
+CXX_INCLUDES = -I/home/tymek/Documents/kody/rendering-reaktor/src/EditorClasses -I/home/tymek/Documents/kody/rendering-reaktor/nativefiledialog-extended/src/include -I/home/tymek/Documents/kody/rendering-reaktor/src/rendering/glad/include -I/home/tymek/Documents/kody/rendering-reaktor/src/rendering/. -I/home/tymek/Documents/kody/rendering-reaktor/glm
 
 CXX_FLAGS = -std=gnu++20
 
