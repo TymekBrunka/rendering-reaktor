@@ -134,7 +134,7 @@ int main() {
 	RR_AUTOATTRIB(skybox_vert, uv, GL_TRUE);
 
 	//Camera
-	Camera cam(glm::vec3(0.0f, 0.0f, 0.0f), 0, 0);
+	Camera cam(glm::vec3(0.1f, 0.1f, 0.1f), 0, 0);
 	cam.update_projection(800, 600, 75);
 	cam.computeMatricies();
 
