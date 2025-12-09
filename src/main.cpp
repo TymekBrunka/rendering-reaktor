@@ -9,6 +9,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/string_cast.hpp"
+
 #include "stb_image.h"
 #include <iostream>
 
@@ -135,7 +138,7 @@ int main() {
 
 	//Camera
 	Camera cam(glm::vec3(0.1f, 0.1f, 0.1f), 0, 0);
-	cam.update_projection(800, 600, 75);
+	cam.update_projection(800, 600, 360);
 	cam.computeMatricies();
 
 	const GLint rotatm4 = glGetUniformLocation(program.id, "rotat");
@@ -163,9 +166,9 @@ int main() {
 
         glm::mat4 mat = glm::mat4(1.0f);
         glm::mat4 rotat = glm::rotate(mat, glm::radians(currentFrame) * 20, glm::vec3(0.0f, 1.0f, 0.0f));
-        rotat = glm::rotate(rotat, glm::radians(-30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		mat = rotat * cam.read().camera_skybox;
-        glUniformMatrix3fv(rotatm4, 1, GL_FALSE, (const GLfloat*) glm::value_ptr(mat));
+        rotat = glm::rotate(rotat, glm::radians(currentFrame) * 20, glm::vec3(1.0f, 0.0f, 0.0f));
+		mat = cam.read().camera_skybox * rotat;
+        glUniformMatrix4fv(rotatm4, 1, GL_FALSE, (const GLfloat*) glm::value_ptr(mat));
 
         // glDrawArrays(GL_TRIANGLES, 0, 6);
         glDrawElements(GL_TRIANGLES, sizeof(skybox_indecies) / sizeof(GLuint), GL_UNSIGNED_INT, 0);

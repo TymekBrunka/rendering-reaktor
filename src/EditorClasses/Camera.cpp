@@ -74,8 +74,8 @@ void Camera::move_and_set_orientation(float input[], float deltatime, float orie
 }
 
 void Camera::computeMatricies() {
-	this->priv.camera = this->priv.view * this->priv.projection ;
-	this->priv.camera_skybox = this->priv.view_skybox * this->priv.projection;
+	this->priv.camera = this->priv.projection * this->priv.view ;
+	this->priv.camera_skybox = this->priv.projection * this->priv.view_skybox;
 	glm::vec4 unit(1.0f, 1.0f, 1.0f, 1.0f);
 	std::cout << glm::to_string(unit * this->priv.camera) << "\n";
 	std::cout << "perspective: " << glm::to_string(this->priv.projection) << "\n";
