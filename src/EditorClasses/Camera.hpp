@@ -16,14 +16,15 @@ class Camera {
 private:
 	CameraPrivates priv;
 public:
-	float orientation_x;
-	float orientation_y;
+	bool holding_rmb;
+	glm::vec2 orientation;
+	glm::vec2 last_mouse_pos;
 	glm::vec3 position;
 
-	Camera(glm::vec3 position, float orientation_x, float orientation_y);
+	Camera(glm::vec3 position, glm::vec2 orientation);
 	void update_projection(int width, int height, float fov);
-	void update_view(glm::vec3 position, float orientation_x, float orientation_y);
-	void move_and_set_orientation(float input[], float deltatime, float orientation_x, float orientation_y);
+	void update_view(glm::vec3 position, glm::vec2 orientation);
+	void move_and_set_orientation(float input[], float deltatime, glm::vec2 orientation);
 	void computeMatricies();
 	const CameraPrivates& read();
 };
