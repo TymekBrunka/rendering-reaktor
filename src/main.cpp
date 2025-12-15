@@ -15,7 +15,7 @@
 #include "stb_image.h"
 #include <iostream>
 
-//#include "imgui_boilerplate.hpp"
+#include "imgui_boilerplate.hpp"
 
 Camera camera(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec2(0.0f, 0.0f));
 
