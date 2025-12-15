@@ -1,6 +1,4 @@
 build/*
 .cache/
-nativefiledialog-extended/
-glm/
 Makefile
 compile_commands.json

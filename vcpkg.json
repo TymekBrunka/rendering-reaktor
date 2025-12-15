@@ -2,6 +2,8 @@
     "dependencies": [
         "glfw3",
         "xlsxio",
-        "imguizmo"
+        "imguizmo",
+        "glm",
+        "nativefiledialog-extended"
     ]
 }
