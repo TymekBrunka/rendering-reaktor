@@ -1,4 +1,4 @@
-build/*
-.cache/
 Makefile
 compile_commands.json
+build/*
+.cache/
