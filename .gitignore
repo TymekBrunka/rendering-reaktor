@@ -2,10 +2,5 @@ build/*
 .cache/
 nativefiledialog-extended/
 glm/
-CMakeCache.txt
-CMakeFiles/
-CMakePresets.json
-CMakeUserPresets.json
 Makefile
 compile_commands.json
-cmake_install.cmake
