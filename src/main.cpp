@@ -2,8 +2,12 @@
 #include <glad/gl.h>
 #include <nfd.h>
 #include "glm/fwd.hpp"
+#include "rendering/imgui/imgui.h"
 #include "rr.hpp"
 #include "Camera.hpp"
+
+#include "imgui.h"
+#include "imgui_boilerplate.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -15,9 +19,9 @@
 #include "stb_image.h"
 #include <iostream>
 
-#include "imgui_boilerplate.hpp"
-
 Camera camera(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec2(0.0f, 0.0f));
+int Gwidth;
+int Gheight;
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -53,6 +57,8 @@ void mouse_callback(GLFWwindow* window, double x, double y)
 
 static void window_size_callback(GLFWwindow* window, int width, int height)
 {
+	Gwidth = width;
+	Gheight = height;
 	glfwGetFramebufferSize(window, &width, &height);
     // const float ratio = width / (float) height;
     glViewport(0, 0, width, height);
@@ -87,11 +93,16 @@ int main() {
 	glfwSwapInterval(1);
 
 	RR::image_data icon_data = RR::readImage("src/icon.png", 4);
-	GLFWimage icon[1];
-	icon[0].width = icon_data.width;
-	icon[0].height = icon_data.height;
-	icon[0].pixels = icon_data.data;
-	glfwSetWindowIcon(window, 1, icon);
+	{
+		GLFWimage icon[1];
+		icon[0].width = icon_data.width;
+		icon[0].height = icon_data.height;
+		icon[0].pixels = icon_data.data;
+		glfwSetWindowIcon(window, 1, icon);
+	}
+
+	RR::Texture2d icon(icon_data);
+	stbi_image_free(icon_data.data);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -127,8 +138,15 @@ int main() {
     RR::Texture2d texture(img);
     stbi_image_free(img.data);
 
+    img = RR::readImage("src/icons.png");
+    RR::Texture2d icons(img);
+    stbi_image_free(img.data);
+
 	glUseProgram(program.id);
     texture.bindToSlotAndName(program, 0, "skybox");
+
+    icon.bindToSlot(4);
+    icons.bindToSlot(3);
 
 	skybox_vert skybox_verticies[] = {
 		//back
@@ -179,6 +197,9 @@ int main() {
 
 	GLuint skybox_va = RR::createVertexArray();
 	glBindVertexArray(skybox_va);
+
+	iminit(window, true);
+
 	RR::VertexBuffer<skybox_vert> skybox_vb(skybox_verticies, sizeof(skybox_verticies) / sizeof(skybox_vert), GL_STATIC_DRAW);
 	RR::IndexBuffer skybox_ib(skybox_indecies, sizeof(skybox_indecies) / sizeof(GLuint), GL_STATIC_DRAW);
 
@@ -196,10 +217,9 @@ int main() {
 	skybox_ib.bind();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
+    glfwGetFramebufferSize(window, &Gwidth, &Gheight);
     // const float ratio = width / (float) height;
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, Gwidth, Gheight);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -208,6 +228,9 @@ int main() {
         lastFrame = currentFrame;
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        imNewFrame();
+        setupDocking(Gwidth, Gheight);
 
         glUseProgram(program.id);
         // texture.bindToSlot(0);
@@ -221,6 +244,20 @@ int main() {
 
         // glDrawArrays(GL_TRIANGLES, 0, 6);
         glDrawElements(GL_TRIANGLES, sizeof(skybox_indecies) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+
+        // ImGui::SetNextWindowPos(ImVec2(0, 0));
+        // ImGui::SetNextWindowSize(ImVec2(200, Gheight));
+
+        ImGui::Begin("Hello", NULL);
+        ImGui::Image((ImTextureID)icon.id, ImVec2(25, 25));
+        ImGui::SetCursorPos(ImVec2(40, 32));
+        ImGui::Text("Reaktory");
+        ImGui::SetCursorPos(ImVec2(0, 60));
+        ImGui::Image((ImTextureID)icons.id, ImVec2(50, 50), ImVec2(0.0, 0.75), ImVec2(0.25, 0.75));
+        ImGui::End();
+
+        // ImGui::End();
+        imrender();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
