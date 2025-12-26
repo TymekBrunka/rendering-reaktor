@@ -3,7 +3,7 @@
 
 namespace RR {
 	image_data readImage(const char* filepath, int numOfChannels) {
-		image_data img = {0};
+		image_data img = {0, 0, 0, nullptr};
 		unsigned char *data = stbi_load(filepath, &img.width, &img.height, &img.nrChannels, numOfChannels);
 		img.data = data;
 		return img;
