@@ -11,9 +11,13 @@ find_package(glm REQUIRED) #refuses to work normaly with find_package()
 
 add_subdirectory(src/rendering)
 
+imgpack(src/cubemap2.png cubemap2.png.hpp cubemap2Img)
+
 add_executable(main
   src/main.cpp
   src/EditorClasses/Camera.cpp
+  src/EditorClasses/EditorActionsPanel.cpp
+  cubemap2.png.hpp
 )
 
 target_include_directories(main PUBLIC src/EditorClasses/)

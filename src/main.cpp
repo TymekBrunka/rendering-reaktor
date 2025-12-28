@@ -1,11 +1,12 @@
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <glad/gl.h>
 #include <nfd.h>
 #include "glm/fwd.hpp"
-#include "rendering/imgui/imgui.h"
 #include "rr.hpp"
 #include "Camera.hpp"
+#include "EditorActionsPanel.hpp"
 
 #include "imgui.h"
 #include "imgui_boilerplate.hpp"
@@ -136,7 +137,7 @@ int main() {
 	// RR::FrameBuffer fb(600, 800, 1);
 
     stbi_set_flip_vertically_on_load(true);
-    RR::image_data img = RR::readImage("src/cubemap.png", 4);
+    RR::image_data img = RR::readImage("src/cubemap2.png", 4);
     RR::Texture2d texture(img);
     stbi_image_free(img.data);
 
@@ -222,7 +223,7 @@ int main() {
     glfwGetFramebufferSize(window, &Gwidth, &Gheight);
     // const float ratio = width / (float) height;
     glViewport(0, 0, Gwidth, Gheight);
-
+	int cols;
     while (!glfwWindowShouldClose(window))
     {
         currentFrame = static_cast<float>(glfwGetTime());
@@ -238,10 +239,7 @@ int main() {
         // texture.bindToSlot(0);
         glBindVertexArray(skybox_va);
 
-        glm::mat4 mat = glm::mat4(1.0f);
-        glm::mat4 rotat = glm::rotate(mat, glm::radians(currentFrame) * 20, glm::vec3(0.0f, 1.0f, 0.0f));
-        // rotat = glm::rotate(rotat, glm::radians(currentFrame) * 20, glm::vec3(1.0f, 0.0f, 0.0f));
-		mat = camera.read().camera_skybox;
+        glm::mat4 mat = camera.read().camera_skybox;
         glUniformMatrix4fv(rotatm4, 1, GL_FALSE, (const GLfloat*) glm::value_ptr(mat));
 
         // glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -250,15 +248,11 @@ int main() {
         // ImGui::SetNextWindowPos(ImVec2(0, 0));
         // ImGui::SetNextWindowSize(ImVec2(200, Gheight));
 
-        ImGui::Begin("Hello", NULL);
-        ImGui::Image((ImTextureID)icon.id, ImVec2(25, 25));
-        ImGui::SetCursorPos(ImVec2(40, 32));
-        ImGui::Text("Reaktory");
-        // ImGui::SetCursorPos(ImVec2(0, 60));
-        ImGui::Image((ImTextureID)icons.id, ImVec2(50, 50), ImVec2(0, 1.0), ImVec2(0.25, 0.75));
-        ImGui::Image((ImTextureID)icons.id, ImVec2(50, 50), ImVec2(0, 0.5), ImVec2(0.25, 0.25));
-        ImGui::Image((ImTextureID)icons.id, ImVec2(50, 50), ImVec2(0, 0.5), ImVec2(0.25, 0.25));
-        ImGui::End();
+        ImGui::Begin("Panel", NULL);
+		{
+			EditorActionsPanel::UI(icon, icons);
+			ImGui::End();
+		}
 
         // ImGui::End();
         imrender();

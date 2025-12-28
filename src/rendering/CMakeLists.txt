@@ -33,3 +33,17 @@ target_link_libraries(rr PUBLIC glfw stb_image imgui glad)
 
 #target_include_directories(rr PUBLIC glad/include)
 target_include_directories(rr PUBLIC .)
+
+#---- asset packers
+
+add_executable(imgpacker assetPackers/imagePacker.cpp stb_image.cpp)
+
+function(imgpack)
+	add_custom_command(
+		OUTPUT ${ARGV2}.hpp ${ARGV2}.cpp
+		COMMAND imgpacker ${ARGV0} ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV1} ${ARGV2} 4
+
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0} imgpacker
+		VERBATIM
+	)
+endfunction(imgpack)
