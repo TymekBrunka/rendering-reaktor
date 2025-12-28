@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
     std::ofstream header(headerpath);
     header << \
     "#include \"Texture2d.hpp\\n"\
-    "extern image_data " << varname << ";\0"
+    "extern image_data " << varname << ";\0";
 
     std::ofstream cfile(cpath);
     cfile << \
