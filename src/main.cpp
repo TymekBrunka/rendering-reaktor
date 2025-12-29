@@ -8,6 +8,9 @@
 #include "Camera.hpp"
 #include "EditorActionsPanel.hpp"
 
+#include "cubemap2.png.hpp"
+#include "icon.png.hpp"
+
 #include "imgui.h"
 #include "imgui_boilerplate.hpp"
 
@@ -95,7 +98,6 @@ int main() {
 	gladLoadGL(glfwGetProcAddress); // only then we can load
 	glfwSwapInterval(1);
 
-	RR::image_data icon_data = RR::readImage("src/icon.png", 4);
 	{
 		GLFWimage icon[1];
 		icon[0].width = icon_data.width;
@@ -105,7 +107,6 @@ int main() {
 	}
 
 	RR::Texture2d icon(icon_data);
-	stbi_image_free(icon_data.data);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -135,13 +136,10 @@ int main() {
 	}();
 
 	// RR::FrameBuffer fb(600, 800, 1);
+    RR::Texture2d texture(cubemap2Img);
 
-    stbi_set_flip_vertically_on_load(true);
-    RR::image_data img = RR::readImage("src/cubemap2.png", 4);
-    RR::Texture2d texture(img);
-    stbi_image_free(img.data);
-
-    img = RR::readImage("src/icons.png", 4);
+	stbi_set_flip_vertically_on_load(true);
+    RR::image_data img = RR::readImage("src/icons.png", 4);
     RR::Texture2d icons(img);
     stbi_image_free(img.data);
 

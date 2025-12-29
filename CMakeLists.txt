@@ -11,15 +11,24 @@ find_package(glm REQUIRED) #refuses to work normaly with find_package()
 
 add_subdirectory(src/rendering)
 
-imgpack(src/cubemap2.png cubemap2.png.hpp cubemap2Img)
+imgpack(cubemap2Img src/cubemap2.png cubemap2.png y 4)
+imgpack(icon_data src/icon.png icon.png n 4)
+imgpack(iconsImg src/icons.png ikony.png y 4)
 
 add_executable(main
   src/main.cpp
   src/EditorClasses/Camera.cpp
   src/EditorClasses/EditorActionsPanel.cpp
-  cubemap2.png.hpp
 )
 
 target_include_directories(main PUBLIC src/EditorClasses/)
-target_link_libraries(main PUBLIC nfd::nfd rr glm::glm-header-only)
+target_link_libraries(main PUBLIC
+  nfd::nfd
+  rr
+  glm::glm-header-only
+
+#prebuilt assets
+  cubemap2Img
+  icon_data
+)
 target_link_libraries(main PUBLIC imgui imguizmo::imguizmo)

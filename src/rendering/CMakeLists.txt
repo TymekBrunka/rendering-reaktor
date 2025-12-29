@@ -38,12 +38,18 @@ target_include_directories(rr PUBLIC .)
 
 add_executable(imgpacker assetPackers/imagePacker.cpp stb_image.cpp)
 
-function(imgpack)
+function(imgpack name input output flip channels)
 	add_custom_command(
-		OUTPUT ${ARGV2}.hpp ${ARGV2}.cpp
-		COMMAND imgpacker ${ARGV0} ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV1} ${ARGV2} 4
+		OUTPUT ${output}.hpp ${output}.cpp
+		COMMAND imgpacker ${name} ${CMAKE_CURRENT_SOURCE_DIR}/${input} ${output} ${channels} ${flip}
 
-		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0} imgpacker
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV1} imgpacker
 		VERBATIM
 	)
+	add_custom_target(${name}_file DEPENDS ${output}.cpp)
+	add_library(${name} OBJECT ${output}.cpp)
+	add_dependencies(${name} ${name}_file)
+	target_link_libraries(${name} glad stb_image)
+	target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/ ${CMAKE_BINARY_DIR})
+
 endfunction(imgpack)
