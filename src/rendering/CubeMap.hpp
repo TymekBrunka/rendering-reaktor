@@ -8,6 +8,7 @@ namespace RR {
 	public:
 		GLuint id = -1;
 		
+		CubeMap();
 		CubeMap(const image_data faces[]);
 		CubeMap(GLuint id);
 		~CubeMap();

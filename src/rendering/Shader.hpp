@@ -6,6 +6,7 @@ namespace RR {
 	public:
 		GLuint id = -1;
 
+		Shader();
 		Shader(GLenum typ, const char* txt);
 		~Shader();
 		Shader(Shader&& other) noexcept;

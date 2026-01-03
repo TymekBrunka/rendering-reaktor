@@ -9,6 +9,8 @@ namespace RR {
 		return img;
 	}
 
+  Texture2d::Texture2d() {}
+
 	Texture2d::Texture2d(image_data& data, GLenum interp_mode, GLenum clamp_mode) {
 		GLuint texture;
 		glGenTextures(1, &texture);

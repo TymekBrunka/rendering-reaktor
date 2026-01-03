@@ -13,7 +13,9 @@ add_subdirectory(src/rendering)
 
 imgpack(cubemap2Img src/cubemap2.png cubemap2.png y 4)
 imgpack(icon_data src/icon.png icon.png n 4)
-imgpack(iconsImg src/icons.png ikony.png y 4)
+imgpack(iconsImg src/icons.png icons.png y 4)
+bytepack(skybox_vertex_text src/shaders/skybox.vertex.glsl skybox.vertex.glsl)
+bytepack(skybox_fragment_text src/shaders/skybox.frag.glsl skybox.frag.glsl)
 
 add_executable(main
   src/main.cpp
@@ -30,5 +32,8 @@ target_link_libraries(main PUBLIC
 #prebuilt assets
   cubemap2Img
   icon_data
+  iconsImg
+  skybox_vertex_text
+  skybox_fragment_text
 )
 target_link_libraries(main PUBLIC imgui imguizmo::imguizmo)

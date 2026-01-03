@@ -1,33 +1,22 @@
 #include "IndexBuffer.hpp"
+#include "BufferBase.hpp"
+
+#include "impl_buffer_move.hpp"
 
 namespace RR {
-        IndexBuffer::IndexBuffer(const GLuint data[], GLsizeiptr n, GLenum usage) {
-            glGenBuffers(1, &this->id);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->id);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, n * sizeof(GLuint), data, usage);
-            this->length = n;
-        }
 
-        IndexBuffer::~IndexBuffer() {
-            if (this->id != -1) glDeleteBuffers(1, &this->id);
-        }
-
-        IndexBuffer::IndexBuffer(IndexBuffer&& other) noexcept {
-            this->id = other.id;
-            this->length = other.length;
-            other.id = -1;
-        }
-
-        IndexBuffer& IndexBuffer::operator=(IndexBuffer&& other) noexcept {
-            if (this != &other) {
-                this->id = other.id;
-                this->length = other.length;
-                other.id = -1;
-            }
-            return *this;
-        }
-
-        void IndexBuffer::bind() {
-            if (this->id != -1) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->id);
-        }
+IndexBuffer::IndexBuffer(const GLuint data[], GLsizeiptr n, GLenum usage)
+  : BufferBase(GL_ELEMENT_ARRAY_BUFFER, (const void **)data, n * sizeof(GLuint), usage)
+{
+  this->length = n;
 }
+
+__RR_impl_buffer_move(IndexBuffer, GL_ELEMENT_ARRAY_BUFFER, 
+  this->length = other.length;
+)
+
+void IndexBuffer::bind() {
+  BufferBase::bind(GL_ELEMENT_ARRAY_BUFFER);
+}
+
+} // namespace RR

@@ -3,6 +3,9 @@
 #include <iostream>
 
 namespace RR {
+
+	CubeMap::CubeMap() {}
+
 	CubeMap::CubeMap(const image_data faces[]) {
 		unsigned int texture;
 		glGenTextures(1, &texture);

@@ -8,6 +8,7 @@ namespace RR {
 		GLuint id = -1;
 
 		Program();
+		Program(const char* x);
 		~Program();
 		Program(Program&& other) noexcept;
 		Program& operator=(Program&& other) noexcept;

@@ -4,7 +4,9 @@
 #include <string>
 
 namespace RR {
-	Program::Program() {
+	Program::Program() {}
+
+	Program::Program(const char* x) {
 		this->id = glCreateProgram();
 	}
 

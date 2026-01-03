@@ -3,6 +3,8 @@
 #include <iostream>
 
 namespace RR {
+  Shader::Shader() {}
+
 	Shader::Shader(GLenum typ, const char* txt) {
 		const GLuint shader = glCreateShader(typ);
         glShaderSource(shader, 1, &txt, NULL);

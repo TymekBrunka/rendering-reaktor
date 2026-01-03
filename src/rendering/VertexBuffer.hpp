@@ -1,41 +1,33 @@
 #pragma once
+#include "BufferBase.hpp"
 #include <glad/gl.h>
+#include <utility>
 
 namespace RR {
-    template<typename T>
-    class VertexBuffer {
-    public:
-        GLuint id = -1;
-        GLsizeiptr length;
 
-        VertexBuffer(const T data[], GLsizeiptr n, GLenum usage) {
-            glGenBuffers(1, &this->id);
-            glBindBuffer(GL_ARRAY_BUFFER, this->id);
-            glBufferData(GL_ARRAY_BUFFER, n * sizeof(T), data, usage);
-            this->length = n;
-        }
+template <typename T> class VertexBuffer : BufferBase {
+public:
+  GLsizeiptr length;
 
-        ~VertexBuffer() {
-            if (this->id != -1) glDeleteBuffers(1, &this->id);
-        }
+  VertexBuffer(const T data[], GLsizeiptr n, GLenum usage)
+  : BufferBase(GL_ARRAY_BUFFER, (const void **)data, n * sizeof(T), usage)
+  {
+    this->length = n;
+  }
 
-        VertexBuffer(VertexBuffer&& other) noexcept {
-            this->id = other.id;
-            this->length = other.length;
-            other.id = -1;
-        }
+  VertexBuffer(VertexBuffer &&other) noexcept : BufferBase(std::move(other)) {
+    this->length = other.length;
+  }
 
-        VertexBuffer& operator=(VertexBuffer&& other) noexcept {
-            if (this != &other) {
-                this->id = other.id;
-                this->length = other.length;
-                other.id = -1;
-            }
-            return *this;
-        }
+  VertexBuffer &operator=(VertexBuffer &&other) noexcept {
+    if (this != &other) {
+      this->id = other.id;
+      other.id = BufferBase::INVALID_ID;
+      this->length = other.length;
+    }
+  }
 
-        void bind() {
-            if (this->id != -1) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->id);
-        }
-    };
-}
+  void bind() {}
+};
+
+} // namespace RR
