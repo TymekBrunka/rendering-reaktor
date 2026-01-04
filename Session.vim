@@ -14,7 +14,7 @@ else
   set shortmess=aoO
 endif
 badd +1 \[dap-terminal]\ LLDB:\ Launch\ (args)
-badd +115 ~/Documents/kody/rendering-reaktor/src/main.cpp
+badd +111 ~/Documents/kody/rendering-reaktor/src/main.cpp
 badd +14 ~/Documents/kody/rendering-reaktor/src/rendering/IndexBuffer.cpp
 badd +12 src/rendering/IndexBuffer.hpp
 badd +18 ~/Documents/kody/rendering-reaktor/src/rendering/BufferBase.hpp
@@ -57,12 +57,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 210 - ((9 * winheight(0) + 26) / 52)
+let s:l = 111 - ((10 * winheight(0) + 26) / 52)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 210
-normal! 025|
+keepjumps 111
+normal! 010|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
