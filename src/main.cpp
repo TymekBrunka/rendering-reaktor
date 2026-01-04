@@ -113,19 +113,17 @@ int main() {
   glCullFace(GL_BACK);
 
   RR::Program program("");
-  auto [skybox_vertex, skybox_fragment] = [&program]() {
-    try {
-      RR::Shader skybox_vertex = RR::Shader(GL_VERTEX_SHADER, skybox_vertex_text);
-      RR::Shader skybox_fragment = RR::Shader(GL_FRAGMENT_SHADER, skybox_fragment_text);
-      program.attachShader(skybox_vertex).attachShader(skybox_fragment);
-      program.link();
-
-      return std::make_tuple(std::move(skybox_vertex), std::move(skybox_fragment));
-    } catch (std::string ex) {
-      std::cout << ex << "\n";
-      exit(1);
-    }
-  }();
+  RR::Shader skybox_vertex;
+  RR::Shader skybox_fragment;
+  try {
+    skybox_vertex = RR::Shader(GL_VERTEX_SHADER, skybox_vertex_text);
+    skybox_fragment = RR::Shader(GL_FRAGMENT_SHADER, skybox_fragment_text);
+    program.attachShader(skybox_vertex).attachShader(skybox_fragment);
+    program.link();
+  } catch (std::string ex) {
+    std::cout << ex << "\n";
+    exit(1);
+  }
 
   // RR::FrameBuffer fb(600, 800, 1);
   RR::Texture2d texture(cubemap2Img);
