@@ -13,6 +13,7 @@ namespace EditorActionsPanel {
 	constexpr int amountOfEnties = sizeof(EditorActionsPanel::entries) / sizeof(EditorActionsPanel::actionEntry);
 
 	void UI(RR::Texture2d& icon, RR::Texture2d& icons) {
+		ImGui::PushStyleVar( ImGuiStyleVar_FrameRounding, 30);
 		ImGui::Begin("Panel", NULL);
 		{
 			if (ImGui::BeginTable("hIcon", 2))
@@ -31,13 +32,17 @@ namespace EditorActionsPanel {
 
 				ImGui::EndTable();
 			}
-			int cols = (int)((ImGui::GetWindowSize().x - 10) / 58);
+			// ImGui::
+			float widthR = (ImGui::GetWindowSize().x * 0.05);
+			float heightR = ((ImGui::GetWindowSize().y - 100) * 0.25);
+			float iconSize = 40 + (widthR < heightR ? widthR : heightR);
+			int cols = (int)((ImGui::GetWindowSize().x - 10) / (iconSize + 15));
 			if (cols == 0) cols = 1;
 			if (cols > amountOfEnties) cols = amountOfEnties;
-			if (ImGui::BeginTable("hIcon", cols))
+			if (ImGui::BeginTable("actionIcons", cols))
 			{
 				for (int i = 0; i < cols; i++) {
-					ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
+					ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
 				}
 				for (int i = 0; i < amountOfEnties; i++) {
 					if (i % cols == 0) ImGui::TableNextRow();
@@ -46,7 +51,7 @@ namespace EditorActionsPanel {
 						// ImGui::Image((ImTextureID)icons.id, ImVec2(50, 50), ImVec2(0, 1.0), ImVec2(0.25, 0.75));
 						ImGui::ImageButton(
 								EditorActionsPanel::entries[i].label,
-								(ImTextureID)icons.id, ImVec2(50, 50),
+								(ImTextureID)icons.id, ImVec2(iconSize, iconSize),
 								EditorActionsPanel::entries[i].begin,
 								EditorActionsPanel::entries[i].end);
 						ImGui::Text(EditorActionsPanel::entries[i].label);
@@ -56,6 +61,7 @@ namespace EditorActionsPanel {
 			}
 
 			ImGui::End();
+			ImGui::PopStyleVar(1);
 		}
 	}
 }

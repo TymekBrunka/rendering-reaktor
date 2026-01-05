@@ -9,7 +9,7 @@ target_include_directories(glad PUBLIC glad/include)
 
 add_library(stb_image stb_image.cpp)
 
-add_library(rr OBJECT rr.cpp
+add_library(rr STATIC rr.cpp
   BufferBase.cpp
 	Shader.cpp
 	Program.cpp
@@ -40,7 +40,7 @@ function(imgpack name input output flip channels)
 		VERBATIM
 	)
 	add_custom_target(${name}_file DEPENDS ${output}.cpp)
-	add_library(${name} OBJECT ${output}.cpp)
+	add_library(${name} STATIC ${output}.cpp)
 	add_dependencies(${name} ${name}_file)
 	target_link_libraries(${name} glad stb_image)
 	target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/ ${CMAKE_BINARY_DIR})
@@ -56,8 +56,8 @@ function(bytepack name input output)
 		VERBATIM
 	)
 	add_custom_target(${name}_file DEPENDS ${output}.cpp)
-	add_library(${name} OBJECT ${output}.cpp)
+	add_library(${name} STATIC ${output}.cpp)
 	add_dependencies(${name} ${name}_file)
 	target_include_directories(${name} PUBLIC ${CMAKE_BINARY_DIR})
 
-endfunction(imgpack)
+endfunction(bytepack)

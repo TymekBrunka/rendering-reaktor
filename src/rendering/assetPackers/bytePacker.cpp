@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
   f.seekg(0, std::ios::end);
   int length = f.tellg();
   f.seekg(0, std::ios::beg);
-  char *data = new char[length * 3];
+  char *data = (char*)std::calloc(length, sizeof(char));
 
   f.read(data, length);
   f.close();
@@ -48,10 +48,10 @@ int main(int argc, char *argv[]) {
 
   std::FILE *cppfile = std::fopen(cppath.c_str(), "w");
   std::fprintf(cppfile,
-               "#include \"%s.hpp\"\n"
+               "#include \"%s\"\n"
                "const char* %s = \"%s\";",
-               output.c_str(), varname, sb);
+               headerpath.c_str(), varname, sb);
   std::fclose(cppfile);
-  delete[] data;
+  free(data);
   delete[] sb;
 }

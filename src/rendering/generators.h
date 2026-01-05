@@ -27,6 +27,12 @@ namespace RR {
     };
 
     template<>
+    struct ATTRIB_SPECS<RR::vec4> {
+        static const GLint size = 4;
+        static const GLenum type = GL_FLOAT;
+    };
+
+    template<>
     struct ATTRIB_SPECS<RR::mat4> {
         static const GLint size = 16;
         static const GLenum type = GL_FLOAT;
