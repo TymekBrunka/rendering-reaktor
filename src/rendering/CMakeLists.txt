@@ -2,9 +2,11 @@ cmake_minimum_required(VERSION 3.23)
 project(rr LANGUAGES C CXX)
 set (CMAKE_CXX_STANDARD 20)
 
+find_package(glfw3 REQUIRED) #glfw3 is name OF THE FILE, NOT TARGET
+
 include_directories(.)
 
-add_library(glad OBJECT glad/src/gl.c)
+add_library(glad OBJECT glad/src/glad.c)
 target_include_directories(glad PUBLIC glad/include)
 
 add_library(stb_image stb_image.cpp)

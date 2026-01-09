@@ -1,7 +1,7 @@
 #ifndef _RR_DENINED_GENERATORS
 #define _RR_DENINED_GENERATORS
 
-#include <glad/gl.h>
+#include <glad/glad.h>
 #include "glMathTypes.hpp"
 #include "Program.hpp"
 // #include <glm/vec2.hpp>

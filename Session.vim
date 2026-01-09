@@ -13,40 +13,39 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +1 \[dap-terminal]\ LLDB:\ Launch\ (args)
-badd +111 ~/Documents/kody/rendering-reaktor/src/main.cpp
-badd +14 ~/Documents/kody/rendering-reaktor/src/rendering/IndexBuffer.cpp
-badd +12 src/rendering/IndexBuffer.hpp
-badd +18 ~/Documents/kody/rendering-reaktor/src/rendering/BufferBase.hpp
-badd +4 ~/Documents/kody/rendering-reaktor/.clang-format
-badd +32 ~/Documents/kody/rendering-reaktor/src/rendering/BufferBase.cpp
+badd +4 ~/Documents/kody/rendering-reaktor/src/rendering/CubeMap.hpp
+badd +129 /usr/include/GL/glew.h
+badd +3 ~/Documents/kody/rendering-reaktor/src/rendering/FrameBuffer.hpp
+badd +2 ~/Documents/kody/rendering-reaktor/src/rendering/Texture2d.hpp
+badd +2 ~/Documents/kody/rendering-reaktor/src/rendering/Program.hpp
+badd +2 ~/Documents/kody/rendering-reaktor/src/rendering/Shader.hpp
+badd +31 ~/Documents/kody/rendering-reaktor/src/rendering/imgui/imgui_impl_opengl3.h
+badd +3 ~/Documents/kody/rendering-reaktor/src/rendering/VertexBuffer.hpp
+badd +1 ~/Documents/kody/rendering-reaktor/src/rendering/generators.h
+badd +128 ~/Documents/kody/rendering-reaktor/src/main.cpp
 badd +58 ~/Documents/kody/rendering-reaktor/src/rendering/CMakeLists.txt
-badd +40 ~/Documents/kody/rendering-reaktor/src/rendering/generators.h
-badd +21 ~/Documents/kody/rendering-reaktor/src/rendering/VertexBuffer.hpp
-badd +2 ~/Documents/kody/rendering-reaktor/src/rendering/impl_buffer_move.hpp
-badd +39 ~/Documents/kody/rendering-reaktor/src/rendering/FrameBuffer.cpp
-badd +8 ~/Documents/kody/rendering-reaktor/src/rendering/FrameBuffer.hpp
-badd +52 ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/bytePacker.cpp
-badd +60 ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/imagePacker.cpp
-badd +18 CMakeLists.txt
-badd +1 DAP\ Scopes
-badd +1 DAP\ Breakpoints
-badd +1 DAP\ Stacks
-badd +1 DAP\ Watches
-badd +1 \[dap-repl-47]
-badd +8 ~/Documents/kody/rendering-reaktor/src/rendering/CubeMap.cpp
-badd +11 ~/Documents/kody/rendering-reaktor/src/rendering/CubeMap.hpp
-badd +11 ~/Documents/kody/rendering-reaktor/src/rendering/Program.hpp
-badd +7 ~/Documents/kody/rendering-reaktor/src/rendering/Program.cpp
-badd +9 ~/Documents/kody/rendering-reaktor/src/rendering/Shader.hpp
-badd +3 ~/Documents/kody/rendering-reaktor/src/rendering/Shader.cpp
-badd +19 ~/Documents/kody/rendering-reaktor/src/rendering/Texture2d.hpp
-badd +59 ~/Documents/kody/rendering-reaktor/src/rendering/Texture2d.cpp
+badd +2 ~/Documents/kody/rendering-reaktor/src/rendering/BufferBase.hpp
+badd +28 ~/Documents/kody/rendering-reaktor/CMakeLists.txt
+badd +7 ~/Documents/kody/rendering-reaktor/vcpkg.json
+badd +24 ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/bytePacker.cpp
+badd +1 ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/imagePacker.cpp
+badd +13 ~/Documents/kody/rendering-reaktor/src/rendering/imgui/CMakeLists.txt
+badd +961 ~/Documents/kody/rendering-reaktor/src/rendering/glad/src/glad.c
+badd +1955 ~/Documents/kody/rendering-reaktor/src/rendering/glad/include/glad/glad.h
+badd +1 ~/Documents/kody/rendering-reaktor/src/rendering/IndexBuffer.hpp
+badd +8 ~/Documents/kody/rendering-reaktor/src/rendering/rr.hpp
+badd +2 ~/Documents/kody/rendering-reaktor/src/rendering/rr.cpp
+badd +10 src/EditorClasses/EditorActionsPanel.hpp
+badd +1 src/EditorClasses/EditorActionsPanel.cpp
+badd +1 ~/Documents/kody/rendering-reaktor/build/skybox.frag.glsl.cpp
+badd +1 ~/Documents/kody/rendering-reaktor/build/skybox.vertex.glsl.cpp
+badd +10 ~/Documents/kody/rendering-reaktor/src/shaders/skybox.vertex.glsl
+badd +10 ~/Documents/kody/rendering-reaktor/src/shaders/skybox.frag.glsl
 argglobal
 %argdel
 edit ~/Documents/kody/rendering-reaktor/src/main.cpp
 argglobal
-balt ~/Documents/kody/rendering-reaktor/src/rendering/Texture2d.cpp
+balt ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/bytePacker.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -57,12 +56,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 111 - ((10 * winheight(0) + 26) / 52)
+let s:l = 128 - ((24 * winheight(0) + 26) / 52)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 111
-normal! 010|
+keepjumps 128
+normal! 032|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
@@ -76,7 +75,6 @@ if filereadable(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
 set hlsearch
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :

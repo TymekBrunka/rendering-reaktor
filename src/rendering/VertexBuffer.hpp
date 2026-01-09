@@ -1,6 +1,6 @@
 #pragma once
 #include "BufferBase.hpp"
-#include <glad/gl.h>
+#include <glad/glad.h>
 #include <utility>
 
 namespace RR {

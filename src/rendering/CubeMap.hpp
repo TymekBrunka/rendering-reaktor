@@ -1,7 +1,7 @@
 #pragma once
 #include "Program.hpp"
 #include "Texture2d.hpp"
-#include <glad/gl.h>
+#include <glad/glad.h>
 
 namespace RR {
 	class CubeMap {

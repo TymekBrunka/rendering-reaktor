@@ -4,7 +4,6 @@
         "xlsxio",
         "imguizmo",
         "glm",
-        "nativefiledialog-extended",
-        "assimp"
+        "nativefiledialog-extended"
     ]
 }

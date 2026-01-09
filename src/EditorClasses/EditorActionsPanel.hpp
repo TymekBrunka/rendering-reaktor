@@ -7,6 +7,7 @@ namespace EditorActionsPanel {
 		const char* label;
 		ImVec2 begin;
 		ImVec2 end;
+    void (*callback)();
 	};
 
 	extern actionEntry entries[];

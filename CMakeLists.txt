@@ -4,7 +4,6 @@ set (CMAKE_CXX_STANDARD 20)
 
 find_package(nfd REQUIRED) #refuses to work normaly with find_package()
 
-find_package(glfw3 REQUIRED) #glfw3 is name OF THE FILE, NOT TARGET
 find_package(imguizmo CONFIG REQUIRED)
 
 find_package(glm REQUIRED) #refuses to work normaly with find_package()

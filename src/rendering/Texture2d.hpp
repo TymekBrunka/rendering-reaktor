@@ -1,6 +1,5 @@
 #pragma once
 #include "Program.hpp"
-#include <glad/gl.h>
 
 namespace RR {
 	struct image_data {

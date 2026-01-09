@@ -1,20 +1,21 @@
 #include "Camera.hpp"
 #include "EditorActionsPanel.hpp"
 #include "FrameBuffer.hpp"
+#include "Program.hpp"
 #include "glm/fwd.hpp"
 #include "rendering/imgui/imgui.h"
 #include "rr.hpp"
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <glad/gl.h>
+#include <glad/glad.h>
 #include <nfd.h>
 
 #include "cubemap2.png.hpp"
 #include "icon.png.hpp"
 #include "icons.png.hpp"
-#include "skybox.vertex.glsl.hpp"
 #include "skybox.frag.glsl.hpp"
+#include "skybox.vertex.glsl.hpp"
 
 #include "imgui.h"
 #include "imgui_boilerplate.hpp"
@@ -94,7 +95,15 @@ int main() {
   glfwSetMouseButtonCallback(window, mouse_button_callback);
 
   glfwMakeContextCurrent(window); // context must be set first
-  gladLoadGL(glfwGetProcAddress); // only then we can load
+  gladLoadGL();                   // only then we can load
+                                  //
+  // GLint numExtensions;
+  // glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+  // std::cout << "- Extensions" << std::endl;
+  // for (GLint i = 0; i < numExtensions; i++) {
+  //   std::cout << glGetStringi(GL_EXTENSIONS, i) << std::endl;
+  // }
+
   glfwSwapInterval(1);
 
   {
