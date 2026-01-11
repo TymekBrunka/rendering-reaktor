@@ -1,15 +1,11 @@
 #include "Camera.hpp"
 #include "EditorActionsPanel.hpp"
-#include "FrameBuffer.hpp"
-#include "Program.hpp"
-#include "glm/fwd.hpp"
+#include "logger.hpp"
+
+#include "portable-file-dialogs.h"
 #include "rendering/imgui/imgui.h"
 #include "rr.hpp"
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
 #include <glad/glad.h>
-#include <nfd.h>
 
 #include "cubemap2.png.hpp"
 #include "icon.png.hpp"
@@ -20,6 +16,7 @@
 #include "imgui.h"
 #include "imgui_boilerplate.hpp"
 
+#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -28,7 +25,11 @@
 #include "glm/gtx/string_cast.hpp"
 
 #include "stb_image.h"
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
+#include <thread>
 
 Camera camera(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec2(0.0f, 0.0f));
 int Gwidth;
@@ -62,6 +63,98 @@ void mouse_callback(GLFWwindow *window, double x, double y) {
   camera.last_mouse_pos[1] = y;
 }
 
+void APIENTRY gl_debug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
+// Some debug messages are just annoying informational messages
+    switch (id)
+    {
+    case 131185: // glBufferData
+        return;
+    }
+
+    printf("Message: %s\n", message);
+    printf("Source: ");
+
+    switch (source)
+    {
+    case GL_DEBUG_SOURCE_API_ARB:
+        printf("API");
+        break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
+        printf("Window System");
+        break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
+        printf("Shader Compiler");
+        break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
+        printf("Third Party");
+        break;
+    case GL_DEBUG_SOURCE_APPLICATION_ARB:
+        printf("Application");
+        break;
+    case GL_DEBUG_SOURCE_OTHER_ARB:
+        printf("Other");
+        break;
+    }
+
+    printf("\n");
+    printf("Type: ");
+
+    switch (type)
+    {
+    case GL_DEBUG_TYPE_ERROR_ARB:
+        printf("Error");
+        break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
+        printf("Deprecated Behavior");
+        break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
+        printf("Undefined Behavior");
+        break;
+    case GL_DEBUG_TYPE_PORTABILITY_ARB:
+        printf("Portability");
+        break;
+    case GL_DEBUG_TYPE_PERFORMANCE_ARB:
+        printf("Performance");
+        break;
+    // // below dont work
+    // case GL_DEBUG_TYPE_MARKER:
+    //     printf("Marker");
+    //     break;
+    // case GL_DEBUG_TYPE_PUSH_GROUP:
+    //     printf("Push Group");
+    //     break;
+    // case GL_DEBUG_TYPE_POP_GROUP:
+    //     printf("Pop Group");
+    //     break;
+    // case GL_DEBUG_TYPE_OTHER:
+    //     printf("Other");
+    //     break;
+    }
+
+    printf("\n");
+    printf("ID: %d\n", id);
+    printf("Severity: ");
+
+    switch (severity)
+    {
+    case GL_DEBUG_SEVERITY_HIGH_ARB:
+        printf("High");
+        break;
+    case GL_DEBUG_SEVERITY_MEDIUM_ARB:
+        printf("Medium");
+        break;
+    case GL_DEBUG_SEVERITY_LOW_ARB:
+        printf("Low");
+        break;
+    // // below doesnt work
+    // case GL_DEBUG_SEVERITY_NOTIFICATION_ARB:
+    //     printf("Notification");
+    //     break;
+    }
+
+    printf("\n\n");
+}
+
 static void window_size_callback(GLFWwindow *window, int width, int height) {
   Gwidth = width;
   Gheight = height;
@@ -81,6 +174,16 @@ GLint location_pos;
 GLint location_uv;
 
 int main() {
+
+  // Check that a backend is available
+  if (!pfd::settings::available()) {
+    std::cout << "Portable File Dialogs are not available on this platform.\n";
+    return 1;
+  }
+
+  // Set verbosity to true
+  pfd::settings::verbose(true);
+
   RR::init();
   // imgui_boilerplate();
   GLFWwindow *window = RR::createWindow(640, 480, "Reaktory", 3, 2); // #version 320
@@ -96,7 +199,13 @@ int main() {
 
   glfwMakeContextCurrent(window); // context must be set first
   gladLoadGL();                   // only then we can load
-                                  //
+  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+
+  if (GLAD_GL_ARB_debug_output) {
+    Logger::info("MAIN") << "OpenGL debugging enabled\n";
+    glDebugMessageCallbackARB(gl_debug, NULL);
+  }
+  //
   // GLint numExtensions;
   // glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
   // std::cout << "- Extensions" << std::endl;
@@ -114,143 +223,144 @@ int main() {
     glfwSetWindowIcon(window, 1, icon);
   }
 
-  RR::Texture2d icon(icon_data);
-
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-
-  RR::Program program("");
-  RR::Shader skybox_vertex;
-  RR::Shader skybox_fragment;
-  try {
-    skybox_vertex = RR::Shader(GL_VERTEX_SHADER, skybox_vertex_text);
-    skybox_fragment = RR::Shader(GL_FRAGMENT_SHADER, skybox_fragment_text);
-    program.attachShader(skybox_vertex).attachShader(skybox_fragment);
-    program.link();
-  } catch (std::string ex) {
-    std::cout << ex << "\n";
-    exit(1);
-  }
-
-  // RR::FrameBuffer fb(600, 800, 1);
-  RR::Texture2d texture(cubemap2Img);
-  RR::Texture2d icons(iconsImg);
-
-  // stbi_set_flip_vertically_on_load(true);
-  // RR::image_data img = RR::readImage("src/icons.png", 4);
-  // stbi_image_free(img.data);
-
-  glUseProgram(program.id);
-  texture.bindToSlotAndName(program, 0, "skybox");
-
-  icon.bindToSlot(4);
-  icons.bindToSlot(3);
-
-  skybox_vert skybox_verticies[] = {
-      // back
-      {{-1.0, 1.0, -1.0}, {0.75, 0.665}},
-      {{-1.0, -1.0, -1.0}, {0.75, 0.334}},
-      {{1.0, -1.0, -1.0}, {1.00, 0.334}},
-      {{1.0, 1.0, -1.0}, {1.00, 0.665}},
-
-      // front
-      {{1.0, 1.0, 1.0}, {0.25, 0.665}},
-      {{1.0, -1.0, 1.0}, {0.25, 0.334}},
-      {{-1.0, -1.0, 1.0}, {0.50, 0.334}},
-      {{-1.0, 1.0, 1.0}, {0.50, 0.665}},
-
-      // right
-      {{1.0, 1.0, -1.0}, {0.00, 0.665}},
-      {{1.0, -1.0, -1.0}, {0.00, 0.334}},
-      {{1.0, -1.0, 1.0}, {0.25, 0.334}},
-      {{1.0, 1.0, 1.0}, {0.25, 0.665}},
-
-      // left
-      {{-1.0, 1.0, 1.0}, {0.50, 0.665}},
-      {{-1.0, -1.0, 1.0}, {0.50, 0.334}},
-      {{-1.0, -1.0, -1.0}, {0.75, 0.334}},
-      {{-1.0, 1.0, -1.0}, {0.75, 0.665}},
-
-      // bottom
-      {{-1.0, -1.0, -1.0}, {0.499, 0.000}},
-      {{-1.0, -1.0, 1.0}, {0.499, 0.332}},
-      {{1.0, -1.0, 1.0}, {0.251, 0.332}},
-      {{1.0, -1.0, -1.0}, {0.251, 0.000}},
-
-      // top
-      {{-1.0, 1.0, 1.0}, {0.499, 0.667}},
-      {{-1.0, 1.0, -1.0}, {0.499, 1.000}},
-      {{1.0, 1.0, -1.0}, {0.251, 1.000}},
-      {{1.0, 1.0, 1.0}, {0.251, 0.667}},
-  };
-
-  GLuint skybox_indecies[] = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23};
-
-  GLuint skybox_va = RR::createVertexArray();
-  glBindVertexArray(skybox_va);
-
-  iminit(window, true);
-
-  RR::VertexBuffer<skybox_vert> skybox_vb(skybox_verticies, sizeof(skybox_verticies) / sizeof(skybox_vert), GL_STATIC_DRAW);
-  RR::IndexBuffer skybox_ib(skybox_indecies, sizeof(skybox_indecies) / sizeof(GLuint), GL_STATIC_DRAW);
-
-  RR_AUTOATTRIB(skybox_vert, pos, GL_TRUE);
-  RR_AUTOATTRIB(skybox_vert, uv, GL_TRUE);
-
-  // Camera
-  camera.update_projection(800, 600, 120);
-  camera.computeMatricies();
-
-  const GLint rotatm4 = glGetUniformLocation(program.id, "rotat");
-
-  float currentFrame, lastFrame, deltaTime;
-  skybox_vb.bind();
-  skybox_ib.bind();
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-  glfwGetFramebufferSize(window, &Gwidth, &Gheight);
-  // const float ratio = width / (float) height;
-  glViewport(0, 0, Gwidth, Gheight);
-  int cols;
-  while (!glfwWindowShouldClose(window)) {
-    currentFrame = static_cast<float>(glfwGetTime());
-    deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    imNewFrame();
-    setupDocking(Gwidth, Gheight);
-
-    glUseProgram(program.id);
-    // texture.bindToSlot(0);
-    glBindVertexArray(skybox_va);
-
-    glm::mat4 mat = camera.read().camera_skybox;
-    glUniformMatrix4fv(rotatm4, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(mat));
-
-    // glDrawArrays(GL_TRIANGLES, 0, 6);
-    glDrawElements(GL_TRIANGLES, sizeof(skybox_indecies) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
-
-    // ImGui::SetNextWindowPos(ImVec2(0, 0));
-    // ImGui::SetNextWindowSize(ImVec2(200, Gheight));
-
-    ImGui::Begin("Panel", NULL);
-    {
-      EditorActionsPanel::UI(icon, icons);
-      ImGui::End();
+  {
+    RR::Texture2d icon(icon_data);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    RR::Program program("");
+    RR::Shader skybox_vertex;
+    RR::Shader skybox_fragment;
+    try {
+      skybox_vertex = RR::Shader(GL_VERTEX_SHADER, skybox_vertex_text);
+      skybox_fragment = RR::Shader(GL_FRAGMENT_SHADER, skybox_fragment_text);
+      program.attachShader(skybox_vertex).attachShader(skybox_fragment);
+      program.link();
+    } catch (std::string ex) {
+      std::cout << ex << "\n";
+      exit(1);
     }
 
-    // ImGui::End();
-    imrender();
+    // RR::FrameBuffer fb(600, 800, 1);
+    RR::Texture2d texture(cubemap2Img);
+    RR::Texture2d icons(iconsImg);
 
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+    // stbi_set_flip_vertically_on_load(true);
+    // RR::image_data img = RR::readImage("src/icons.png", 4);
+    // stbi_image_free(img.data);
+
+    glUseProgram(program.id);
+    texture.bindToSlotAndName(program, 0, "skybox");
+
+    icon.bindToSlot(4);
+    icons.bindToSlot(3);
+
+    skybox_vert skybox_verticies[] = {
+        // back
+        {{-1.0, 1.0, -1.0}, {0.75, 0.665}},
+        {{-1.0, -1.0, -1.0}, {0.75, 0.334}},
+        {{1.0, -1.0, -1.0}, {1.00, 0.334}},
+        {{1.0, 1.0, -1.0}, {1.00, 0.665}},
+
+        // front
+        {{1.0, 1.0, 1.0}, {0.25, 0.665}},
+        {{1.0, -1.0, 1.0}, {0.25, 0.334}},
+        {{-1.0, -1.0, 1.0}, {0.50, 0.334}},
+        {{-1.0, 1.0, 1.0}, {0.50, 0.665}},
+
+        // right
+        {{1.0, 1.0, -1.0}, {0.00, 0.665}},
+        {{1.0, -1.0, -1.0}, {0.00, 0.334}},
+        {{1.0, -1.0, 1.0}, {0.25, 0.334}},
+        {{1.0, 1.0, 1.0}, {0.25, 0.665}},
+
+        // left
+        {{-1.0, 1.0, 1.0}, {0.50, 0.665}},
+        {{-1.0, -1.0, 1.0}, {0.50, 0.334}},
+        {{-1.0, -1.0, -1.0}, {0.75, 0.334}},
+        {{-1.0, 1.0, -1.0}, {0.75, 0.665}},
+
+        // bottom
+        {{-1.0, -1.0, -1.0}, {0.499, 0.000}},
+        {{-1.0, -1.0, 1.0}, {0.499, 0.332}},
+        {{1.0, -1.0, 1.0}, {0.251, 0.332}},
+        {{1.0, -1.0, -1.0}, {0.251, 0.000}},
+
+        // top
+        {{-1.0, 1.0, 1.0}, {0.499, 0.667}},
+        {{-1.0, 1.0, -1.0}, {0.499, 1.000}},
+        {{1.0, 1.0, -1.0}, {0.251, 1.000}},
+        {{1.0, 1.0, 1.0}, {0.251, 0.667}},
+    };
+
+    GLuint skybox_indecies[] = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23};
+
+    GLuint skybox_va = RR::createVertexArray();
+    glBindVertexArray(skybox_va);
+
+    iminit(window, true);
+
+    RR::VertexBuffer<skybox_vert> skybox_vb(skybox_verticies, sizeof(skybox_verticies) / sizeof(skybox_vert), GL_STATIC_DRAW);
+    RR::IndexBuffer skybox_ib(skybox_indecies, sizeof(skybox_indecies) / sizeof(GLuint), GL_STATIC_DRAW);
+
+    RR_AUTOATTRIB(skybox_vert, pos, GL_TRUE);
+    RR_AUTOATTRIB(skybox_vert, uv, GL_TRUE);
+
+    // Camera
+    camera.update_projection(800, 600, 120);
+    camera.computeMatricies();
+
+    const GLint rotatm4 = glGetUniformLocation(program.id, "rotat");
+
+    float currentFrame, lastFrame, deltaTime;
+    skybox_vb.bind();
+    skybox_ib.bind();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glfwGetFramebufferSize(window, &Gwidth, &Gheight);
+    // const float ratio = width / (float) height;
+    glViewport(0, 0, Gwidth, Gheight);
+    int cols;
+    while (!glfwWindowShouldClose(window)) {
+      currentFrame = static_cast<float>(glfwGetTime());
+      deltaTime = currentFrame - lastFrame;
+      lastFrame = currentFrame;
+
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      imNewFrame();
+      setupDocking(Gwidth, Gheight);
+
+      glUseProgram(program.id);
+      // texture.bindToSlot(0);
+      glBindVertexArray(skybox_va);
+
+      glm::mat4 mat = camera.read().camera_skybox;
+      glUniformMatrix4fv(rotatm4, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(mat));
+
+      // glDrawArrays(GL_TRIANGLES, 0, 6);
+      glDrawElements(GL_TRIANGLES, sizeof(skybox_indecies) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+
+      // ImGui::SetNextWindowPos(ImVec2(0, 0));
+      // ImGui::SetNextWindowSize(ImVec2(200, Gheight));
+
+      ImGui::Begin("Panel", NULL);
+      {
+        EditorActionsPanel::UI(icon, icons);
+        ImGui::End();
+      }
+
+      // ImGui::End();
+      imrender();
+
+      glfwSwapBuffers(window);
+      glfwPollEvents();
+    }
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
   glfwDestroyWindow(window);
 
   glfwTerminate();

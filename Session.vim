@@ -13,39 +13,27 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +4 ~/Documents/kody/rendering-reaktor/src/rendering/CubeMap.hpp
-badd +129 /usr/include/GL/glew.h
-badd +3 ~/Documents/kody/rendering-reaktor/src/rendering/FrameBuffer.hpp
-badd +2 ~/Documents/kody/rendering-reaktor/src/rendering/Texture2d.hpp
-badd +2 ~/Documents/kody/rendering-reaktor/src/rendering/Program.hpp
-badd +2 ~/Documents/kody/rendering-reaktor/src/rendering/Shader.hpp
-badd +31 ~/Documents/kody/rendering-reaktor/src/rendering/imgui/imgui_impl_opengl3.h
-badd +3 ~/Documents/kody/rendering-reaktor/src/rendering/VertexBuffer.hpp
-badd +1 ~/Documents/kody/rendering-reaktor/src/rendering/generators.h
-badd +128 ~/Documents/kody/rendering-reaktor/src/main.cpp
-badd +58 ~/Documents/kody/rendering-reaktor/src/rendering/CMakeLists.txt
-badd +2 ~/Documents/kody/rendering-reaktor/src/rendering/BufferBase.hpp
-badd +28 ~/Documents/kody/rendering-reaktor/CMakeLists.txt
-badd +7 ~/Documents/kody/rendering-reaktor/vcpkg.json
-badd +24 ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/bytePacker.cpp
-badd +1 ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/imagePacker.cpp
-badd +13 ~/Documents/kody/rendering-reaktor/src/rendering/imgui/CMakeLists.txt
-badd +961 ~/Documents/kody/rendering-reaktor/src/rendering/glad/src/glad.c
-badd +1955 ~/Documents/kody/rendering-reaktor/src/rendering/glad/include/glad/glad.h
-badd +1 ~/Documents/kody/rendering-reaktor/src/rendering/IndexBuffer.hpp
-badd +8 ~/Documents/kody/rendering-reaktor/src/rendering/rr.hpp
-badd +2 ~/Documents/kody/rendering-reaktor/src/rendering/rr.cpp
-badd +10 src/EditorClasses/EditorActionsPanel.hpp
-badd +1 src/EditorClasses/EditorActionsPanel.cpp
-badd +1 ~/Documents/kody/rendering-reaktor/build/skybox.frag.glsl.cpp
-badd +1 ~/Documents/kody/rendering-reaktor/build/skybox.vertex.glsl.cpp
-badd +10 ~/Documents/kody/rendering-reaktor/src/shaders/skybox.vertex.glsl
-badd +10 ~/Documents/kody/rendering-reaktor/src/shaders/skybox.frag.glsl
+badd +27 src/EditorClasses/MeshManager.hpp
+badd +225 build/vcpkg_installed/x64-linux/include/nfd.h
+badd +8 ~/Documents/kody/rendering-reaktor/src/EditorClasses/MeshManager.cpp
+badd +4 ~/Documents/kody/rendering-reaktor/src/EditorClasses/EditorActionsPanel.hpp
+badd +8 ~/Documents/kody/rendering-reaktor/src/EditorClasses/EditorActionsPanel.cpp
+badd +1 src/main.cpp
+badd +4 ~/Documents/kody/rendering-reaktor/vcpkg.json
+badd +30 ~/Documents/kody/rendering-reaktor/CMakeLists.txt
+badd +1 ~/Documents/kody/rendering-reaktor/build/vcpkg_installed/x64-linux/share/portable-file-dialogs/copyright
+badd +1 ~/Documents/kody/rendering-reaktor/build/vcpkg_installed/x64-linux/share/portable-file-dialogs/vcpkg_abi_info.txt
+badd +1 ~/Documents/kody/rendering-reaktor/src/tinyobjloader/tiny_obj_loader.cc
+badd +1 ~/Documents/kody/rendering-reaktor/src/tinyobjloader/tiny_obj_loader.h
+badd +373 ~/Documents/kody/rendering-reaktor/src/pfd/portable-file-dialogs.h
+badd +26 ~/Documents/kody/rendering-reaktor/src/rendering/BufferBase.cpp
+badd +1 ~/Documents/kody/rendering-reaktor/src/pfd/pfd.cpp
+badd +3 ~/Documents/kody/rendering-reaktor/src/triangleVB.cpp
 argglobal
 %argdel
-edit ~/Documents/kody/rendering-reaktor/src/main.cpp
+edit ~/Documents/kody/rendering-reaktor/src/triangleVB.cpp
 argglobal
-balt ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/bytePacker.cpp
+balt src/main.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -56,12 +44,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 128 - ((24 * winheight(0) + 26) / 52)
+let s:l = 3 - ((2 * winheight(0) + 26) / 52)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 128
-normal! 032|
+keepjumps 3
+normal! 06|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
@@ -75,6 +63,7 @@ if filereadable(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
 set hlsearch
+nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :

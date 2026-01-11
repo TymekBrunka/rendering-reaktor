@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.23)
 project(reaktory LANGUAGES C CXX)
 set (CMAKE_CXX_STANDARD 20)
 
-find_package(nfd REQUIRED) #refuses to work normaly with find_package()
-
 find_package(imguizmo CONFIG REQUIRED)
 
 find_package(glm REQUIRED) #refuses to work normaly with find_package()
@@ -19,19 +17,23 @@ bytepack(skybox_fragment_text src/shaders/skybox.frag.glsl skybox.frag.glsl)
 add_library(tinyobjloader OBJECT src/tinyobjloader/tiny_obj_loader.cc)
 target_include_directories(tinyobjloader PUBLIC src/tinyobjloader/)
 
+add_library(pfd src/pfd/pfd.cpp)
+target_include_directories(pfd PUBLIC src/pfd/)
+
 add_executable(main
   src/main.cpp
   src/EditorClasses/Camera.cpp
   src/EditorClasses/EditorActionsPanel.cpp
   src/EditorClasses/MeshManager.cpp
+  src/EditorClasses/logger.cpp
 )
 
-target_include_directories(main PUBLIC src/EditorClasses/)
+target_include_directories(main PUBLIC src/EditorClasses/ src)
 target_link_libraries(main PUBLIC
-  nfd::nfd
   rr
   glm::glm-header-only
   tinyobjloader
+  pfd
 
 #prebuilt assets
   cubemap2Img
