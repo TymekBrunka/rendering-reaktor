@@ -1,6 +1,7 @@
 #include "Camera.hpp"
 #include "EditorActionsPanel.hpp"
 #include "utils/Logger.hpp"
+#include "WorkerThreads.hpp"
 
 #include "portable-file-dialogs.h"
 #include "rendering/imgui/imgui.h"
