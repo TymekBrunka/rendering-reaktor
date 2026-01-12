@@ -25,7 +25,7 @@ add_executable(main
   src/EditorClasses/Camera.cpp
   src/EditorClasses/EditorActionsPanel.cpp
   src/EditorClasses/MeshManager.cpp
-  src/EditorClasses/logger.cpp
+  src/utils/Logger.hpp
 )
 
 target_include_directories(main PUBLIC src/EditorClasses/ src)

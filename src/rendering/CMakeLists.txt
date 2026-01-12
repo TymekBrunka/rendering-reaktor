@@ -15,7 +15,7 @@ add_library(rr STATIC rr.cpp
   BufferBase.cpp
 	Shader.cpp
 	Program.cpp
-	#VertexBuffer.cpp
+	VertexBuffer.hpp
 	FrameBuffer.cpp
 	Texture2d.cpp
 	IndexBuffer.cpp

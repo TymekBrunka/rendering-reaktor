@@ -1,6 +1,6 @@
 #include "Camera.hpp"
 #include "EditorActionsPanel.hpp"
-#include "logger.hpp"
+#include "utils/Logger.hpp"
 
 #include "portable-file-dialogs.h"
 #include "rendering/imgui/imgui.h"
@@ -25,11 +25,9 @@
 #include "glm/gtx/string_cast.hpp"
 
 #include "stb_image.h"
-#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <thread>
 
 Camera camera(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec2(0.0f, 0.0f));
 int Gwidth;
@@ -71,88 +69,86 @@ void APIENTRY gl_debug(GLenum source, GLenum type, GLuint id, GLenum severity, G
         return;
     }
 
-    printf("Message: %s\n", message);
-    printf("Source: ");
-
-    switch (source)
-    {
-    case GL_DEBUG_SOURCE_API_ARB:
-        printf("API");
-        break;
-    case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
-        printf("Window System");
-        break;
-    case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
-        printf("Shader Compiler");
-        break;
-    case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
-        printf("Third Party");
-        break;
-    case GL_DEBUG_SOURCE_APPLICATION_ARB:
-        printf("Application");
-        break;
-    case GL_DEBUG_SOURCE_OTHER_ARB:
-        printf("Other");
-        break;
-    }
-
-    printf("\n");
-    printf("Type: ");
-
-    switch (type)
-    {
-    case GL_DEBUG_TYPE_ERROR_ARB:
-        printf("Error");
-        break;
-    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
-        printf("Deprecated Behavior");
-        break;
-    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
-        printf("Undefined Behavior");
-        break;
-    case GL_DEBUG_TYPE_PORTABILITY_ARB:
-        printf("Portability");
-        break;
-    case GL_DEBUG_TYPE_PERFORMANCE_ARB:
-        printf("Performance");
-        break;
-    // // below dont work
-    // case GL_DEBUG_TYPE_MARKER:
-    //     printf("Marker");
-    //     break;
-    // case GL_DEBUG_TYPE_PUSH_GROUP:
-    //     printf("Push Group");
-    //     break;
-    // case GL_DEBUG_TYPE_POP_GROUP:
-    //     printf("Pop Group");
-    //     break;
-    // case GL_DEBUG_TYPE_OTHER:
-    //     printf("Other");
-    //     break;
-    }
-
-    printf("\n");
-    printf("ID: %d\n", id);
-    printf("Severity: ");
+    Logger<>::error("OpenGL") << "\n / " << id << " Severity: ";
 
     switch (severity)
     {
     case GL_DEBUG_SEVERITY_HIGH_ARB:
-        printf("High");
+        std::cout << "\x1b[31mHigh\x1b[0m";
         break;
     case GL_DEBUG_SEVERITY_MEDIUM_ARB:
-        printf("Medium");
+        std::cout << "\x1b[33mMedium\x1b[0m";
         break;
     case GL_DEBUG_SEVERITY_LOW_ARB:
-        printf("Low");
+        std::cout << "\x1b[35mLow\x1b[0m";
         break;
     // // below doesnt work
     // case GL_DEBUG_SEVERITY_NOTIFICATION_ARB:
-    //     printf("Notification");
+    //     std::cout << "Notification";
     //     break;
     }
 
-    printf("\n\n");
+    std::cout << " Type: ";
+
+    switch (type)
+    {
+    case GL_DEBUG_TYPE_ERROR_ARB:
+        std::cout << "\x1b[31mError\x1b[0m";
+        break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
+        std::cout << "Deprecated Behavior";
+        break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
+        std::cout << "Undefined Behavior";
+        break;
+    case GL_DEBUG_TYPE_PORTABILITY_ARB:
+        std::cout << "Portability";
+        break;
+    case GL_DEBUG_TYPE_PERFORMANCE_ARB:
+        std::cout << "Performance";
+        break;
+    // // below dont work
+    // case GL_DEBUG_TYPE_MARKER:
+    //     std::cout << "Marker";
+    //     break;
+    // case GL_DEBUG_TYPE_PUSH_GROUP:
+    //     std::cout << "Push Group";
+    //     break;
+    // case GL_DEBUG_TYPE_POP_GROUP:
+    //     std::cout << "Pop Group";
+    //     break;
+    // case GL_DEBUG_TYPE_OTHER:
+    //     std::cout << "Other";
+    //     break;
+    }
+
+    std::cout << " /\n > Source:  \x1b[34m";
+
+    switch (source)
+    {
+    case GL_DEBUG_SOURCE_API_ARB:
+        std::cout << "API";
+        break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
+        std::cout << "Window System";
+        break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
+        std::cout << "Shader Compiler";
+        break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
+        std::cout << "Third Party";
+        break;
+    case GL_DEBUG_SOURCE_APPLICATION_ARB:
+        std::cout << "Application";
+        break;
+    case GL_DEBUG_SOURCE_OTHER_ARB:
+        std::cout << "Other";
+        break;
+    }
+
+    std::cout << "\x1b[0m\n > Message: " << message;
+
+    std::cout << "\n\n";
 }
 
 static void window_size_callback(GLFWwindow *window, int width, int height) {
@@ -202,7 +198,7 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
   if (GLAD_GL_ARB_debug_output) {
-    Logger::info("MAIN") << "OpenGL debugging enabled\n";
+    Logger<>::info("MAIN") << "OpenGL debugging enabled\n";
     glDebugMessageCallbackARB(gl_debug, NULL);
   }
   //
