@@ -182,6 +182,8 @@ int main() {
   pfd::settings::verbose(true);
 
   RR::init();
+
+  WorkerPool<2> wp("");
   // imgui_boilerplate();
   GLFWwindow *window = RR::createWindow(640, 480, "Reaktory", 3, 2); // #version 320
   if (!window) {
