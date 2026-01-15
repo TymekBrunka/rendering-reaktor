@@ -1,14 +1,32 @@
 #include "EditorActionsPanel.hpp"
 
 #include "MeshManager.hpp"
-namespace EditorActionsPanel {
+#include "WorkerThreads.hpp"
+#include "portable-file-dialogs.h"
 
 void empty() {};
+void empty2(worker_status status) {
+  std::cout << "hello mf\n";
+};
+
+void test() {
+  pfd::open_file f = pfd::open_file("Wybierz plik z modelem 3D", pfd::path::home(),
+                          { "Modele 3D (.obj)", "*.obj",
+                            "Wszystkie pliki", "*" },
+                          pfd::opt::none);
+}
+
+void test2() {
+  workers->execute(test, empty2);
+}
+
+namespace EditorActionsPanel {
+
 
 // clang-format off
 actionEntry entries[] = {
     {"dodaj", ImVec2(0, 1.0), ImVec2(0.25, 0.75), MeshManager::load_from_file},
-    {"usun", ImVec2(0.25, 1.0), ImVec2(0.5, 0.75), empty},
+    {"usun", ImVec2(0.25, 1.0), ImVec2(0.5, 0.75), test2},
     {"model", ImVec2(0.25, 0.75), ImVec2(0.5, 0.5), empty},
     {"zdjecie", ImVec2(0.5, 0.75), ImVec2(0.75, 0.5), empty},
     {"zaladuj", ImVec2(0.75, 0.75), ImVec2(1.0, 0.5), empty},

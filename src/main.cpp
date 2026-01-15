@@ -183,7 +183,9 @@ int main() {
 
   RR::init();
 
-  WorkerPool<2> wp("");
+  WorkerPool<5> workers_pool("");
+  workers = &workers_pool;
+
   // imgui_boilerplate();
   GLFWwindow *window = RR::createWindow(640, 480, "Reaktory", 3, 2); // #version 320
   if (!window) {
@@ -315,13 +317,15 @@ int main() {
     float currentFrame, lastFrame, deltaTime;
     skybox_vb.bind();
     skybox_ib.bind();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glfwGetFramebufferSize(window, &Gwidth, &Gheight);
     // const float ratio = width / (float) height;
     glViewport(0, 0, Gwidth, Gheight);
     int cols;
+
     while (!glfwWindowShouldClose(window)) {
+      workers->handle();
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
       currentFrame = static_cast<float>(glfwGetTime());
       deltaTime = currentFrame - lastFrame;
       lastFrame = currentFrame;

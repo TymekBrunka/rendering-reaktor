@@ -1,3 +1,4 @@
+#pragma once
 #include <format>
 #include <glad/glad.h>
 #include <iostream>

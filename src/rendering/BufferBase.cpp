@@ -1,5 +1,4 @@
 #include "BufferBase.hpp"
-#include <iostream>
 
 namespace RR {
 

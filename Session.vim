@@ -13,34 +13,36 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +27 src/EditorClasses/MeshManager.hpp
+badd +4 src/EditorClasses/MeshManager.hpp
 badd +225 build/vcpkg_installed/x64-linux/include/nfd.h
-badd +8 ~/Documents/kody/rendering-reaktor/src/EditorClasses/MeshManager.cpp
-badd +4 ~/Documents/kody/rendering-reaktor/src/EditorClasses/EditorActionsPanel.hpp
-badd +1 ~/Documents/kody/rendering-reaktor/src/EditorClasses/EditorActionsPanel.cpp
-badd +31 src/main.cpp
-badd +4 ~/Documents/kody/rendering-reaktor/vcpkg.json
-badd +28 ~/Documents/kody/rendering-reaktor/CMakeLists.txt
-badd +1 ~/Documents/kody/rendering-reaktor/build/vcpkg_installed/x64-linux/share/portable-file-dialogs/copyright
-badd +1 ~/Documents/kody/rendering-reaktor/build/vcpkg_installed/x64-linux/share/portable-file-dialogs/vcpkg_abi_info.txt
-badd +1 ~/Documents/kody/rendering-reaktor/src/tinyobjloader/tiny_obj_loader.cc
-badd +1 ~/Documents/kody/rendering-reaktor/src/tinyobjloader/tiny_obj_loader.h
-badd +373 ~/Documents/kody/rendering-reaktor/src/pfd/portable-file-dialogs.h
-badd +26 ~/Documents/kody/rendering-reaktor/src/rendering/BufferBase.cpp
-badd +1 ~/Documents/kody/rendering-reaktor/src/pfd/pfd.cpp
-badd +1930 ~/Documents/kody/rendering-reaktor/src/rendering/glad/include/glad/glad.h
+badd +26 src/EditorClasses/MeshManager.cpp
+badd +4 src/EditorClasses/EditorActionsPanel.hpp
+badd +10 src/EditorClasses/EditorActionsPanel.cpp
+badd +348 src/main.cpp
+badd +4 vcpkg.json
+badd +28 CMakeLists.txt
+badd +1 build/vcpkg_installed/x64-linux/share/portable-file-dialogs/copyright
+badd +1 build/vcpkg_installed/x64-linux/share/portable-file-dialogs/vcpkg_abi_info.txt
+badd +1 src/tinyobjloader/tiny_obj_loader.cc
+badd +1 src/tinyobjloader/tiny_obj_loader.h
+badd +373 src/pfd/portable-file-dialogs.h
+badd +2 src/rendering/BufferBase.cpp
+badd +1 src/pfd/pfd.cpp
+badd +1930 src/rendering/glad/include/glad/glad.h
 badd +65 /usr/include/c++/15.2.1/iostream
 badd +145 /usr/include/c++/15.2.1/iosfwd
 badd +92 /usr/include/c++/15.2.1/bits/ostream.h
-badd +18 ~/Documents/kody/rendering-reaktor/src/rendering/CMakeLists.txt
-badd +1 ~/Documents/kody/rendering-reaktor/src/utils/Logger.hpp
-badd +10 ~/Documents/kody/rendering-reaktor/src/EditorClasses/WorkerThreads.hpp
-badd +0 ~/Documents/kody/rendering-reaktor/Session.vim
+badd +18 src/rendering/CMakeLists.txt
+badd +25 src/utils/Logger.hpp
+badd +128 src/EditorClasses/WorkerThreads.hpp
+badd +75 Session.vim
+badd +1 src/rendering/BufferBase.hpp
+badd +98 /usr/include/c++/15.2.1/condition_variable
 argglobal
 %argdel
-edit ~/Documents/kody/rendering-reaktor/Session.vim
+edit src/EditorClasses/EditorActionsPanel.cpp
 argglobal
-balt ~/Documents/kody/rendering-reaktor/src/EditorClasses/WorkerThreads.hpp
+balt src/EditorClasses/WorkerThreads.hpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -48,15 +50,15 @@ setlocal foldignore=#
 setlocal foldlevel=0
 setlocal foldminlines=1
 setlocal foldnestmax=20
-setlocal foldenable
+setlocal nofoldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 26) / 52)
+let s:l = 95 - ((51 * winheight(0) + 26) / 52)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 1
-normal! 0
+keepjumps 95
+normal! 027|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
