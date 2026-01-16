@@ -1,5 +1,6 @@
 #pragma once
 #include "VertexBuffer.hpp"
+#include "WorkerThreads.hpp"
 #include "generators.h"
 #include <iostream>
 #include <vector>
@@ -21,9 +22,13 @@ struct Instance_data {
   glm::mat4 transform;
 };
 
+struct AwaitingMesh {
+};
+
 inline std::vector<RR::VertexBuffer<Mesh_vertex>> meshes;
 inline std::vector<Instance_data> instance_data;
 
-void load_from_file();
+void load_from_file(std::string filepath);
+void render_thread_post_work(worker_status status);
 
 } // namespace MeshManager

@@ -3,7 +3,7 @@
 #include "utils/Logger.hpp"
 #include "WorkerThreads.hpp"
 
-#include "portable-file-dialogs.h"
+// #include "portable-file-dialogs.h"
 #include "rendering/imgui/imgui.h"
 #include "rr.hpp"
 #include <glad/glad.h>
@@ -348,11 +348,14 @@ int main() {
       // ImGui::SetNextWindowPos(ImVec2(0, 0));
       // ImGui::SetNextWindowSize(ImVec2(200, Gheight));
 
+      int old_size = ImGui::GetFont()->Scale;
+      ImGui::GetFont()->Scale *= 0.9;
       ImGui::Begin("Panel", NULL);
       {
         EditorActionsPanel::UI(icon, icons);
         ImGui::End();
       }
+      ImGui::GetFont()->Scale = old_size;
 
       // ImGui::End();
       imrender();

@@ -17,8 +17,9 @@ bytepack(skybox_fragment_text src/shaders/skybox.frag.glsl skybox.frag.glsl)
 add_library(tinyobjloader OBJECT src/tinyobjloader/tiny_obj_loader.cc)
 target_include_directories(tinyobjloader PUBLIC src/tinyobjloader/)
 
-add_library(pfd src/pfd/pfd.cpp)
-target_include_directories(pfd PUBLIC src/pfd/)
+add_library(pfd STATIC src/pfd/pfd.cpp)
+# target_include_directories(pfd PUBLIC src/pfd/)
+target_precompile_headers(pfd PUBLIC src/pfd/portable-file-dialogs.h)
 
 add_executable(main
   src/main.cpp
@@ -33,7 +34,6 @@ target_link_libraries(main PUBLIC
   rr
   glm::glm-header-only
   tinyobjloader
-  pfd
 
 #prebuilt assets
   cubemap2Img
@@ -41,5 +41,8 @@ target_link_libraries(main PUBLIC
   iconsImg
   skybox_vertex_text
   skybox_fragment_text
+  INTERFACE
+  pfd
 )
+target_precompile_headers(main REUSE_FROM pfd)
 target_link_libraries(main PUBLIC imgui imguizmo::imguizmo)
