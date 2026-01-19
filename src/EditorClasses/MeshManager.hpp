@@ -4,9 +4,12 @@
 #include "generators.h"
 #include <iostream>
 #include <vector>
+#include <mutex>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "tiny_obj_loader.h"
 
 namespace MeshManager {
 
@@ -23,12 +26,17 @@ struct Instance_data {
 };
 
 struct AwaitingMesh {
+  std::vector<Mesh_vertex> vertex_data;
 };
+
+inline std::vector<AwaitingMesh*> awaiting_meshes;
+inline std::condition_variable cv;
+inline std::mutex awaiting_meshes_mutex;
 
 inline std::vector<RR::VertexBuffer<Mesh_vertex>> meshes;
 inline std::vector<Instance_data> instance_data;
 
-void load_from_file(std::string filepath);
+AwaitingMesh* load_from_file(std::string filepath);
 void render_thread_post_work(worker_status status);
 
 } // namespace MeshManager

@@ -315,7 +315,7 @@ int main() {
     const GLint rotatm4 = glGetUniformLocation(program.id, "rotat");
 
     float currentFrame, lastFrame, deltaTime;
-    skybox_vb.bind();
+    // skybox_vb.bind();
     skybox_ib.bind();
 
     glfwGetFramebufferSize(window, &Gwidth, &Gheight);
@@ -325,6 +325,7 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
       workers->handle();
+      skybox_vb.bind();
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
       currentFrame = static_cast<float>(glfwGetTime());
       deltaTime = currentFrame - lastFrame;

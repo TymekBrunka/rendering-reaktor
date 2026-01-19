@@ -13,16 +13,28 @@ void empty2(worker_status status) { std::cout << "hello mf\n"; };
 
 void load_from_file() {
   pfd::open_file f = pfd::open_file("Wybierz plik z modelem 3D", pfd::path::home(), {"Modele 3D (.obj)", "*.obj", "Wszystkie pliki", "*"}, pfd::opt::multiselect);
-  for (auto const &name : f.result())
-    MeshManager::load_from_file(name);
+  std::vector<MeshManager::AwaitingMesh *> am_s;
+  for (auto const &name : f.result()) {
+    MeshManager::AwaitingMesh *am = MeshManager::load_from_file(name);
+    if (am != nullptr) {
+      am_s.push_back(am);
+    }
+  }
+  {
+    std::lock_guard lg(MeshManager::awaiting_meshes_mutex);
+    for (auto &am_ : am_s) {
+      MeshManager::awaiting_meshes.push_back(am_);
+    }
+    std::cout << "broke free\n";
+  }
 }
 
 void load_from_file_threaded() { workers->execute(load_from_file, MeshManager::render_thread_post_work); }
 
 // clang-format off
 actionEntry entries[] = {
-    {"dodaj", ImVec2(0, 1.0), ImVec2(0.25, 0.75), empty},
-    {"usun", ImVec2(0.25, 1.0), ImVec2(0.5, 0.75), empty},
+    // {"dodaj", ImVec2(0, 1.0), ImVec2(0.25, 0.75), empty},
+    // {"usun", ImVec2(0.25, 1.0), ImVec2(0.5, 0.75), empty},
     {"model", ImVec2(0.25, 0.75), ImVec2(0.5, 0.5), load_from_file_threaded},
     {"zdjecie", ImVec2(0.5, 0.75), ImVec2(0.75, 0.5), empty},
     {"zaladuj", ImVec2(0.75, 0.75), ImVec2(1.0, 0.5), empty},
