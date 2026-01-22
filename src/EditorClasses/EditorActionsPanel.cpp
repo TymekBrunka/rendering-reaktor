@@ -9,27 +9,9 @@
 namespace EditorActionsPanel {
 
 void empty() {};
-void empty2(worker_status status) { std::cout << "hello mf\n"; };
+void empty2(worker_status status) {};
 
-void load_from_file() {
-  pfd::open_file f = pfd::open_file("Wybierz plik z modelem 3D", pfd::path::home(), {"Modele 3D (.obj)", "*.obj", "Wszystkie pliki", "*"}, pfd::opt::multiselect);
-  std::vector<MeshManager::AwaitingMesh *> am_s;
-  for (auto const &name : f.result()) {
-    MeshManager::AwaitingMesh *am = MeshManager::load_from_file(name);
-    if (am != nullptr) {
-      am_s.push_back(am);
-    }
-  }
-  {
-    std::lock_guard lg(MeshManager::awaiting_meshes_mutex);
-    for (auto &am_ : am_s) {
-      MeshManager::awaiting_meshes.push_back(am_);
-    }
-    std::cout << "broke free\n";
-  }
-}
-
-void load_from_file_threaded() { workers->execute(load_from_file, MeshManager::render_thread_post_work); }
+void load_from_file_threaded() { workers->execute(MeshManager::openDialogAndLoad, MeshManager::render_thread_post_work); }
 
 // clang-format off
 actionEntry entries[] = {

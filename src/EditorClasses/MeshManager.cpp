@@ -1,12 +1,63 @@
 #include "MeshManager.hpp"
+#include "Program.hpp"
+#include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
 #include "utils/Logger.hpp"
+#include <cstddef>
+#include <iostream>
+#include <ostream>
 
 namespace MeshManager {
+
+template<typename T>
+void printvec(std::vector<T>& vec) {
+  std::cout << "Vector contents: \n";
+  for (auto& i : vec) {
+    std::cout << i << "\n";
+  }
+  std::cout << "\n";
+}
+
+std::ostream& operator<<(std::ostream& stream, Mesh_vertex vertex) {
+  stream << "pos: " << vertex.pos[0] << " , " << vertex.pos[1] << " , " << vertex.pos[2] << "\n";
+  stream << "uv: " << vertex.uv[0] << " , " << vertex.uv[1] << "\n";
+  stream << "normal: " << vertex.normal[0] << " , " << vertex.normal[1] << " , " << vertex.normal[2] << "\n";
+  return stream;
+}
+
+void vertexArraySetup(RR::Program &program) {
+  // clang-format off
+  vertex_array = RR::VertexArray("");
+  vertex_array.setStructure(program, sizeof(Mesh_vertex), {
+    {"pos", RR::AttribKind::VEC3, GL_FALSE, offsetof(Mesh_vertex, pos)},
+    {"uv", RR::AttribKind::VEC2, GL_TRUE, offsetof(Mesh_vertex, uv)},
+    {"normal", RR::AttribKind::VEC3, GL_TRUE, offsetof(Mesh_vertex, normal)},
+  });
+  // clang-format on
+}
+
+void openDialogAndLoad() {
+  pfd::open_file f = pfd::open_file("Wybierz plik z modelem 3D", pfd::path::home(), {"Modele 3D (.obj)", "*.obj", "Wszystkie pliki", "*"}, pfd::opt::multiselect);
+  std::vector<MeshManager::AwaitingMesh *> am_s;
+  for (auto const &name : f.result()) {
+    MeshManager::AwaitingMesh *am = MeshManager::load_from_file(name);
+    if (am != nullptr) {
+      am_s.push_back(am);
+    }
+  }
+  {
+    std::lock_guard lg(MeshManager::awaiting_meshes_mutex);
+    for (auto &am_ : am_s) {
+      MeshManager::awaiting_meshes.push_back(am_);
+    }
+    std::cout << "broke free\n";
+  }
+}
 
 AwaitingMesh *load_from_file(std::string filepath) {
   tinyobj::ObjReaderConfig reader_config;
   // reader_config.mtl_search_path = "./"; // Path to material files
+  reader_config.triangulate = true;
   tinyobj::ObjReader reader;
 
   if (!reader.ParseFromFile(filepath, reader_config)) {
@@ -71,6 +122,7 @@ AwaitingMesh *load_from_file(std::string filepath) {
     }
   }
 
+  printvec(am->vertex_data);
   return am;
 }
 
@@ -80,8 +132,10 @@ void render_thread_post_work(worker_status status) {
   for (auto &am : awaiting_meshes) {
     RR::VertexBuffer<Mesh_vertex> mesh(am->vertex_data.data(), am->vertex_data.size(), GL_STATIC_DRAW);
     meshes.push_back(std::move(mesh));
+    printvec(am->vertex_data);
     delete am;
   }
+  awaiting_meshes.clear();
 }
 
 } // namespace MeshManager

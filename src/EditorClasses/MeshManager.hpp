@@ -1,7 +1,7 @@
 #pragma once
+#include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
 #include "WorkerThreads.hpp"
-#include "generators.h"
 #include <iostream>
 #include <vector>
 #include <mutex>
@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "glMathTypes.hpp"
 #include "tiny_obj_loader.h"
 
 namespace MeshManager {
@@ -18,6 +19,8 @@ struct Mesh_vertex {
   RR::vec2 uv;
   RR::vec3 normal;
 };
+
+static inline RR::VertexArray vertex_array;
 
 struct Instance_data {
   int id;
@@ -38,5 +41,8 @@ inline std::vector<Instance_data> instance_data;
 
 AwaitingMesh* load_from_file(std::string filepath);
 void render_thread_post_work(worker_status status);
+void openDialogAndLoad();
+
+void vertexArraySetup(RR::Program& program);
 
 } // namespace MeshManager

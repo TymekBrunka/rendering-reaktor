@@ -1,5 +1,8 @@
 #include "Camera.hpp"
 #include "EditorActionsPanel.hpp"
+#include "MeshManager.hpp"
+#include "VertexArray.hpp"
+#include "pfd/portable-file-dialogs.h"
 #include "utils/Logger.hpp"
 #include "WorkerThreads.hpp"
 
@@ -200,7 +203,7 @@ int main() {
 
   glfwMakeContextCurrent(window); // context must be set first
   gladLoadGL();                   // only then we can load
-  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+  // glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
   if (GLAD_GL_ARB_debug_output) {
     Logger<>::info("MAIN") << "OpenGL debugging enabled\n";
@@ -296,27 +299,28 @@ int main() {
     };
 
     GLuint skybox_indecies[] = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23};
-
-    GLuint skybox_va = RR::createVertexArray();
-    glBindVertexArray(skybox_va);
+    glUseProgram(program.id);
+    RR::VertexArray skybox_va = RR::VertexArray("");
 
     iminit(window, true);
 
     RR::VertexBuffer<skybox_vert> skybox_vb(skybox_verticies, sizeof(skybox_verticies) / sizeof(skybox_vert), GL_STATIC_DRAW);
     RR::IndexBuffer skybox_ib(skybox_indecies, sizeof(skybox_indecies) / sizeof(GLuint), GL_STATIC_DRAW);
 
-    RR_AUTOATTRIB(skybox_vert, pos, GL_TRUE);
-    RR_AUTOATTRIB(skybox_vert, uv, GL_TRUE);
+    skybox_va.setStructure(program, sizeof(skybox_vert), {
+      {"pos", RR::AttribKind::VEC3, GL_TRUE, offsetof(skybox_vert, pos)},
+      {"uv", RR::AttribKind::VEC2, GL_TRUE, offsetof(skybox_vert, uv)},
+    });
 
     // Camera
     camera.update_projection(800, 600, 120);
     camera.computeMatricies();
 
+    MeshManager::vertexArraySetup(program);
+
     const GLint rotatm4 = glGetUniformLocation(program.id, "rotat");
 
     float currentFrame, lastFrame, deltaTime;
-    // skybox_vb.bind();
-    skybox_ib.bind();
 
     glfwGetFramebufferSize(window, &Gwidth, &Gheight);
     // const float ratio = width / (float) height;
@@ -325,7 +329,6 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
       workers->handle();
-      skybox_vb.bind();
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
       currentFrame = static_cast<float>(glfwGetTime());
       deltaTime = currentFrame - lastFrame;
@@ -338,13 +341,22 @@ int main() {
 
       glUseProgram(program.id);
       // texture.bindToSlot(0);
-      glBindVertexArray(skybox_va);
 
       glm::mat4 mat = camera.read().camera_skybox;
       glUniformMatrix4fv(rotatm4, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(mat));
 
+      skybox_va.bind();
+      skybox_vb.bind();
       // glDrawArrays(GL_TRIANGLES, 0, 6);
       glDrawElements(GL_TRIANGLES, sizeof(skybox_indecies) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+
+      MeshManager::vertex_array.bind();
+      glDisable(GL_CULL_FACE);
+      for (auto& i : MeshManager::meshes) {
+        i.bind();
+        glDrawArrays(GL_TRIANGLES, 0, i.length);
+      }
+      glEnable(GL_CULL_FACE);
 
       // ImGui::SetNextWindowPos(ImVec2(0, 0));
       // ImGui::SetNextWindowSize(ImVec2(200, Gheight));

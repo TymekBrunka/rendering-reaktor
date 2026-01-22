@@ -1,6 +1,7 @@
 #ifndef _RR_DENINED_GENERATORS
 #define _RR_DENINED_GENERATORS
 
+#include <iostream>
 #include <glad/glad.h>
 #include "glMathTypes.hpp"
 #include "Program.hpp"
@@ -43,6 +44,7 @@ namespace RR {
     template<typename T/*, typename F*/>
     inline void f__RR_AUTOATTRIB(Program& program, /*F T::* T Field,*/ GLboolean normalized, GLint& Location, const char* locname, const void* offset, GLsizei stride) {
         Location = glGetAttribLocation(program.id, locname);
+        std::cout << "location of " << locname << " is " << Location << "\n";
         glEnableVertexAttribArray(Location);
         glVertexAttribPointer(
             Location,

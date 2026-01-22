@@ -10,8 +10,6 @@
 #include "FrameBuffer.hpp"
 #include "Texture2d.hpp"
 
-#include "generators.h"
-
 namespace RR {
 
     void error_callback(int error, const char* description);

@@ -19,6 +19,7 @@ add_library(rr STATIC rr.cpp
 	FrameBuffer.cpp
 	Texture2d.cpp
 	IndexBuffer.cpp
+  VertexArray.cpp
 )
 
 add_subdirectory(imgui)
