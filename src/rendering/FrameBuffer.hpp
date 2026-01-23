@@ -4,7 +4,7 @@
 #include <vector>
 
 namespace RR {
-	class FrameBuffer : BufferBase {
+	class FrameBuffer : public BufferBase {
 	public:
 		std::vector<Texture2d> textures;
 		GLuint depth_texture;

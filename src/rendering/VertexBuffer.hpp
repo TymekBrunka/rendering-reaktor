@@ -5,7 +5,7 @@
 
 namespace RR {
 
-template <typename T> class VertexBuffer : BufferBase {
+template <typename T> class VertexBuffer : public BufferBase {
 public:
   GLsizeiptr length;
 

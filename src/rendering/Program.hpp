@@ -1,10 +1,12 @@
 #pragma once
 #include <glad/glad.h>
+#include <limits>
 #include "Shader.hpp"
 
 namespace RR {
 	class Program {
 	public:
+    static constexpr GLuint INVALID_ID = std::numeric_limits<GLuint>::max();
 		GLuint id = -1;
 
 		Program();

@@ -11,7 +11,7 @@ namespace RR {
 	}
 
 	Program::~Program() {
-        if (this->id != -1) glDeleteProgram(this->id);
+        if (this->id != Program::INVALID_ID) glDeleteProgram(this->id);
 	}
 
 	Program& Program::attachShader(RR::Shader& shader) {
@@ -40,13 +40,13 @@ namespace RR {
 
 	Program::Program(Program&& other) noexcept {
 		this->id = other.id;
-		other.id = -1;
+		other.id = Program::INVALID_ID;
 	}
 
 	Program& Program::operator=(Program&& other) noexcept {
 		if (this != &other) {
 			this->id = other.id;
-			other.id = -1;
+			other.id = Program::INVALID_ID;
 		}
 		return *this;
 	}

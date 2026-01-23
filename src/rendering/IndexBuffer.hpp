@@ -3,7 +3,7 @@
 
 namespace RR {
 
-class IndexBuffer : BufferBase {
+class IndexBuffer : public BufferBase {
 public:
   GLsizeiptr length;
 

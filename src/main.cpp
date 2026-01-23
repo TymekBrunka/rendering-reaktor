@@ -353,8 +353,9 @@ int main() {
       MeshManager::vertex_array.bind();
       glDisable(GL_CULL_FACE);
       for (auto& i : MeshManager::meshes) {
-        i.bind();
-        glDrawArrays(GL_TRIANGLES, 0, i.length);
+        i.vb.bind();
+        i.ib.bind();
+        glDrawElements(GL_TRIANGLES, i.ib.length, GL_UNSIGNED_INT, 0);
       }
       glEnable(GL_CULL_FACE);
 

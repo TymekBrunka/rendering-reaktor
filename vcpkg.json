@@ -3,6 +3,7 @@
         "glfw3",
         "xlsxio",
         "imguizmo",
-        "glm"
+        "glm",
+        "assimp"
     ]
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "IndexBuffer.hpp"
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
 #include "WorkerThreads.hpp"
@@ -10,7 +11,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "glMathTypes.hpp"
-#include "tiny_obj_loader.h"
 
 namespace MeshManager {
 
@@ -30,13 +30,19 @@ struct Instance_data {
 
 struct AwaitingMesh {
   std::vector<Mesh_vertex> vertex_data;
+  std::vector<GLuint> indices;
+};
+
+struct Mesh {
+  RR::VertexBuffer<Mesh_vertex> vb;
+  RR::IndexBuffer ib;
 };
 
 inline std::vector<AwaitingMesh*> awaiting_meshes;
 inline std::condition_variable cv;
 inline std::mutex awaiting_meshes_mutex;
 
-inline std::vector<RR::VertexBuffer<Mesh_vertex>> meshes;
+inline std::vector<Mesh> meshes;
 inline std::vector<Instance_data> instance_data;
 
 AwaitingMesh* load_from_file(std::string filepath);
