@@ -36,7 +36,7 @@ std::ostream &operator<<(std::ostream &stream, Mesh& mesh) {
 
 void vertexArraySetup(RR::Program &program) {
   // clang-format off
-  vertex_array = RR::VertexArray("");
+  // vertex_array = RR::VertexArray("");
   vertex_array.setStructure(program, sizeof(Mesh_vertex), {
     {"pos", RR::AttribKind::VEC3, GL_FALSE, offsetof(Mesh_vertex, pos)},
     {"uv", RR::AttribKind::VEC2, GL_TRUE, offsetof(Mesh_vertex, uv)},
@@ -172,7 +172,7 @@ void processMesh(aiMesh *mesh, AwaitingMesh *am) {
 
 void processNode(aiNode *node, const aiScene *scene, AwaitingMesh *am) {
   // process all the node's meshes (if any)
-  std::cout << "ive been called\n";
+  // std::cout << "ive been called\n";
   for (unsigned int i = 0; i < node->mNumMeshes; i++) {
     aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
     processMesh(mesh, am);
@@ -197,7 +197,7 @@ AwaitingMesh *load_from_file(std::string filepath) {
   AwaitingMesh *am = new AwaitingMesh{};
   processNode(scene->mRootNode, scene, am);
   // printvec(am->vertex_data);
-  std::cout << "done\n";
+  // std::cout << "done\n";
   return am;
 }
 
@@ -207,10 +207,11 @@ void render_thread_post_work(worker_status status) {
   for (auto &am : awaiting_meshes) {
     RR::VertexBuffer<Mesh_vertex> mesh(am->vertex_data.data(), am->vertex_data.size(), GL_STATIC_DRAW);
     RR::IndexBuffer mesh_i(am->indices.data(), am->indices.size(), GL_STATIC_DRAW);
-    std::cout << "ids: " << mesh.id << " , " << mesh_i.id << "\n";
-    std::cout << "meshes: " << meshes.size() << "\n";
+    // std::cout << "ids: " << mesh.id << " , " << mesh_i.id << std::endl;
+    // std::cout << "meshes: " << meshes.size() << std::endl;
     meshes.push_back({std::move(mesh), std::move(mesh_i)});
-    // printvec(meshes);
+    // std::cout << "pushed ids: " << meshes[0].vb.id << " , " << meshes[0].ib.id << std::endl;
+    // printvec(am->vertex_data);
     delete am;
   }
   awaiting_meshes.clear();

@@ -2,6 +2,7 @@
 #include "BufferBase.hpp"
 
 #include "impl_buffer_move.hpp"
+#include <iostream>
 
 namespace RR {
 

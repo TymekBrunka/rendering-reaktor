@@ -25,7 +25,7 @@ void VertexArray::setStructure(Program &program, int struct_size, std::initializ
   int index = 0;
   for (auto &attrib : attribs) {
     glBindAttribLocation(program.id, index, attrib.name);
-    std::cout << attrib.name << " is " << index << "\n";
+    // std::cout << attrib.name << " is " << index << "\n";
     glEnableVertexAttribArray(index);
     // clang-format off
     glVertexAttribPointer(index,

@@ -23,8 +23,8 @@ public:
 
 	Camera(glm::vec3 position, glm::vec2 orientation);
 	void update_projection(int width, int height, float fov);
-	void update_view(glm::vec3 position, glm::vec2 orientation);
-	void move_and_set_orientation(float input[], float deltatime, glm::vec2 orientation);
+	void update_view(glm::vec2 orientation);
+	void move(float input[], float deltatime);
 	void computeMatricies();
 	const CameraPrivates& read();
 };

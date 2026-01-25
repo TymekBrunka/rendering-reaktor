@@ -2,13 +2,14 @@
 #include "EditorActionsPanel.hpp"
 #include "MeshManager.hpp"
 #include "VertexArray.hpp"
+#include "WorkerThreads.hpp"
 #include "pfd/portable-file-dialogs.h"
 #include "utils/Logger.hpp"
-#include "WorkerThreads.hpp"
 
 // #include "portable-file-dialogs.h"
 #include "rendering/imgui/imgui.h"
 #include "rr.hpp"
+#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
 #include "cubemap2.png.hpp"
@@ -37,9 +38,42 @@ Camera camera(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec2(0.0f, 0.0f));
 int Gwidth;
 int Gheight;
 
+float motion_input[] = {0, 0};
+
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
+  if (action == GLFW_PRESS) {
+    switch (key) {
+    case GLFW_KEY_W:
+      motion_input[1] += 1;
+      break;
+    case GLFW_KEY_S:
+      motion_input[1] -= 1;
+      break;
+    case GLFW_KEY_A:
+      motion_input[0] -= 1;
+      break;
+    case GLFW_KEY_D:
+      motion_input[0] += 1;
+      break;
+    }
+  } else if (action == GLFW_RELEASE) {
+    switch (key) {
+    case GLFW_KEY_W:
+      motion_input[1] -= 1;
+      break;
+    case GLFW_KEY_S:
+      motion_input[1] += 1;
+      break;
+    case GLFW_KEY_A:
+      motion_input[0] += 1;
+      break;
+    case GLFW_KEY_D:
+      motion_input[0] -= 1;
+      break;
+    }
+  }
 }
 
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
@@ -58,7 +92,7 @@ void mouse_callback(GLFWwindow *window, double x, double y) {
     // std::cout << x << ", " << y << "hai\n";
     camera.orientation -= glm::radians(temp - camera.last_mouse_pos) / 2.0f;
     camera.orientation = glm::vec2(glm::mod(camera.orientation.x, (2.0f * 3.14f)), glm::clamp(camera.orientation.y, (-0.5f * 3.14f) + 0.0001f, (0.5f * 3.14f) + 0.0001f));
-    camera.update_view(glm::vec3(0.0f), camera.orientation);
+    camera.update_view(camera.orientation);
     camera.computeMatricies();
   }
   camera.last_mouse_pos[0] = x;
@@ -66,51 +100,48 @@ void mouse_callback(GLFWwindow *window, double x, double y) {
 }
 
 void APIENTRY gl_debug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
-// Some debug messages are just annoying informational messages
-    switch (id)
-    {
-    case 131185: // glBufferData
-        return;
-    }
+  // Some debug messages are just annoying informational messages
+  switch (id) {
+  case 131185: // glBufferData
+    return;
+  }
 
-    Logger<>::error("OpenGL") << "\n / " << id << " Severity: ";
+  Logger<>::error("OpenGL") << "\n / " << id << " Severity: ";
 
-    switch (severity)
-    {
-    case GL_DEBUG_SEVERITY_HIGH_ARB:
-        std::cout << "\x1b[31mHigh\x1b[0m";
-        break;
-    case GL_DEBUG_SEVERITY_MEDIUM_ARB:
-        std::cout << "\x1b[33mMedium\x1b[0m";
-        break;
-    case GL_DEBUG_SEVERITY_LOW_ARB:
-        std::cout << "\x1b[35mLow\x1b[0m";
-        break;
+  switch (severity) {
+  case GL_DEBUG_SEVERITY_HIGH_ARB:
+    std::cout << "\x1b[31mHigh\x1b[0m";
+    break;
+  case GL_DEBUG_SEVERITY_MEDIUM_ARB:
+    std::cout << "\x1b[33mMedium\x1b[0m";
+    break;
+  case GL_DEBUG_SEVERITY_LOW_ARB:
+    std::cout << "\x1b[35mLow\x1b[0m";
+    break;
     // // below doesnt work
     // case GL_DEBUG_SEVERITY_NOTIFICATION_ARB:
     //     std::cout << "Notification";
     //     break;
-    }
+  }
 
-    std::cout << " Type: ";
+  std::cout << " Type: ";
 
-    switch (type)
-    {
-    case GL_DEBUG_TYPE_ERROR_ARB:
-        std::cout << "\x1b[31mError\x1b[0m";
-        break;
-    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
-        std::cout << "Deprecated Behavior";
-        break;
-    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
-        std::cout << "Undefined Behavior";
-        break;
-    case GL_DEBUG_TYPE_PORTABILITY_ARB:
-        std::cout << "Portability";
-        break;
-    case GL_DEBUG_TYPE_PERFORMANCE_ARB:
-        std::cout << "Performance";
-        break;
+  switch (type) {
+  case GL_DEBUG_TYPE_ERROR_ARB:
+    std::cout << "\x1b[31mError\x1b[0m";
+    break;
+  case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
+    std::cout << "Deprecated Behavior";
+    break;
+  case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
+    std::cout << "Undefined Behavior";
+    break;
+  case GL_DEBUG_TYPE_PORTABILITY_ARB:
+    std::cout << "Portability";
+    break;
+  case GL_DEBUG_TYPE_PERFORMANCE_ARB:
+    std::cout << "Performance";
+    break;
     // // below dont work
     // case GL_DEBUG_TYPE_MARKER:
     //     std::cout << "Marker";
@@ -124,35 +155,34 @@ void APIENTRY gl_debug(GLenum source, GLenum type, GLuint id, GLenum severity, G
     // case GL_DEBUG_TYPE_OTHER:
     //     std::cout << "Other";
     //     break;
-    }
+  }
 
-    std::cout << " /\n > Source:  \x1b[34m";
+  std::cout << " /\n > Source:  \x1b[34m";
 
-    switch (source)
-    {
-    case GL_DEBUG_SOURCE_API_ARB:
-        std::cout << "API";
-        break;
-    case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
-        std::cout << "Window System";
-        break;
-    case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
-        std::cout << "Shader Compiler";
-        break;
-    case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
-        std::cout << "Third Party";
-        break;
-    case GL_DEBUG_SOURCE_APPLICATION_ARB:
-        std::cout << "Application";
-        break;
-    case GL_DEBUG_SOURCE_OTHER_ARB:
-        std::cout << "Other";
-        break;
-    }
+  switch (source) {
+  case GL_DEBUG_SOURCE_API_ARB:
+    std::cout << "API";
+    break;
+  case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
+    std::cout << "Window System";
+    break;
+  case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
+    std::cout << "Shader Compiler";
+    break;
+  case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
+    std::cout << "Third Party";
+    break;
+  case GL_DEBUG_SOURCE_APPLICATION_ARB:
+    std::cout << "Application";
+    break;
+  case GL_DEBUG_SOURCE_OTHER_ARB:
+    std::cout << "Other";
+    break;
+  }
 
-    std::cout << "\x1b[0m\n > Message: " << message;
+  std::cout << "\x1b[0m\n > Message: " << message;
 
-    std::cout << "\n\n";
+  std::cout << "\n\n";
 }
 
 static void window_size_callback(GLFWwindow *window, int width, int height) {
@@ -300,6 +330,8 @@ int main() {
 
     GLuint skybox_indecies[] = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23};
     glUseProgram(program.id);
+
+    MeshManager::vertex_array = RR::VertexArray("");
     RR::VertexArray skybox_va = RR::VertexArray("");
 
     iminit(window, true);
@@ -307,18 +339,18 @@ int main() {
     RR::VertexBuffer<skybox_vert> skybox_vb(skybox_verticies, sizeof(skybox_verticies) / sizeof(skybox_vert), GL_STATIC_DRAW);
     RR::IndexBuffer skybox_ib(skybox_indecies, sizeof(skybox_indecies) / sizeof(GLuint), GL_STATIC_DRAW);
 
-    skybox_va.setStructure(program, sizeof(skybox_vert), {
-      {"pos", RR::AttribKind::VEC3, GL_TRUE, offsetof(skybox_vert, pos)},
-      {"uv", RR::AttribKind::VEC2, GL_TRUE, offsetof(skybox_vert, uv)},
-    });
+    skybox_va.setStructure(program, sizeof(skybox_vert),
+                           {
+                               {"pos", RR::AttribKind::VEC3, GL_TRUE, offsetof(skybox_vert, pos)},
+                               {"uv", RR::AttribKind::VEC2, GL_TRUE, offsetof(skybox_vert, uv)},
+                           });
 
     // Camera
     camera.update_projection(800, 600, 120);
     camera.computeMatricies();
 
-    MeshManager::vertexArraySetup(program);
-
-    const GLint rotatm4 = glGetUniformLocation(program.id, "rotat");
+    // const GLint skybox_camera = glGetUniformLocation(program.id, "skybox_camera");
+    const GLint world_camera = glGetUniformLocation(program.id, "world_camera");
 
     float currentFrame, lastFrame, deltaTime;
 
@@ -334,6 +366,11 @@ int main() {
       deltaTime = currentFrame - lastFrame;
       lastFrame = currentFrame;
 
+      if (*(double *)motion_input) {
+        camera.move(motion_input, deltaTime);
+        camera.computeMatricies();
+      }
+
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       imNewFrame();
@@ -342,19 +379,25 @@ int main() {
       glUseProgram(program.id);
       // texture.bindToSlot(0);
 
-      glm::mat4 mat = camera.read().camera_skybox;
-      glUniformMatrix4fv(rotatm4, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(mat));
+      // glm::mat4 mat = camera.read().camera_skybox;
+      // glUniformMatrix4fv(skybox_camera, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(camera.read().camera_skybox));
+      glUniformMatrix4fv(world_camera, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(camera.read().camera));
 
       skybox_va.bind();
       skybox_vb.bind();
+      skybox_ib.bind();
       // glDrawArrays(GL_TRIANGLES, 0, 6);
       glDrawElements(GL_TRIANGLES, sizeof(skybox_indecies) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
-      MeshManager::vertex_array.bind();
+      if (!MeshManager::meshes.empty()) {
+        MeshManager::vertex_array.bind();
+      }
       glDisable(GL_CULL_FACE);
-      for (auto& i : MeshManager::meshes) {
+      std::cout << "# of meshes loaded: " << MeshManager::meshes.size() << "\n";
+      for (auto &i : MeshManager::meshes) {
         i.vb.bind();
         i.ib.bind();
+        MeshManager::vertexArraySetup(program);
         glDrawElements(GL_TRIANGLES, i.ib.length, GL_UNSIGNED_INT, 0);
       }
       glEnable(GL_CULL_FACE);
