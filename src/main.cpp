@@ -1,13 +1,12 @@
+#include "main.hpp"
 #include "Camera.hpp"
 #include "EditorActionsPanel.hpp"
 #include "MeshManager.hpp"
-#include "VertexArray.hpp"
 #include "WorkerThreads.hpp"
 #include "pfd/portable-file-dialogs.h"
 #include "utils/Logger.hpp"
 
 // #include "portable-file-dialogs.h"
-#include "rendering/imgui/imgui.h"
 #include "rr.hpp"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -263,7 +262,7 @@ int main() {
     glDepthFunc(GL_LESS);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    RR::Program program("");
+    program = RR::Program("");
     RR::Shader skybox_vertex;
     RR::Shader skybox_fragment;
     try {
@@ -331,7 +330,7 @@ int main() {
     GLuint skybox_indecies[] = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23};
     glUseProgram(program.id);
 
-    MeshManager::vertex_array = RR::VertexArray("");
+    // MeshManager::vertex_array = RR::VertexArray("");
     RR::VertexArray skybox_va = RR::VertexArray("");
 
     iminit(window, true);
@@ -389,15 +388,16 @@ int main() {
       // glDrawArrays(GL_TRIANGLES, 0, 6);
       glDrawElements(GL_TRIANGLES, sizeof(skybox_indecies) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
-      if (!MeshManager::meshes.empty()) {
-        MeshManager::vertex_array.bind();
-      }
+      // if (!MeshManager::meshes.empty()) {
+      //   MeshManager::vertex_array.bind();
+      // }
       glDisable(GL_CULL_FACE);
       std::cout << "# of meshes loaded: " << MeshManager::meshes.size() << "\n";
       for (auto &i : MeshManager::meshes) {
         i.vb.bind();
         i.ib.bind();
-        MeshManager::vertexArraySetup(program);
+        i.va.bind();
+        std::cout << "vb, ib, va: " << i.vb.id << "," << i.ib.id << "," << i.va.id << "\n";
         glDrawElements(GL_TRIANGLES, i.ib.length, GL_UNSIGNED_INT, 0);
       }
       glEnable(GL_CULL_FACE);

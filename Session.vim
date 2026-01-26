@@ -15,19 +15,19 @@ else
 endif
 badd +175 ~/Documents/kody/rendering-reaktor/src/EditorClasses/MeshManager.cpp
 badd +28 src/rendering/VertexArray.cpp
-badd +396 src/main.cpp
+badd +400 src/main.cpp
 badd +15 src/rendering/VertexArray.hpp
 badd +1 src/EditorClasses/MeshManager.hpp
 badd +13 ~/Documents/kody/rendering-reaktor/src/rendering/IndexBuffer.cpp
 badd +26 ~/Documents/kody/rendering-reaktor/src/EditorClasses/Camera.hpp
 badd +74 ~/Documents/kody/rendering-reaktor/src/EditorClasses/Camera.cpp
 badd +11 ~/Documents/kody/rendering-reaktor/src/shaders/skybox.vertex.glsl
-badd +30 ~/Documents/kody/rendering-reaktor/src/rendering/CMakeLists.txt
+badd +37 ~/Documents/kody/rendering-reaktor/src/rendering/CMakeLists.txt
 argglobal
 %argdel
-edit ~/Documents/kody/rendering-reaktor/src/rendering/CMakeLists.txt
+edit src/main.cpp
 argglobal
-balt src/main.cpp
+balt ~/Documents/kody/rendering-reaktor/src/rendering/CMakeLists.txt
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -38,12 +38,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 30 - ((29 * winheight(0) + 26) / 52)
+let s:l = 400 - ((29 * winheight(0) + 26) / 52)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 30
-normal! 0
+keepjumps 400
+normal! 09|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

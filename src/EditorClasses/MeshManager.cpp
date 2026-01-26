@@ -12,6 +12,8 @@
 #include <assimp/scene.h>
 // #include "tiny_obj_loader.h"
 
+#include "main.hpp"
+
 namespace MeshManager {
 
 template <typename T> void printvec(std::vector<T> &vec) {
@@ -29,20 +31,9 @@ std::ostream &operator<<(std::ostream &stream, Mesh_vertex vertex) {
   return stream;
 }
 
-std::ostream &operator<<(std::ostream &stream, Mesh& mesh) {
+std::ostream &operator<<(std::ostream &stream, Mesh &mesh) {
   stream << "mesh (vb, ib): " << mesh.vb.id << " , " << mesh.ib.id << "\n";
   return stream;
-}
-
-void vertexArraySetup(RR::Program &program) {
-  // clang-format off
-  // vertex_array = RR::VertexArray("");
-  vertex_array.setStructure(program, sizeof(Mesh_vertex), {
-    {"pos", RR::AttribKind::VEC3, GL_FALSE, offsetof(Mesh_vertex, pos)},
-    {"uv", RR::AttribKind::VEC2, GL_TRUE, offsetof(Mesh_vertex, uv)},
-    {"normal", RR::AttribKind::VEC3, GL_TRUE, offsetof(Mesh_vertex, normal)},
-  });
-  // clang-format on
 }
 
 void openDialogAndLoad() {
@@ -207,9 +198,18 @@ void render_thread_post_work(worker_status status) {
   for (auto &am : awaiting_meshes) {
     RR::VertexBuffer<Mesh_vertex> mesh(am->vertex_data.data(), am->vertex_data.size(), GL_STATIC_DRAW);
     RR::IndexBuffer mesh_i(am->indices.data(), am->indices.size(), GL_STATIC_DRAW);
+    RR::VertexArray va("");
+    mesh.bind();
+    mesh_i.bind();
+    va.setStructure(program, sizeof(Mesh_vertex),
+                    {
+                        {"pos", RR::AttribKind::VEC3, GL_FALSE, offsetof(Mesh_vertex, pos)},
+                        {"uv", RR::AttribKind::VEC2, GL_TRUE, offsetof(Mesh_vertex, uv)},
+                        {"normal", RR::AttribKind::VEC3, GL_TRUE, offsetof(Mesh_vertex, normal)},
+                    });
     // std::cout << "ids: " << mesh.id << " , " << mesh_i.id << std::endl;
     // std::cout << "meshes: " << meshes.size() << std::endl;
-    meshes.push_back({std::move(mesh), std::move(mesh_i)});
+    meshes.push_back({std::move(va), std::move(mesh), std::move(mesh_i)});
     // std::cout << "pushed ids: " << meshes[0].vb.id << " , " << meshes[0].ib.id << std::endl;
     // printvec(am->vertex_data);
     delete am;

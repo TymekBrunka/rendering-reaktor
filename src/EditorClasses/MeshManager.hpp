@@ -20,7 +20,7 @@ struct Mesh_vertex {
   RR::vec3 normal;
 };
 
-static inline RR::VertexArray vertex_array;
+// static inline RR::VertexArray vertex_array;
 
 struct Instance_data {
   int id;
@@ -34,6 +34,7 @@ struct AwaitingMesh {
 };
 
 struct Mesh {
+  RR::VertexArray va;
   RR::VertexBuffer<Mesh_vertex> vb;
   RR::IndexBuffer ib;
 };
@@ -48,7 +49,5 @@ inline std::vector<Instance_data> instance_data;
 AwaitingMesh* load_from_file(std::string filepath);
 void render_thread_post_work(worker_status status);
 void openDialogAndLoad();
-
-void vertexArraySetup(RR::Program& program);
 
 } // namespace MeshManager
