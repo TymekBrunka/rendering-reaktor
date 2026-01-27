@@ -9,15 +9,9 @@ template <typename T> class VertexBuffer : public BufferBase {
 public:
   GLsizeiptr length;
 
-  VertexBuffer(const T data[], GLsizeiptr n, GLenum usage)
-  : BufferBase(GL_ARRAY_BUFFER, (const void **)data, n * sizeof(T), usage)
-  {
-    this->length = n;
-  }
+  VertexBuffer(const T data[], GLsizeiptr n, GLenum usage) : BufferBase(GL_ARRAY_BUFFER, (const void **)data, n * sizeof(T), usage) { this->length = n; }
 
-  VertexBuffer(VertexBuffer &&other) noexcept : BufferBase(std::move(other)) {
-    this->length = other.length;
-  }
+  VertexBuffer(VertexBuffer &&other) noexcept : BufferBase(std::move(other)) { this->length = other.length; }
 
   VertexBuffer &operator=(VertexBuffer &&other) noexcept {
     if (this != &other) {
@@ -27,7 +21,7 @@ public:
     }
   }
 
-  void bind() {}
+  void bind() { BufferBase::bind(GL_ARRAY_BUFFER); }
 };
 
 } // namespace RR

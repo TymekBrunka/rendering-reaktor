@@ -16,6 +16,8 @@
 #include "icons.png.hpp"
 #include "skybox.frag.glsl.hpp"
 #include "skybox.vertex.glsl.hpp"
+#include "model.frag.glsl.hpp"
+#include "model.vertex.glsl.hpp"
 
 #include "imgui.h"
 #include "imgui_boilerplate.hpp"
@@ -265,11 +267,20 @@ int main() {
     program = RR::Program("");
     RR::Shader skybox_vertex;
     RR::Shader skybox_fragment;
+
+    model_program = RR::Program("");
+    RR::Shader model_vertex;
+    RR::Shader model_fragment;
     try {
       skybox_vertex = RR::Shader(GL_VERTEX_SHADER, skybox_vertex_text);
       skybox_fragment = RR::Shader(GL_FRAGMENT_SHADER, skybox_fragment_text);
       program.attachShader(skybox_vertex).attachShader(skybox_fragment);
       program.link();
+
+      model_vertex = RR::Shader(GL_VERTEX_SHADER, model_vertex_text);
+      model_fragment = RR::Shader(GL_FRAGMENT_SHADER, model_fragment_text);
+      model_program.attachShader(model_vertex).attachShader(model_fragment);
+      model_program.link();
     } catch (std::string ex) {
       std::cout << ex << "\n";
       exit(1);
@@ -283,8 +294,15 @@ int main() {
     // RR::image_data img = RR::readImage("src/icons.png", 4);
     // stbi_image_free(img.data);
 
+    glUseProgram(model_program.id);
+
+    texture.bindToSlotAndName(model_program, 0, "skybox");
+    const GLint world_camera = glGetUniformLocation(model_program.id, "world_camera");
+
     glUseProgram(program.id);
+
     texture.bindToSlotAndName(program, 0, "skybox");
+    const GLint skybox_camera = glGetUniformLocation(program.id, "skybox_camera");
 
     icon.bindToSlot(4);
     icons.bindToSlot(3);
@@ -328,7 +346,6 @@ int main() {
     };
 
     GLuint skybox_indecies[] = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23};
-    glUseProgram(program.id);
 
     // MeshManager::vertex_array = RR::VertexArray("");
     RR::VertexArray skybox_va = RR::VertexArray("");
@@ -349,7 +366,7 @@ int main() {
     camera.computeMatricies();
 
     // const GLint skybox_camera = glGetUniformLocation(program.id, "skybox_camera");
-    const GLint world_camera = glGetUniformLocation(program.id, "world_camera");
+    // const GLint world_camera = glGetUniformLocation(program.id, "world_camera");
 
     float currentFrame, lastFrame, deltaTime;
 
@@ -376,11 +393,7 @@ int main() {
       setupDocking(Gwidth, Gheight);
 
       glUseProgram(program.id);
-      // texture.bindToSlot(0);
-
-      // glm::mat4 mat = camera.read().camera_skybox;
-      // glUniformMatrix4fv(skybox_camera, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(camera.read().camera_skybox));
-      glUniformMatrix4fv(world_camera, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(camera.read().camera));
+      glUniformMatrix4fv(skybox_camera, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(camera.read().camera_skybox));
 
       skybox_va.bind();
       skybox_vb.bind();
@@ -388,22 +401,23 @@ int main() {
       // glDrawArrays(GL_TRIANGLES, 0, 6);
       glDrawElements(GL_TRIANGLES, sizeof(skybox_indecies) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
-      // if (!MeshManager::meshes.empty()) {
-      //   MeshManager::vertex_array.bind();
-      // }
-      glDisable(GL_CULL_FACE);
-      std::cout << "# of meshes loaded: " << MeshManager::meshes.size() << "\n";
-      for (auto &i : MeshManager::meshes) {
-        i.vb.bind();
-        i.ib.bind();
-        i.va.bind();
-        std::cout << "vb, ib, va: " << i.vb.id << "," << i.ib.id << "," << i.va.id << "\n";
-        glDrawElements(GL_TRIANGLES, i.ib.length, GL_UNSIGNED_INT, 0);
-      }
-      glEnable(GL_CULL_FACE);
+      glClear(GL_DEPTH_BUFFER_BIT);
+      glUseProgram(model_program.id);
 
-      // ImGui::SetNextWindowPos(ImVec2(0, 0));
-      // ImGui::SetNextWindowSize(ImVec2(200, Gheight));
+      glUniformMatrix4fv(world_camera, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(camera.read().camera));
+
+      // std::cout << "# of meshes loaded: " << MeshManager::meshes.size() << "\n";
+      // for (auto &i : MeshManager::meshes) {
+      //   i.va.bind();
+      //   i.ib.bind();
+      //   glDrawElements(GL_TRIANGLES, i.ib.length, GL_UNSIGNED_INT, 0);
+      // }
+
+      for (auto& instance : MeshManager::instances) {
+        instance.mesh.va.bind();
+        instance.mesh.ib.bind();
+        glDrawElements(GL_TRIANGLES, instance.mesh.ib.length, GL_UNSIGNED_INT, 0);
+      }
 
       int old_size = ImGui::GetFont()->Scale;
       ImGui::GetFont()->Scale *= 0.9;
@@ -412,6 +426,7 @@ int main() {
         EditorActionsPanel::UI(icon, icons);
         ImGui::End();
       }
+      MeshManager::UI();
       ImGui::GetFont()->Scale = old_size;
 
       // ImGui::End();

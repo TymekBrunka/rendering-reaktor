@@ -7,7 +7,7 @@ namespace RR {
 	class Program {
 	public:
     static constexpr GLuint INVALID_ID = std::numeric_limits<GLuint>::max();
-		GLuint id = -1;
+		GLuint id = INVALID_ID;
 
 		Program();
 		Program(const char* x);

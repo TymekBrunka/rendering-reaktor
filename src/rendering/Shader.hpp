@@ -1,10 +1,12 @@
 #pragma once
 #include <glad/glad.h>
+#include <limits>
 
 namespace RR {
 	class Shader {
 	public:
-		GLuint id = -1;
+    static constexpr GLuint INVALID_ID = std::numeric_limits<GLuint>::max();
+		GLuint id = INVALID_ID;
 
 		Shader();
 		Shader(GLenum typ, const char* txt);

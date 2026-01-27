@@ -57,7 +57,7 @@ void Camera::move(float input[], float deltatime) {
 	glm::vec3 up = glm::cross(right, forward);
 
 	glm::vec3 movement_right(-cosx, 0.0, sinx);
-	this->position = this->position + 20.f * deltatime * glm::vec3(forward * input[1] + movement_right * input[0]);
+	this->position = this->position + 40.f * deltatime * glm::vec3(forward * input[1] + movement_right * input[0]);
 
 	this->priv.view = glm::lookAt(this->position, this->position + forward, up);
 	this->priv.view_skybox = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), forward, up);

@@ -2,8 +2,10 @@
 #include "Program.hpp"
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
+#include "imgui.h"
 #include "utils/Logger.hpp"
 #include <cstddef>
+#include <glm/fwd.hpp>
 #include <iostream>
 #include <ostream>
 
@@ -14,27 +16,33 @@
 
 #include "main.hpp"
 
+#ifndef _WIN32
+#define DIR_SEPARATOR '/'
+#else
+#define DIR_SEPARATOR '\\'
+#endif
+
 namespace MeshManager {
 
-template <typename T> void printvec(std::vector<T> &vec) {
-  std::cout << "Vector contents: \n";
-  for (auto &i : vec) {
-    std::cout << i;
-  }
-  std::cout << "\n";
-}
-
-std::ostream &operator<<(std::ostream &stream, Mesh_vertex vertex) {
-  stream << "pos: " << vertex.pos[0] << " , " << vertex.pos[1] << " , " << vertex.pos[2] << "\n";
-  stream << "uv: " << vertex.uv[0] << " , " << vertex.uv[1] << "\n";
-  stream << "normal: " << vertex.normal[0] << " , " << vertex.normal[1] << " , " << vertex.normal[2] << "\n";
-  return stream;
-}
-
-std::ostream &operator<<(std::ostream &stream, Mesh &mesh) {
-  stream << "mesh (vb, ib): " << mesh.vb.id << " , " << mesh.ib.id << "\n";
-  return stream;
-}
+// template <typename T> void printvec(std::vector<T> &vec) {
+//   std::cout << "Vector contents: \n";
+//   for (auto &i : vec) {
+//     std::cout << i;
+//   }
+//   std::cout << "\n";
+// }
+//
+// std::ostream &operator<<(std::ostream &stream, Mesh_vertex vertex) {
+//   stream << "pos: " << vertex.pos[0] << " , " << vertex.pos[1] << " , " << vertex.pos[2] << "\n";
+//   stream << "uv: " << vertex.uv[0] << " , " << vertex.uv[1] << "\n";
+//   stream << "normal: " << vertex.normal[0] << " , " << vertex.normal[1] << " , " << vertex.normal[2] << "\n";
+//   return stream;
+// }
+//
+// std::ostream &operator<<(std::ostream &stream, Mesh &mesh) {
+//   stream << "mesh (vb, ib): " << mesh.vb.id << " , " << mesh.ib.id << "\n";
+//   return stream;
+// }
 
 void openDialogAndLoad() {
   pfd::open_file f = pfd::open_file("Wybierz plik z modelem 3D", pfd::path::home(), {"Modele 3D (.obj)", "*.obj", "Wszystkie pliki", "*"}, pfd::opt::multiselect);
@@ -50,81 +58,9 @@ void openDialogAndLoad() {
     for (auto &am_ : am_s) {
       MeshManager::awaiting_meshes.push_back(am_);
     }
-    std::cout << "broke free\n";
+    // std::cout << "broke free\n";
   }
 }
-
-// AwaitingMesh *load_from_file(std::string filepath) {
-//   tinyobj::ObjReaderConfig reader_config;
-//   // reader_config.mtl_search_path = "./"; // Path to material files
-//   reader_config.triangulate = true;
-//   tinyobj::ObjReader reader;
-//
-//   if (!reader.ParseFromFile(filepath, reader_config)) {
-//     if (!reader.Error().empty()) {
-//       Logger<>::error("OBJ LOADER") << "TinyObjReader: " << reader.Error();
-//     }
-//     return nullptr;
-//   }
-//
-//   if (!reader.Warning().empty()) {
-//     Logger<>::warn("OBJ LOADER") << "TinyObjReader: " << reader.Warning();
-//   }
-//
-//   AwaitingMesh *am = new AwaitingMesh{};
-//
-//   auto &attrib = reader.GetAttrib();
-//   auto &shapes = reader.GetShapes();
-//   auto &materials = reader.GetMaterials();
-//
-//   float vx, vy, vz, nx, ny, nz, tx, ty;
-//
-//   // Loop over shapes
-//   for (size_t s = 0; s < shapes.size(); s++) {
-//     // Loop over faces(polygon)
-//     size_t index_offset = 0;
-//     for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
-//       size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
-//       // Loop over vertices in the face.
-//       for (size_t v = 0; v < fv; v++) {
-//         // access to vertex
-//         tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
-//         vx = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
-//         vy = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
-//         vz = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
-//         // Check if `normal_index` is zero or positive. negative = no normal data
-//         if (idx.normal_index >= 0) {
-//           nx = attrib.normals[3 * size_t(idx.normal_index) + 0];
-//           ny = attrib.normals[3 * size_t(idx.normal_index) + 1];
-//           nz = attrib.normals[3 * size_t(idx.normal_index) + 2];
-//         }
-//         // Check if `texcoord_index` is zero or positive. negative = no texcoord data
-//         if (idx.texcoord_index >= 0) {
-//           tx = attrib.texcoords[2 * size_t(idx.texcoord_index) + 0];
-//           ty = attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
-//         }
-//         // Optional: vertex colors
-//         // tinyobj::real_t red   = attrib.colors[3*size_t(idx.vertex_index)+0];
-//         // tinyobj::real_t green = attrib.colors[3*size_t(idx.vertex_index)+1];
-//         // tinyobj::real_t blue  = attrib.colors[3*size_t(idx.vertex_index)+2];
-//
-//         am->vertex_data.push_back({
-//             .pos = {vx, vy, vz},
-//             .uv = {tx, ty},
-//             .normal = {nx, ny, nz},
-//         });
-//       }
-//
-//       index_offset += fv;
-//
-//       // // per-face material
-//       // shapes[s].mesh.material_ids[f];
-//     }
-//   }
-//
-//   printvec(am->vertex_data);
-//   return am;
-// }
 
 void processMesh(aiMesh *mesh, AwaitingMesh *am) {
   Mesh_vertex mv;
@@ -185,7 +121,14 @@ AwaitingMesh *load_from_file(std::string filepath) {
     return nullptr;
   }
 
-  AwaitingMesh *am = new AwaitingMesh{};
+  int last_of_separator = filepath.find_last_of(DIR_SEPARATOR);
+  int last_of_fwd_slash = filepath.find_last_of('/');
+
+  if (last_of_fwd_slash > last_of_separator) last_of_separator = last_of_fwd_slash;
+
+  AwaitingMesh *am = new AwaitingMesh{
+    .name = filepath.substr(last_of_separator + 1)
+  };
   processNode(scene->mRootNode, scene, am);
   // printvec(am->vertex_data);
   // std::cout << "done\n";
@@ -195,13 +138,14 @@ AwaitingMesh *load_from_file(std::string filepath) {
 void render_thread_post_work(worker_status status) {
   std::lock_guard lg(awaiting_meshes_mutex);
 
+  glUseProgram(model_program.id);
   for (auto &am : awaiting_meshes) {
     RR::VertexBuffer<Mesh_vertex> mesh(am->vertex_data.data(), am->vertex_data.size(), GL_STATIC_DRAW);
     RR::IndexBuffer mesh_i(am->indices.data(), am->indices.size(), GL_STATIC_DRAW);
     RR::VertexArray va("");
     mesh.bind();
     mesh_i.bind();
-    va.setStructure(program, sizeof(Mesh_vertex),
+    va.setStructure(model_program, sizeof(Mesh_vertex),
                     {
                         {"pos", RR::AttribKind::VEC3, GL_FALSE, offsetof(Mesh_vertex, pos)},
                         {"uv", RR::AttribKind::VEC2, GL_TRUE, offsetof(Mesh_vertex, uv)},
@@ -209,12 +153,34 @@ void render_thread_post_work(worker_status status) {
                     });
     // std::cout << "ids: " << mesh.id << " , " << mesh_i.id << std::endl;
     // std::cout << "meshes: " << meshes.size() << std::endl;
-    meshes.push_back({std::move(va), std::move(mesh), std::move(mesh_i)});
+    meshes.push_back({std::move(am->name), std::move(va), std::move(mesh), std::move(mesh_i)});
     // std::cout << "pushed ids: " << meshes[0].vb.id << " , " << meshes[0].ib.id << std::endl;
     // printvec(am->vertex_data);
     delete am;
   }
   awaiting_meshes.clear();
+}
+
+void UI() {
+  ImGui::Begin("Modele 3D", NULL);
+  {
+    if (ImGui::BeginListBox("##")) {
+      for (auto &mesh : meshes) {
+        if (ImGui::Selectable(mesh.name.c_str())) {
+          Instance_data instance = {
+            .id = _id,
+            ._id = {(float)_id, 0, 0, 0},
+            .mesh = mesh, // INFO: mesh is stored as a reference, migh couse issues if missused
+            .transform = glm::mat4(1)
+          };
+          _id++;
+          instances.push_back(instance);
+        }
+      }
+      ImGui::EndListBox();
+    }
+  }
+  ImGui::End();
 }
 
 } // namespace MeshManager

@@ -15,6 +15,8 @@ imgpack(icon_data src/icon.png icon.png n 4)
 imgpack(iconsImg src/icons.png icons.png y 4)
 bytepack(skybox_vertex_text src/shaders/skybox.vertex.glsl skybox.vertex.glsl)
 bytepack(skybox_fragment_text src/shaders/skybox.frag.glsl skybox.frag.glsl)
+bytepack(model_vertex_text src/shaders/model.vertex.glsl model.vertex.glsl)
+bytepack(model_fragment_text src/shaders/model.frag.glsl model.frag.glsl)
 
 # add_library(tinyobjloader OBJECT src/tinyobjloader/tiny_obj_loader.cc)
 # target_include_directories(tinyobjloader PUBLIC src/tinyobjloader/)
@@ -44,6 +46,8 @@ target_link_libraries(main PUBLIC
   iconsImg
   skybox_vertex_text
   skybox_fragment_text
+  model_vertex_text
+  model_fragment_text
   INTERFACE
   pfd
 )

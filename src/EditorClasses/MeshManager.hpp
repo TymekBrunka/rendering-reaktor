@@ -20,23 +20,26 @@ struct Mesh_vertex {
   RR::vec3 normal;
 };
 
-// static inline RR::VertexArray vertex_array;
+static inline int _id = 0;
+
+struct Mesh {
+  const std::string name;
+  RR::VertexArray va;
+  RR::VertexBuffer<Mesh_vertex> vb;
+  RR::IndexBuffer ib;
+};
 
 struct Instance_data {
   int id;
   RR::vec4 _id;
+  Mesh& mesh;
   glm::mat4 transform;
 };
 
 struct AwaitingMesh {
+  const std::string name;
   std::vector<Mesh_vertex> vertex_data;
   std::vector<GLuint> indices;
-};
-
-struct Mesh {
-  RR::VertexArray va;
-  RR::VertexBuffer<Mesh_vertex> vb;
-  RR::IndexBuffer ib;
 };
 
 inline std::vector<AwaitingMesh*> awaiting_meshes;
@@ -44,10 +47,11 @@ inline std::condition_variable cv;
 inline std::mutex awaiting_meshes_mutex;
 
 inline std::vector<Mesh> meshes;
-inline std::vector<Instance_data> instance_data;
+inline std::vector<Instance_data> instances;
 
 AwaitingMesh* load_from_file(std::string filepath);
 void render_thread_post_work(worker_status status);
 void openDialogAndLoad();
+void UI();
 
 } // namespace MeshManager
