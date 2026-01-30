@@ -9,8 +9,9 @@ namespace RR {
 		std::vector<Texture2d> textures;
 		GLuint depth_texture;
 
+    FrameBuffer();
 		FrameBuffer(int width, int height, int num_outputs);
-		// ~FrameBuffer();
+		~FrameBuffer();
 		FrameBuffer(FrameBuffer&& other) noexcept;
 		FrameBuffer& operator=(FrameBuffer&& other) noexcept;
 	};

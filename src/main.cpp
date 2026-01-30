@@ -1,7 +1,10 @@
 #include "main.hpp"
 #include "Camera.hpp"
 #include "EditorActionsPanel.hpp"
+#include "FrameBuffer.hpp"
 #include "MeshManager.hpp"
+#include "VertexArray.hpp"
+#include "VertexBuffer.hpp"
 #include "WorkerThreads.hpp"
 #include "pfd/portable-file-dialogs.h"
 #include "utils/Logger.hpp"
@@ -14,14 +17,15 @@
 #include "cubemap2.png.hpp"
 #include "icon.png.hpp"
 #include "icons.png.hpp"
-#include "skybox.frag.glsl.hpp"
-#include "skybox.vertex.glsl.hpp"
 #include "model.frag.glsl.hpp"
 #include "model.vertex.glsl.hpp"
+#include "skybox.frag.glsl.hpp"
+#include "skybox.vertex.glsl.hpp"
 
 #include "imgui.h"
 #include "imgui_boilerplate.hpp"
 
+#include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -35,171 +39,29 @@
 #include <cstdlib>
 #include <iostream>
 
-Camera camera(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec2(0.0f, 0.0f));
-int Gwidth;
-int Gheight;
-
-float motion_input[] = {0, 0};
-
-static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, GLFW_TRUE);
-  if (action == GLFW_PRESS) {
-    switch (key) {
-    case GLFW_KEY_W:
-      motion_input[1] += 1;
-      break;
-    case GLFW_KEY_S:
-      motion_input[1] -= 1;
-      break;
-    case GLFW_KEY_A:
-      motion_input[0] -= 1;
-      break;
-    case GLFW_KEY_D:
-      motion_input[0] += 1;
-      break;
-    }
-  } else if (action == GLFW_RELEASE) {
-    switch (key) {
-    case GLFW_KEY_W:
-      motion_input[1] -= 1;
-      break;
-    case GLFW_KEY_S:
-      motion_input[1] += 1;
-      break;
-    case GLFW_KEY_A:
-      motion_input[0] += 1;
-      break;
-    case GLFW_KEY_D:
-      motion_input[0] -= 1;
-      break;
-    }
-  }
-}
-
-void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
-  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    camera.holding_rmb = true;
-  } else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    camera.holding_rmb = false;
-  }
-}
-
-void mouse_callback(GLFWwindow *window, double x, double y) {
-  glm::vec2 temp((float)x, (float)y);
-  if (camera.holding_rmb) {
-    // std::cout << x << ", " << y << "hai\n";
-    camera.orientation -= glm::radians(temp - camera.last_mouse_pos) / 2.0f;
-    camera.orientation = glm::vec2(glm::mod(camera.orientation.x, (2.0f * 3.14f)), glm::clamp(camera.orientation.y, (-0.5f * 3.14f) + 0.0001f, (0.5f * 3.14f) + 0.0001f));
-    camera.update_view(camera.orientation);
-    camera.computeMatricies();
-  }
-  camera.last_mouse_pos[0] = x;
-  camera.last_mouse_pos[1] = y;
-}
-
-void APIENTRY gl_debug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
-  // Some debug messages are just annoying informational messages
-  switch (id) {
-  case 131185: // glBufferData
-    return;
-  }
-
-  Logger<>::error("OpenGL") << "\n / " << id << " Severity: ";
-
-  switch (severity) {
-  case GL_DEBUG_SEVERITY_HIGH_ARB:
-    std::cout << "\x1b[31mHigh\x1b[0m";
-    break;
-  case GL_DEBUG_SEVERITY_MEDIUM_ARB:
-    std::cout << "\x1b[33mMedium\x1b[0m";
-    break;
-  case GL_DEBUG_SEVERITY_LOW_ARB:
-    std::cout << "\x1b[35mLow\x1b[0m";
-    break;
-    // // below doesnt work
-    // case GL_DEBUG_SEVERITY_NOTIFICATION_ARB:
-    //     std::cout << "Notification";
-    //     break;
-  }
-
-  std::cout << " Type: ";
-
-  switch (type) {
-  case GL_DEBUG_TYPE_ERROR_ARB:
-    std::cout << "\x1b[31mError\x1b[0m";
-    break;
-  case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
-    std::cout << "Deprecated Behavior";
-    break;
-  case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
-    std::cout << "Undefined Behavior";
-    break;
-  case GL_DEBUG_TYPE_PORTABILITY_ARB:
-    std::cout << "Portability";
-    break;
-  case GL_DEBUG_TYPE_PERFORMANCE_ARB:
-    std::cout << "Performance";
-    break;
-    // // below dont work
-    // case GL_DEBUG_TYPE_MARKER:
-    //     std::cout << "Marker";
-    //     break;
-    // case GL_DEBUG_TYPE_PUSH_GROUP:
-    //     std::cout << "Push Group";
-    //     break;
-    // case GL_DEBUG_TYPE_POP_GROUP:
-    //     std::cout << "Pop Group";
-    //     break;
-    // case GL_DEBUG_TYPE_OTHER:
-    //     std::cout << "Other";
-    //     break;
-  }
-
-  std::cout << " /\n > Source:  \x1b[34m";
-
-  switch (source) {
-  case GL_DEBUG_SOURCE_API_ARB:
-    std::cout << "API";
-    break;
-  case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
-    std::cout << "Window System";
-    break;
-  case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
-    std::cout << "Shader Compiler";
-    break;
-  case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
-    std::cout << "Third Party";
-    break;
-  case GL_DEBUG_SOURCE_APPLICATION_ARB:
-    std::cout << "Application";
-    break;
-  case GL_DEBUG_SOURCE_OTHER_ARB:
-    std::cout << "Other";
-    break;
-  }
-
-  std::cout << "\x1b[0m\n > Message: " << message;
-
-  std::cout << "\n\n";
-}
-
-static void window_size_callback(GLFWwindow *window, int width, int height) {
-  Gwidth = width;
-  Gheight = height;
-  glfwGetFramebufferSize(window, &width, &height);
-  // const float ratio = width / (float) height;
-  glViewport(0, 0, width, height);
-  camera.update_projection(width, height, 120);
-  camera.computeMatricies();
-}
+#include "input_handling.cpp"
 
 struct skybox_vert {
   RR::vec3 pos;
   RR::vec2 uv;
 };
+
+struct composite_vert {
+  RR::vec2 pos;
+  RR::vec2 uv;
+};
+
+skybox_vert composite_verticies[] = {
+  {{-1.0, 1.0, 0.0}, {0.0, 1.0}},
+  {{-1.0, -1.0, 0.0}, {0.0, 0.0}},
+  {{1.0, -1.0, 0.0}, {1.0, 0.0}},
+  {{-1.0, 1.0, 0.0}, {0.0, 1.0}},
+  {{1.0, -1.0, 0.0}, {1.0, 0.0}},
+  {{1.0, 1.0, 0.0}, {1.0, 1.0}}
+};
+
+RR::VertexBuffer<skybox_vert> composite_vb;
+RR::VertexArray composite_va;
 
 GLint location_pos;
 GLint location_uv;
@@ -221,7 +83,7 @@ int main() {
   workers = &workers_pool;
 
   // imgui_boilerplate();
-  GLFWwindow *window = RR::createWindow(640, 480, "Reaktory", 3, 2); // #version 320
+  GLFWwindow *window = RR::createWindow(800, 600, "Reaktory", 3, 3); // #version 330
   if (!window) {
     glfwTerminate();
     exit(EXIT_FAILURE);
@@ -259,7 +121,9 @@ int main() {
   }
 
   {
-    RR::Texture2d icon(icon_data);
+    RR::Texture2d icon(&icon_data);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_CULL_FACE);
@@ -286,9 +150,8 @@ int main() {
       exit(1);
     }
 
-    // RR::FrameBuffer fb(600, 800, 1);
-    RR::Texture2d texture(cubemap2Img);
-    RR::Texture2d icons(iconsImg);
+    RR::Texture2d skyboxTexture(&cubemap2Img);
+    RR::Texture2d icons(&iconsImg);
 
     // stbi_set_flip_vertically_on_load(true);
     // RR::image_data img = RR::readImage("src/icons.png", 4);
@@ -296,16 +159,27 @@ int main() {
 
     glUseProgram(model_program.id);
 
-    texture.bindToSlotAndName(model_program, 0, "skybox");
+    const GLint location_texture = glGetUniformLocation(model_program.id, "tex");
+    glUniform1i(location_texture, 1);
+
+    sceneFb = RR::FrameBuffer(800, 600, 2);
+
+    const GLint location_id = glGetUniformLocation(model_program.id, "id");
+    const GLint location_transforms = glGetUniformLocation(model_program.id, "transforms");
+
+    // skyboxTexture.bindToSlot(0);
     const GLint world_camera = glGetUniformLocation(model_program.id, "world_camera");
 
     glUseProgram(program.id);
 
-    texture.bindToSlotAndName(program, 0, "skybox");
+    const GLint color_picker_location = glGetUniformLocation(program.id, "skybox");
+    glUniform1i(color_picker_location, 0);
+
+    skyboxTexture.bindToSlot(0);
     const GLint skybox_camera = glGetUniformLocation(program.id, "skybox_camera");
 
     icon.bindToSlot(4);
-    icons.bindToSlot(3);
+    icons.bindToSlot(5);
 
     skybox_vert skybox_verticies[] = {
         // back
@@ -347,11 +221,16 @@ int main() {
 
     GLuint skybox_indecies[] = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23};
 
-    // MeshManager::vertex_array = RR::VertexArray("");
+    composite_va = RR::VertexArray("");
+    composite_vb = RR::VertexBuffer(composite_verticies, 6, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind ebo so vao doesnt point to it
+    composite_va.setStructure(model_program, sizeof(composite_vert),
+                              {
+                                  {"pos", RR::AttribKind::VEC3, GL_FALSE, offsetof(composite_vert, pos)},
+                                  {"uv", RR::AttribKind::VEC2, GL_TRUE, offsetof(composite_vert, uv)},
+                              });
+
     RR::VertexArray skybox_va = RR::VertexArray("");
-
-    iminit(window, true);
-
     RR::VertexBuffer<skybox_vert> skybox_vb(skybox_verticies, sizeof(skybox_verticies) / sizeof(skybox_vert), GL_STATIC_DRAW);
     RR::IndexBuffer skybox_ib(skybox_indecies, sizeof(skybox_indecies) / sizeof(GLuint), GL_STATIC_DRAW);
 
@@ -360,6 +239,8 @@ int main() {
                                {"pos", RR::AttribKind::VEC3, GL_TRUE, offsetof(skybox_vert, pos)},
                                {"uv", RR::AttribKind::VEC2, GL_TRUE, offsetof(skybox_vert, uv)},
                            });
+
+    iminit(window, true);
 
     // Camera
     camera.update_projection(800, 600, 120);
@@ -395,37 +276,36 @@ int main() {
       glUseProgram(program.id);
       glUniformMatrix4fv(skybox_camera, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(camera.read().camera_skybox));
 
+      skyboxTexture.bindToSlot(0);
       skybox_va.bind();
       skybox_vb.bind();
       skybox_ib.bind();
       // glDrawArrays(GL_TRIANGLES, 0, 6);
       glDrawElements(GL_TRIANGLES, sizeof(skybox_indecies) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
-      glClear(GL_DEPTH_BUFFER_BIT);
+      // glClear(GL_DEPTH_BUFFER_BIT);
       glUseProgram(model_program.id);
 
+      glBindFramebuffer(GL_FRAMEBUFFER, sceneFb.id);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glUniformMatrix4fv(world_camera, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(camera.read().camera));
 
-      // std::cout << "# of meshes loaded: " << MeshManager::meshes.size() << "\n";
-      // for (auto &i : MeshManager::meshes) {
-      //   i.va.bind();
-      //   i.ib.bind();
-      //   glDrawElements(GL_TRIANGLES, i.ib.length, GL_UNSIGNED_INT, 0);
-      // }
-
-      for (auto& instance : MeshManager::instances) {
+      for (auto &instance : MeshManager::instances) {
         instance.mesh.va.bind();
         instance.mesh.ib.bind();
+        glUniform4fv(location_id, 1, (float *)&instance._id);
+        glUniformMatrix4fv(location_transforms, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(glm::rotate(glm::mat4(1.0), lastFrame, glm::vec3(0.0, 1.0, 0.0))));
         glDrawElements(GL_TRIANGLES, instance.mesh.ib.length, GL_UNSIGNED_INT, 0);
       }
 
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      composite_va.bind();
+      sceneFb.textures[0].bindToSlot(0);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+
       int old_size = ImGui::GetFont()->Scale;
       ImGui::GetFont()->Scale *= 0.9;
-      ImGui::Begin("Panel", NULL);
-      {
-        EditorActionsPanel::UI(icon, icons);
-        ImGui::End();
-      }
+      EditorActionsPanel::UI(icon, icons);
       MeshManager::UI();
       ImGui::GetFont()->Scale = old_size;
 

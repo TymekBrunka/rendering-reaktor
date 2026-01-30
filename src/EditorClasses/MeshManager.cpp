@@ -169,11 +169,22 @@ void UI() {
         if (ImGui::Selectable(mesh.name.c_str())) {
           Instance_data instance = {
             .id = _id,
-            ._id = {(float)_id, 0, 0, 0},
+            ._id = {
+              ((float)(_id & 0x00FF0000)) * (1.0/256.0) * (1.0/256.0) * (1.0/256.0),
+              ((float)(_id & 0x0000FF00)) * (1.0/256.0) * (1.0/256.0),
+              ((float)(_id & 0x000000FF)) * (1.0/256.0),
+              0
+            },
             .mesh = mesh, // INFO: mesh is stored as a reference, migh couse issues if missused
             .transform = glm::mat4(1)
           };
+          std::cout << "vec4 id: " \
+            << ((float)(_id & 0x00FF0000)) * (1.0/256.0) * (1.0/256.0) * (1.0/256.0)  << ", " \
+            << ((float)(_id & 0x0000FF00)) * (1.0/256.0) * (1.0/256.0)  << ", " \
+            << ((float)(_id & 0x000000FF)) * (1.0/256.0)  << ", " \
+            << 0.0 << "\n";
           _id++;
+          if (instances.size() > 0) instances.pop_back(); // for sake of testing
           instances.push_back(instance);
         }
       }

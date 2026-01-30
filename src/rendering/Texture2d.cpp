@@ -11,7 +11,7 @@ namespace RR {
 
   Texture2d::Texture2d() {}
 
-	Texture2d::Texture2d(image_data& data, GLenum interp_mode, GLenum clamp_mode) {
+	Texture2d::Texture2d(image_data* data, GLenum interp_mode, GLenum clamp_mode) {
 		GLuint texture;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -22,7 +22,7 @@ namespace RR {
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, interp_mode);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, interp_mode);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, data.width, data.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data);
+		if (data != nullptr) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, data->width, data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data->data);
 		this->id = texture;
 	}
 

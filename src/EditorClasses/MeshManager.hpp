@@ -3,6 +3,7 @@
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
 #include "WorkerThreads.hpp"
+#include <cstdint>
 #include <iostream>
 #include <vector>
 #include <mutex>
@@ -20,7 +21,7 @@ struct Mesh_vertex {
   RR::vec3 normal;
 };
 
-static inline int _id = 0;
+static inline int32_t _id = 1;
 
 struct Mesh {
   const std::string name;
