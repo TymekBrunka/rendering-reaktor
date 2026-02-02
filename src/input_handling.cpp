@@ -3,6 +3,7 @@
 #include "Camera.hpp"
 
 RR::FrameBuffer sceneFb;
+RR::FrameBuffer skyboxFb;
 Camera camera(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec2(0.0f, 0.0f));
 int Gwidth;
 int Gheight;
@@ -160,7 +161,8 @@ static void window_size_callback(GLFWwindow *window, int width, int height) {
   glfwGetFramebufferSize(window, &width, &height);
   // const float ratio = width / (float) height;
   glViewport(0, 0, width, height);
-  sceneFb = std::move(RR::FrameBuffer(width, height, 2));
+  sceneFb = RR::FrameBuffer(width, height, 2);
+  skyboxFb = RR::FrameBuffer(width, height, 2);
   camera.update_projection(width, height, 120);
   camera.computeMatricies();
 }

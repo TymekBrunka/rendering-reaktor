@@ -17,6 +17,8 @@ bytepack(skybox_vertex_text src/shaders/skybox.vertex.glsl skybox.vertex.glsl)
 bytepack(skybox_fragment_text src/shaders/skybox.frag.glsl skybox.frag.glsl)
 bytepack(model_vertex_text src/shaders/model.vertex.glsl model.vertex.glsl)
 bytepack(model_fragment_text src/shaders/model.frag.glsl model.frag.glsl)
+bytepack(composite_vertex_text src/shaders/composite.vertex.glsl composite.vertex.glsl)
+bytepack(composite_fragment_text src/shaders/composite.frag.glsl composite.frag.glsl)
 
 # add_library(tinyobjloader OBJECT src/tinyobjloader/tiny_obj_loader.cc)
 # target_include_directories(tinyobjloader PUBLIC src/tinyobjloader/)
@@ -48,6 +50,8 @@ target_link_libraries(main PUBLIC
   skybox_fragment_text
   model_vertex_text
   model_fragment_text
+  composite_vertex_text
+  composite_fragment_text
   INTERFACE
   pfd
 )

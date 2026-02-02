@@ -1,7 +1,7 @@
 #version 330 core
 
 in vec2 out_uv;
-out vec4 frag_color;
+layout (location = 0) out vec4 frag_color;
 
 uniform sampler2D skybox;
 

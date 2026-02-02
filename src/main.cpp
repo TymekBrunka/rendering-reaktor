@@ -17,6 +17,8 @@
 #include "cubemap2.png.hpp"
 #include "icon.png.hpp"
 #include "icons.png.hpp"
+#include "composite.frag.glsl.hpp"
+#include "composite.vertex.glsl.hpp"
 #include "model.frag.glsl.hpp"
 #include "model.vertex.glsl.hpp"
 #include "skybox.frag.glsl.hpp"
@@ -51,16 +53,16 @@ struct composite_vert {
   RR::vec2 uv;
 };
 
-skybox_vert composite_verticies[] = {
-  {{-1.0, 1.0, 0.0}, {0.0, 1.0}},
-  {{-1.0, -1.0, 0.0}, {0.0, 0.0}},
-  {{1.0, -1.0, 0.0}, {1.0, 0.0}},
-  {{-1.0, 1.0, 0.0}, {0.0, 1.0}},
-  {{1.0, -1.0, 0.0}, {1.0, 0.0}},
-  {{1.0, 1.0, 0.0}, {1.0, 1.0}}
+composite_vert composite_verticies[] = {
+  {{-1.0, 1.0}, {0.0, 1.0}},
+  {{-1.0, -1.0}, {0.0, 0.0}},
+  {{1.0, -1.0}, {1.0, 0.0}},
+  {{-1.0, 1.0}, {0.0, 1.0}},
+  {{1.0, -1.0}, {1.0, 0.0}},
+  {{1.0, 1.0}, {1.0, 1.0}}
 };
 
-RR::VertexBuffer<skybox_vert> composite_vb;
+RR::VertexBuffer<composite_vert> composite_vb;
 RR::VertexArray composite_va;
 
 GLint location_pos;
@@ -135,6 +137,10 @@ int main() {
     model_program = RR::Program("");
     RR::Shader model_vertex;
     RR::Shader model_fragment;
+
+    RR::Program composite_program("");
+    RR::Shader composite_vertex;
+    RR::Shader composite_fragment;
     try {
       skybox_vertex = RR::Shader(GL_VERTEX_SHADER, skybox_vertex_text);
       skybox_fragment = RR::Shader(GL_FRAGMENT_SHADER, skybox_fragment_text);
@@ -145,6 +151,11 @@ int main() {
       model_fragment = RR::Shader(GL_FRAGMENT_SHADER, model_fragment_text);
       model_program.attachShader(model_vertex).attachShader(model_fragment);
       model_program.link();
+
+      composite_vertex = RR::Shader(GL_VERTEX_SHADER, composite_vertex_text);
+      composite_fragment = RR::Shader(GL_FRAGMENT_SHADER, composite_fragment_text);
+      composite_program.attachShader(composite_vertex).attachShader(composite_fragment);
+      composite_program.link();
     } catch (std::string ex) {
       std::cout << ex << "\n";
       exit(1);
@@ -157,12 +168,20 @@ int main() {
     // RR::image_data img = RR::readImage("src/icons.png", 4);
     // stbi_image_free(img.data);
 
+    sceneFb = RR::FrameBuffer(800, 600, 2);
+    skyboxFb = RR::FrameBuffer(800, 600, 1);
+
+    glUseProgram(composite_program.id);
+
+    const GLint location_skyboxTex = glGetUniformLocation(composite_program.id, "skybox");
+    const GLint location_sceneTex = glGetUniformLocation(composite_program.id, "scene");
+    glUniform1i(location_skyboxTex, 2);
+    glUniform1i(location_sceneTex, 3);
+
     glUseProgram(model_program.id);
 
     const GLint location_texture = glGetUniformLocation(model_program.id, "tex");
     glUniform1i(location_texture, 1);
-
-    sceneFb = RR::FrameBuffer(800, 600, 2);
 
     const GLint location_id = glGetUniformLocation(model_program.id, "id");
     const GLint location_transforms = glGetUniformLocation(model_program.id, "transforms");
@@ -172,10 +191,7 @@ int main() {
 
     glUseProgram(program.id);
 
-    const GLint color_picker_location = glGetUniformLocation(program.id, "skybox");
-    glUniform1i(color_picker_location, 0);
-
-    skyboxTexture.bindToSlot(0);
+    skyboxTexture.bindToSlotAndName(program, 0, "skybox");
     const GLint skybox_camera = glGetUniformLocation(program.id, "skybox_camera");
 
     icon.bindToSlot(4);
@@ -224,9 +240,9 @@ int main() {
     composite_va = RR::VertexArray("");
     composite_vb = RR::VertexBuffer(composite_verticies, 6, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind ebo so vao doesnt point to it
-    composite_va.setStructure(model_program, sizeof(composite_vert),
+    composite_va.setStructure(program, sizeof(composite_vert),
                               {
-                                  {"pos", RR::AttribKind::VEC3, GL_FALSE, offsetof(composite_vert, pos)},
+                                  {"pos", RR::AttribKind::VEC2, GL_FALSE, offsetof(composite_vert, pos)},
                                   {"uv", RR::AttribKind::VEC2, GL_TRUE, offsetof(composite_vert, uv)},
                               });
 
@@ -258,7 +274,6 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
       workers->handle();
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
       currentFrame = static_cast<float>(glfwGetTime());
       deltaTime = currentFrame - lastFrame;
       lastFrame = currentFrame;
@@ -268,6 +283,7 @@ int main() {
         camera.computeMatricies();
       }
 
+      glBindFramebuffer(GL_FRAMEBUFFER, skyboxFb.id);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       imNewFrame();
@@ -298,9 +314,13 @@ int main() {
         glDrawElements(GL_TRIANGLES, instance.mesh.ib.length, GL_UNSIGNED_INT, 0);
       }
 
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glUseProgram(composite_program.id);
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
       composite_va.bind();
-      sceneFb.textures[0].bindToSlot(0);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+      skyboxFb.textures[0].bindToSlot(2);
+      sceneFb.textures[0].bindToSlot(3);
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
       int old_size = ImGui::GetFont()->Scale;

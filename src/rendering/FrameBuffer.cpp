@@ -19,22 +19,28 @@ FrameBuffer::~FrameBuffer() {
 FrameBuffer::FrameBuffer(int width, int height, int num_outputs) : BufferBase() {
   glGenFramebuffers(1, &this->id);
   glBindFramebuffer(GL_FRAMEBUFFER, this->id);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->id);
 
-  GLuint *textures = new GLuint[num_outputs];
-  glGenTextures(num_outputs, textures);
+  GLuint *texturess = new GLuint[num_outputs];
+  glGenTextures(num_outputs, texturess);
   RR::Texture2d txtemp((GLuint)0);
+  std::vector<GLenum> output_names(num_outputs);
   this->textures.reserve(num_outputs);
   for (int i = 0; i < num_outputs; i++) {
-    glBindTexture(GL_TEXTURE_2D, textures[i]);
+    glBindTexture(GL_TEXTURE_2D, texturess[i]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    //
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, textures[i], 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texturess[i], 0);
 
-    txtemp = RR::Texture2d(textures[i]);
+    txtemp = RR::Texture2d(texturess[i]);
     this->textures.push_back(std::move(txtemp));
+    output_names.push_back(GL_COLOR_ATTACHMENT0 + 1);
   }
 
-  delete[] textures;
+  // without this, there will be no writes to framebuffers
+  glDrawBuffers(num_outputs, output_names.data());
+  delete[] texturess;
 
   GLuint renderbuffer;
   glGenRenderbuffers(1, &renderbuffer);
