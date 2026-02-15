@@ -24,7 +24,8 @@ FrameBuffer::FrameBuffer(int width, int height, int num_outputs) : BufferBase() 
   GLuint *texturess = new GLuint[num_outputs];
   glGenTextures(num_outputs, texturess);
   RR::Texture2d txtemp((GLuint)0);
-  std::vector<GLenum> output_names(num_outputs);
+  std::vector<GLenum> output_names;
+  output_names.reserve(num_outputs);
   this->textures.reserve(num_outputs);
   for (int i = 0; i < num_outputs; i++) {
     glBindTexture(GL_TEXTURE_2D, texturess[i]);
@@ -35,7 +36,7 @@ FrameBuffer::FrameBuffer(int width, int height, int num_outputs) : BufferBase() 
 
     txtemp = RR::Texture2d(texturess[i]);
     this->textures.push_back(std::move(txtemp));
-    output_names.push_back(GL_COLOR_ATTACHMENT0 + 1);
+    output_names.push_back(GL_COLOR_ATTACHMENT0 + i);
   }
 
   // without this, there will be no writes to framebuffers

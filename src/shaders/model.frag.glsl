@@ -9,6 +9,9 @@ uniform sampler2D tex;
 uniform vec4 id;
 
 void main() {
-    frag_color = texture(tex, out_uv);
-    id_color = id;
+    // frag_color = texture(tex, out_uv);
+    // id_color = id;
+
+    frag_color = vec4(1.0, 0.0, 0.0, 1.0);
+    id_color = vec4(0.0, 1.0, 0.0, 1.0);
 }

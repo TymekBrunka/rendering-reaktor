@@ -162,7 +162,9 @@ static void window_size_callback(GLFWwindow *window, int width, int height) {
   // const float ratio = width / (float) height;
   glViewport(0, 0, width, height);
   sceneFb = RR::FrameBuffer(width, height, 2);
-  skyboxFb = RR::FrameBuffer(width, height, 2);
+  glViewport(0, 0, width, height);
+  skyboxFb = RR::FrameBuffer(width, height, 1);
+  glViewport(0, 0, width, height);
   camera.update_projection(width, height, 120);
   camera.computeMatricies();
 }

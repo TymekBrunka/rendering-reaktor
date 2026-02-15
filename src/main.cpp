@@ -3,6 +3,7 @@
 #include "EditorActionsPanel.hpp"
 #include "FrameBuffer.hpp"
 #include "MeshManager.hpp"
+#include "Program.hpp"
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
 #include "WorkerThreads.hpp"
@@ -14,11 +15,11 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
+#include "composite.frag.glsl.hpp"
+#include "composite.vertex.glsl.hpp"
 #include "cubemap2.png.hpp"
 #include "icon.png.hpp"
 #include "icons.png.hpp"
-#include "composite.frag.glsl.hpp"
-#include "composite.vertex.glsl.hpp"
 #include "model.frag.glsl.hpp"
 #include "model.vertex.glsl.hpp"
 #include "skybox.frag.glsl.hpp"
@@ -53,20 +54,29 @@ struct composite_vert {
   RR::vec2 uv;
 };
 
-composite_vert composite_verticies[] = {
-  {{-1.0, 1.0}, {0.0, 1.0}},
-  {{-1.0, -1.0}, {0.0, 0.0}},
-  {{1.0, -1.0}, {1.0, 0.0}},
-  {{-1.0, 1.0}, {0.0, 1.0}},
-  {{1.0, -1.0}, {1.0, 0.0}},
-  {{1.0, 1.0}, {1.0, 1.0}}
-};
+composite_vert composite_verticies[] = {{{-1.0, 1.0}, {0.0, 1.0}}, {{-1.0, -1.0}, {0.0, 0.0}}, {{1.0, -1.0}, {1.0, 0.0}}, {{-1.0, 1.0}, {0.0, 1.0}}, {{1.0, -1.0}, {1.0, 0.0}}, {{1.0, 1.0}, {1.0, 1.0}}};
 
 RR::VertexBuffer<composite_vert> composite_vb;
 RR::VertexArray composite_va;
 
 GLint location_pos;
 GLint location_uv;
+
+std::string validateProgram(RR::Program &program) {
+  glValidateProgram(program.id);
+  int validation_status;
+  glGetProgramiv(program.id, GL_VALIDATE_STATUS, &validation_status);
+
+  std::string error_msg;
+  if (!validation_status) {
+    std::string shader_type_s;
+
+    int msg_size = error_msg.size();
+    error_msg.resize(512);
+    glGetProgramInfoLog(program.id, 512, NULL, error_msg.data());
+  }
+  return error_msg;
+}
 
 int main() {
 
@@ -283,7 +293,8 @@ int main() {
         camera.computeMatricies();
       }
 
-      glBindFramebuffer(GL_FRAMEBUFFER, skyboxFb.id);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, skyboxFb.id);
+      glViewport(0, 0, Gwidth, Gheight);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       imNewFrame();
@@ -296,13 +307,15 @@ int main() {
       skybox_va.bind();
       skybox_vb.bind();
       skybox_ib.bind();
+
       // glDrawArrays(GL_TRIANGLES, 0, 6);
       glDrawElements(GL_TRIANGLES, sizeof(skybox_indecies) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
       // glClear(GL_DEPTH_BUFFER_BIT);
       glUseProgram(model_program.id);
 
-      glBindFramebuffer(GL_FRAMEBUFFER, sceneFb.id);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sceneFb.id);
+      glViewport(0, 0, Gwidth, Gheight);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glUniformMatrix4fv(world_camera, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(camera.read().camera));
 
@@ -314,9 +327,9 @@ int main() {
         glDrawElements(GL_TRIANGLES, instance.mesh.ib.length, GL_UNSIGNED_INT, 0);
       }
 
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glUseProgram(composite_program.id);
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
       composite_va.bind();
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
       skyboxFb.textures[0].bindToSlot(2);
