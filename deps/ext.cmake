@@ -3,10 +3,20 @@ set(CPM_USE_LOCAL_PACKAGES ON)
 
 find_program(CCACHE_PROGRAM ccache)
 if (CCACHE_PROGRAM)
-  message(found)
+  message("Ccache enabled")
   set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM} base_dir=${PROJECT_SOURCE_DIR} hash_dir=false)
   set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM} base_dir=${PROJECT_SOURCE_DIR} hash_dir=false)
 endif()
+
+#math
+CPMAddPackage(
+  NAME glm
+  VERSION 1.0.3
+  GITHUB_REPOSITORY g-truc/glm
+  GIT_TAG 1.0.3
+  OPTIONS
+    "GLM_ENABLE_CXX_20 ON"
+)
 
 # rendering
 CPMAddPackage(
@@ -23,7 +33,15 @@ CPMAddPackage(
 add_library(glad OBJECT deps/glad/src/glad.c)
 target_include_directories(glad PUBLIC deps/glad/include)
 
-add_subdirectory(deps/imgui)
+file(GLOB imgui_SRC
+  deps/imgui/*.hpp
+  deps/imgui/*.cpp
+)
+
+add_library(imgui OBJECT ${imgui_SRC})
+target_include_directories(imgui PUBLIC deps/imgui)
+target_compile_options(imgui PRIVATE "-DIMGUI_IMPL_OPENGL_LOADER_CUSTOM <glad/glad.h>")
+target_link_libraries(imgui glad)
 
 CPMAddPackage(
   NAME imguizmo
@@ -32,6 +50,17 @@ CPMAddPackage(
   GIT_TAG 1.83
   DOWNLOAD_ONLY
 )
+
+file(GLOB imguizmo_SRC
+  "${imguizmo_SOURCE_DIR}/*.h"
+  "${imguizmo_SOURCE_DIR}/*.cpp"
+)
+
+add_library(imguizmo "${imguizmo_SOURCE_DIR}/ImGuizmo.cpp" ${imguizmo_SRC})
+target_include_directories(imguizmo PUBLIC ${imguizmo_SOURCE_DIR})
+target_compile_options(imguizmo PRIVATE -DIMGUI_DEFINE_MATH_OPERATORS)
+target_compile_features(imguizmo PRIVATE cxx_std_11)
+target_link_libraries(imguizmo PUBLIC imgui)
 
 #loading models
 CPMAddPackage(
@@ -58,7 +87,7 @@ CPMAddPackage(
 
 find_package(expat)
 if (NOT ${expat})
-CPMAddPackage(
+  CPMAddPackage(
   NAME expat
   VERSION 2.7.4
   GITHUB_REPO libexpat/libexpat
@@ -66,11 +95,11 @@ CPMAddPackage(
   DOWNLOAD_ONLY
 )
 
-set(EXPAT_BUILD_TOOLS OFF)
-set(EXPAT_SHARED_LIBS OFF)
-set(EXPAT_BUILD_EXAMPLES OFF)
-set(EXPAT_ENABLE_INSTALL OFF)
-add_subdirectory(${libexpat_SOURCE_DIR}/expat)
+  set(EXPAT_BUILD_TOOLS OFF)
+  set(EXPAT_SHARED_LIBS OFF)
+  set(EXPAT_BUILD_EXAMPLES OFF)
+  set(EXPAT_ENABLE_INSTALL OFF)
+  add_subdirectory(${libexpat_SOURCE_DIR}/expat)
 endif()
 
 CPMAddPackage(

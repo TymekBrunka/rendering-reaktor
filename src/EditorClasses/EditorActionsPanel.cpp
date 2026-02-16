@@ -65,7 +65,7 @@ void UI(RR::Texture2d &icon, RR::Texture2d &icons) {
         ImGui::BeginGroup();
         // ImGui::Image((ImTextureID)icons.id, ImVec2(50, 50), ImVec2(0, 1.0), ImVec2(0.25, 0.75));
 
-        if (ImGui::ImageButton(entry->label, (ImTextureID)icons.id, ImVec2(iconSize, iconSize), entry->begin, entry->end)) {
+        if (ImGui::ImageButton((ImTextureID)icons.id, ImVec2(iconSize, iconSize), entry->begin, entry->end)) {
           entry->callback();
         }
         ImGui::Text(entry->label);

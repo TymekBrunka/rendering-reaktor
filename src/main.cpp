@@ -266,7 +266,7 @@ int main() {
                                {"uv", RR::AttribKind::VEC2, GL_TRUE, offsetof(skybox_vert, uv)},
                            });
 
-    iminit(window, true);
+    iminit(window);
 
     // Camera
     camera.update_projection(800, 600, 120);
@@ -298,7 +298,7 @@ int main() {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       imNewFrame();
-      setupDocking(Gwidth, Gheight);
+      // setupDocking(Gwidth, Gheight);
 
       glUseProgram(program.id);
       glUniformMatrix4fv(skybox_camera, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(camera.read().camera_skybox));
