@@ -9,6 +9,7 @@ if (CCACHE_PROGRAM)
 endif()
 
 #math
+message(glm)
 CPMAddPackage(
   NAME glm
   VERSION 1.0.3
@@ -19,6 +20,7 @@ CPMAddPackage(
 )
 
 # rendering
+message(glfw)
 CPMAddPackage(
   NAME glfw
   VERSION 3.4
@@ -30,6 +32,7 @@ CPMAddPackage(
     "GLFW_BUILD_DOCS OFF"
 )
 
+message(glad)
 add_library(glad OBJECT deps/glad/src/glad.c)
 target_include_directories(glad PUBLIC deps/glad/include)
 
@@ -38,11 +41,13 @@ file(GLOB imgui_SRC
   deps/imgui/*.cpp
 )
 
+message(imgui)
 add_library(imgui OBJECT ${imgui_SRC})
 target_include_directories(imgui PUBLIC deps/imgui)
 target_compile_options(imgui PRIVATE "-DIMGUI_IMPL_OPENGL_LOADER_CUSTOM <glad/glad.h>")
 target_link_libraries(imgui glad)
 
+message(imguizmo)
 CPMAddPackage(
   NAME imguizmo
   VERSION 1.83
@@ -63,6 +68,19 @@ target_compile_features(imguizmo PRIVATE cxx_std_11)
 target_link_libraries(imguizmo PUBLIC imgui)
 
 #loading models
+
+CPMAddPackage( #just couse frikin assimp doesnt let other targets use zlib if compiled from source
+  NAME zlib
+  VERSION 1.3.1.2
+  GITHUB_REPOSITORY madler/zlib
+  GIT_TAG v1.3.1.2
+  OPTIONS
+    "ZLIB_BUILD_TESTING OFF"
+    "ZLIB_BUILD_SHARED OFF"
+    "ZLIB_INSTALL OFF"
+)
+
+message(assimp)
 CPMAddPackage(
   NAME assimp
   VERSION 6.0.4
@@ -73,35 +91,72 @@ CPMAddPackage(
     "ASSIMP_BUILD_TESTS OFF"
     "ASSIMP_INSTALL OFF"
     "ASSIMP_BUILD_DOCS OFF"
+    "ASSIMP_BUILD_ZLIB OFF"
 )
 
 #excel
-CPMAddPackage(
-  NAME minizip
-  VERSION 4.1.0
-  GITHUB_REPOSITORY zlib-ng/minizip-ng
-  GIT_TAG 4.1.0
-  OPTIONS
-    "MZ_ICONV OFF"
-)
-
-find_package(expat)
-if (NOT ${expat})
+set(EXPAT_DIR "")
+find_package(expat QUIET)
+if (NOT expat)
+  message(expat)
   CPMAddPackage(
-  NAME expat
-  VERSION 2.7.4
-  GITHUB_REPO libexpat/libexpat
-  GIT_TAG "R_2_7_4"
-  DOWNLOAD_ONLY
-)
+    NAME expat
+    VERSION 2.7.4
+    GITHUB_REPOSITORY libexpat/libexpat
+    GIT_TAG R_2_7_4
+    # DOWNLOAD_ONLY
+    OPTIONS
+      "EXPAT_BUILD_TOOLS OFF"
+      "EXPAT_SHARED_LIBS OFF"
+      "EXPAT_BUILD_EXAMPLES OFF"
+      "EXPAT_ENABLE_INSTALL OFF"
+  )
 
   set(EXPAT_BUILD_TOOLS OFF)
   set(EXPAT_SHARED_LIBS OFF)
   set(EXPAT_BUILD_EXAMPLES OFF)
   set(EXPAT_ENABLE_INSTALL OFF)
-  add_subdirectory(${libexpat_SOURCE_DIR}/expat)
+
+  set(EXPAT_DIR_ "EXPAT_DIR ${expat_SOURCE_DIR}/expat")
+
+  # add_subdirectory(${expat_SOURCE_DIR}/expat ${CMAKE_BINARY_DIR}/expat.dir)
 endif()
 
+message(minizip)
+# CPMAddPackage(
+#   NAME minizip
+#   VERSION 4.1.0
+#   GITHUB_REPOSITORY zlib-ng/minizip-ng
+#   GIT_TAG 4.1.0
+#   OPTIONS
+#     "MZ_ICONV OFF"
+# )
+
+# CPMAddPackage(
+#   NAME minizip
+#   VERSION 3.16.0
+#   GITHUB_REPOSITORY domoticz/minizip
+#   GIT_TAG master
+# )
+
+CPMAddPackage(
+  NAME libzip
+  VERSION 1.11.4 
+  GITHUB_REPOSITORY nih-at/libzip
+  GIT_TAG v1.11.4
+  OPTIONS
+    "ENABLE_COMMONCRYPTO OFF"
+    "ENABLE_GNUTLS OFF"
+    "ENABLE_MBEDTLS OFF"
+    "ENABLE_OPENSSL OFF"
+    "BUILD_SHARED_LIBS OFF"
+    "BUILD_DOC OFF"
+    "BUILD_EXAMPLES OFF"
+    "BUILD_OSSFUZZ OFF"
+    "BUILD_REGRESS OFF"
+)
+
+message(xlsxio)
 CPMAddPackage(
   NAME xlsxio
   VERSION 0.2.36
@@ -114,5 +169,6 @@ CPMAddPackage(
     "BUILD_DOCUMENTATION OFF"
     "BUILD_PC_FILES OFF"
     "BUILD_EXAMPLES OFF"
-    "WITH_MINIZIP_NG ON"
+    # "WITH_MINIZIP_NG ON"
+    "WITH_LIBZIP ON"
 )
