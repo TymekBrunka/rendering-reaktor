@@ -1,5 +1,5 @@
 include(deps/CPM.cmake)
-set(CPM_USE_LOCAL_PACKAGES ON)
+# set(CPM_USE_LOCAL_PACKAGES ON)
 
 find_program(CCACHE_PROGRAM ccache)
 if (CCACHE_PROGRAM)
@@ -69,16 +69,22 @@ target_link_libraries(imguizmo PUBLIC imgui)
 
 #loading models
 
-CPMAddPackage( #just couse frikin assimp doesnt let other targets use zlib if compiled from source
-  NAME zlib
-  VERSION 1.3.1.2
-  GITHUB_REPOSITORY madler/zlib
-  GIT_TAG v1.3.1.2
-  OPTIONS
-    "ZLIB_BUILD_TESTING OFF"
-    "ZLIB_BUILD_SHARED OFF"
-    "ZLIB_INSTALL OFF"
-)
+find_package(ZLIB 1.3.1.3)
+if (NOT ZLIB)
+  CPMAddPackage( #just couse frikin assimp doesnt let other targets use zlib if compiled from source
+    NAME zlib
+    VERSION 1.3.1.2
+    GITHUB_REPOSITORY madler/zlib
+    GIT_TAG v1.3.1.2
+    OPTIONS
+      "ZLIB_BUILD_STATIC ON"
+      "ZLIB_BUILD_TESTING OFF"
+      "ZLIB_BUILD_SHARED OFF"
+      "ZLIB_INSTALL OFF"
+  )
+
+  add_library(ZLIB::ZLIB ALIAS zlibstatic)
+endif()
 
 message(assimp)
 CPMAddPackage(
@@ -122,39 +128,41 @@ if (NOT expat)
   # add_subdirectory(${expat_SOURCE_DIR}/expat ${CMAKE_BINARY_DIR}/expat.dir)
 endif()
 
-message(minizip)
-# CPMAddPackage(
-#   NAME minizip
-#   VERSION 4.1.0
-#   GITHUB_REPOSITORY zlib-ng/minizip-ng
-#   GIT_TAG 4.1.0
-#   OPTIONS
-#     "MZ_ICONV OFF"
-# )
+macro (install)
+endmacro () 
 
-# CPMAddPackage(
-#   NAME minizip
-#   VERSION 3.16.0
-#   GITHUB_REPOSITORY domoticz/minizip
-#   GIT_TAG master
-# )
-
+message(libzip)
 CPMAddPackage(
   NAME libzip
-  VERSION 1.11.4 
+  VERSION 1.11.4
   GITHUB_REPOSITORY nih-at/libzip
   GIT_TAG v1.11.4
   OPTIONS
+    "ENABLE_OPENSSL OFF"
+    "ENABLE_COVERAGE OFF"
+    "ENABLE_ZSTD OFF"
     "ENABLE_COMMONCRYPTO OFF"
     "ENABLE_GNUTLS OFF"
     "ENABLE_MBEDTLS OFF"
-    "ENABLE_OPENSSL OFF"
+    "ENABLE_BZIP2 OFF"
+    "ENABLE_LZMA OFF"
+    "ENABLE_FDOPEN OFF"
     "BUILD_SHARED_LIBS OFF"
     "BUILD_DOC OFF"
     "BUILD_EXAMPLES OFF"
     "BUILD_OSSFUZZ OFF"
     "BUILD_REGRESS OFF"
+    "LIBZIP_DO_INSTALL OFF"
+    "BUILD_SHARED_LIBS OFF"
+
+    "CFLAGS -I${libzip_SOURCE_DIR}"
 )
+
+target_include_directories(zip PUBLIC ${libzip_SOURCE_DIR})
+
+get_target_property(LIBZIP_INCLUDES libzip::zip INCLUDE_DIRECTORIES)
+# set(LIPZIPINC ${LIBZIP_INCLUDES})
+list(APPEND LIBZIP_INCLUDES $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps> $<BUILD_INTERFACE:${libzip_BINARY_DIR}>)
 
 message(xlsxio)
 CPMAddPackage(
@@ -166,9 +174,18 @@ CPMAddPackage(
     "CMAKE_POLICY_VERSION_MINIMUM 3.5"
     "BUILD_STATIC ON"
     "BUILD_SHARED OFF"
+    "BUILD_TOOLS OFF"
     "BUILD_DOCUMENTATION OFF"
     "BUILD_PC_FILES OFF"
     "BUILD_EXAMPLES OFF"
     # "WITH_MINIZIP_NG ON"
     "WITH_LIBZIP ON"
+
+    "LIBZIP_INCLUDE_DIRS ${LIBZIP_INCLUDES}"
 )
+
+target_link_libraries(xlsxio_read_STATIC zip)
+target_include_directories(xlsxio_read_STATIC PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps>)
+
+target_link_libraries(xlsxio_write_STATIC zip)
+target_include_directories(xlsxio_write_STATIC PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps>)
