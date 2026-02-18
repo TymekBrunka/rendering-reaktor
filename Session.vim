@@ -13,10 +13,26 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
+badd +177 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+badd +49 ~/Documents/kody/rendering-reaktor/deps/zipconf.h
+badd +4 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/config.h
+badd +1 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/zipconf.h
+badd +160 ~/.cache/CPM/xlsxio/f803/CMakeLists.txt
 argglobal
 %argdel
+tabnew +setlocal\ bufhidden=wipe
+tabnew +setlocal\ bufhidden=wipe
+tabrewind
+edit ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+wincmd t
+let s:save_winminheight = &winminheight
+let s:save_winminwidth = &winminwidth
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 argglobal
-enew
+balt ~/Documents/kody/rendering-reaktor/deps/zipconf.h
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -25,6 +41,53 @@ setlocal foldlevel=0
 setlocal foldminlines=1
 setlocal foldnestmax=20
 setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 177 - ((24 * winheight(0) + 26) / 52)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 177
+normal! 016|
+tabnext
+edit ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/zipconf.h
+argglobal
+balt ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/config.h
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 1 - ((0 * winheight(0) + 26) / 52)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 1
+normal! 0
+tabnext
+edit ~/.cache/CPM/xlsxio/f803/CMakeLists.txt
+argglobal
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 159 - ((33 * winheight(0) + 26) / 52)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 159
+normal! 053|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
@@ -38,7 +101,6 @@ if filereadable(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
 set hlsearch
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :

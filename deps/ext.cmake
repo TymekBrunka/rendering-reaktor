@@ -1,5 +1,11 @@
 include(deps/CPM.cmake)
-# set(CPM_USE_LOCAL_PACKAGES ON)
+set(CPM_USE_LOCAL_PACKAGES ON)
+
+macro (install)
+endmacro ()
+
+# macro (find_package)
+# endmacro ()
 
 find_program(CCACHE_PROGRAM ccache)
 if (CCACHE_PROGRAM)
@@ -69,26 +75,6 @@ target_link_libraries(imguizmo PUBLIC imgui)
 
 #loading models
 
-find_package(ZLIB 1.3.1.3)
-if (NOT ZLIB)
-  CPMAddPackage( #just couse frikin assimp doesnt let other targets use zlib if compiled from source
-    NAME zlib
-    VERSION 1.3.1.2
-    GITHUB_REPOSITORY madler/zlib
-    GIT_TAG v1.3.1.2
-    OPTIONS
-      "ZLIB_BUILD_STATIC ON"
-      "ZLIB_BUILD_TESTING OFF"
-      "ZLIB_BUILD_SHARED OFF"
-      "ZLIB_INSTALL OFF"
-  )
-
-  add_library(ZLIB::ZLIB ALIAS zlibstatic)
-endif()
-
-get_target_property(ZLIBLIB zlibstatic LOCATION)
-message("zliublib " ${ZLIBLIB})
-
 message(assimp)
 CPMAddPackage(
   NAME assimp
@@ -100,42 +86,58 @@ CPMAddPackage(
     "ASSIMP_BUILD_TESTS OFF"
     "ASSIMP_INSTALL OFF"
     "ASSIMP_BUILD_DOCS OFF"
-    "ASSIMP_BUILD_ZLIB OFF"
+    "ASSIMP_BUILD_ZLIB ON"
     "ZLIB_LIBRARY ${ZLIBLIB}"
     "ZLIB_INCLUDE_DIR ${ZLIB_INCLUDES}"
     "ZLIB_DIR ${zlib_SOURCE_DIR}"
 )
 
-#excel
-set(EXPAT_DIR "")
-find_package(expat QUIET)
-if (NOT expat)
-  message(expat)
-  CPMAddPackage(
-    NAME expat
-    VERSION 2.7.4
-    GITHUB_REPOSITORY libexpat/libexpat
-    GIT_TAG R_2_7_4
-    DOWNLOAD_ONLY
-    # OPTIONS
-    #   "EXPAT_BUILD_TOOLS OFF"
-    #   "EXPAT_SHARED_LIBS OFF"
-    #   "EXPAT_BUILD_EXAMPLES OFF"
-    #   "EXPAT_ENABLE_INSTALL OFF"
-  )
+find_package(ZLIB 1.3.1.3)
+if (NOT ZLIB)
+  #   CPMAddPackage( #just couse frikin assimp doesnt let other targets use zlib if compiled from source
+  #     NAME zlib
+  #     VERSION 1.3.1.2
+  #     GITHUB_REPOSITORY madler/zlib
+  #     GIT_TAG v1.3.1.2
+  #     OPTIONS
+  #       "ZLIB_BUILD_STATIC ON"
+  #       "ZLIB_BUILD_TESTING OFF"
+  #       "ZLIB_BUILD_SHARED OFF"
+  #       "ZLIB_INSTALL OFF"
+  #   )
 
-  set(EXPAT_BUILD_TOOLS OFF)
-  set(EXPAT_SHARED_LIBS OFF)
-  set(EXPAT_BUILD_EXAMPLES OFF)
-  set(EXPAT_ENABLE_INSTALL OFF)
-
-  set(EXPAT_DIR_ "EXPAT_DIR ${expat_SOURCE_DIR}/expat")
-
-  add_subdirectory(${expat_SOURCE_DIR}/expat ${CMAKE_BINARY_DIR}/expat.dir)
+  add_library(ZLIB::ZLIB ALIAS zlibstatic)
 endif()
 
-macro (install)
-endmacro () 
+# get_target_property(ZLIBLIB $<TARGET_FILE:zlibstatic> LOCATION)
+# message("zliublib " ${})
+
+#excel
+set(CPM_USE_LOCAL_PACKAGES OFF)
+message(expat)
+CPMAddPackage(
+  NAME expat
+  VERSION 2.7.4
+  GITHUB_REPOSITORY libexpat/libexpat
+  GIT_TAG R_2_7_4
+  DOWNLOAD_ONLY
+  # OPTIONS
+  #   "EXPAT_BUILD_TOOLS OFF"
+  #   "EXPAT_SHARED_LIBS OFF"
+  #   "EXPAT_BUILD_EXAMPLES OFF"
+  #   "EXPAT_ENABLE_INSTALL OFF"
+)
+set(CPM_USE_LOCAL_PACKAGES ON)
+
+set(EXPAT_BUILD_TOOLS OFF)
+set(EXPAT_SHARED_LIBS OFF)
+set(EXPAT_BUILD_EXAMPLES OFF)
+set(EXPAT_ENABLE_INSTALL OFF)
+
+set(EXPAT_DIR "EXPAT_DIR ${expat_SOURCE_DIR}/expat")
+
+message(STATUS expatsrc ${expat_SOURCE_DIR})
+add_subdirectory(${expat_SOURCE_DIR}/expat ${CMAKE_BINARY_DIR}/expat.dir)
 
 message(libzip)
 CPMAddPackage(
@@ -167,13 +169,10 @@ CPMAddPackage(
 target_include_directories(zip PUBLIC ${libzip_SOURCE_DIR})
 
 get_target_property(LIBZIP_INCLUDES libzip::zip INCLUDE_DIRECTORIES)
-get_target_property(EXPAT_INCLUDES expat::expat INCLUDE_DIRECTORIES)
+get_target_property(EXPAT_INCLUDES expat INCLUDE_DIRECTORIES)
+message(STATUS expat includes ${EXPAT_INCLUDES})
 get_target_property(ZLIB_INCLUDES zlibstatic INCLUDE_DIRECTORIES)
-message(includes, ${ZLIB_INCLUDES})
-# set(LIPZIPINC ${LIBZIP_INCLUDES})
 list(APPEND LIBZIP_INCLUDES $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps> $<BUILD_INTERFACE:${libzip_BINARY_DIR}>)
-
-set(EXPATEXPAT $<TARGET_FILE:expat::expat>)
 
 message(xlsxio)
 CPMAddPackage(
@@ -194,7 +193,7 @@ CPMAddPackage(
 
     "EXPAT_INCLUDE_DIR ${EXPAT_INCLUDES}"
     "EXPAT_LIBRARIES expat"
-    "EXPAT_DIR ${expat_SOURCE_DIR}"
+    "EXPAT_DIR ${EXPAT_DIR}"
     # "ZLIB_INCLUDE_DIR ${ZLIB_INCLUDES}"
     # "ZLIB_DIR ${zlib_SOURCE_DIR}"
 
@@ -206,5 +205,3 @@ target_include_directories(xlsxio_read_STATIC PUBLIC $<BUILD_INTERFACE:${CMAKE_C
 
 target_link_libraries(xlsxio_write_STATIC zip)
 target_include_directories(xlsxio_write_STATIC PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps>)
-
-message("gexu")
