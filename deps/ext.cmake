@@ -45,7 +45,7 @@ message(imgui)
 add_library(imgui OBJECT ${imgui_SRC})
 target_include_directories(imgui PUBLIC deps/imgui)
 target_compile_options(imgui PRIVATE "-DIMGUI_IMPL_OPENGL_LOADER_CUSTOM <glad/glad.h>")
-target_link_libraries(imgui glad)
+target_link_libraries(imgui glad glfw)
 
 message(imguizmo)
 CPMAddPackage(
@@ -86,6 +86,9 @@ if (NOT ZLIB)
   add_library(ZLIB::ZLIB ALIAS zlibstatic)
 endif()
 
+get_target_property(ZLIBLIB zlibstatic LOCATION)
+message("zliublib " ${ZLIBLIB})
+
 message(assimp)
 CPMAddPackage(
   NAME assimp
@@ -98,6 +101,9 @@ CPMAddPackage(
     "ASSIMP_INSTALL OFF"
     "ASSIMP_BUILD_DOCS OFF"
     "ASSIMP_BUILD_ZLIB OFF"
+    "ZLIB_LIBRARY ${ZLIBLIB}"
+    "ZLIB_INCLUDE_DIR ${ZLIB_INCLUDES}"
+    "ZLIB_DIR ${zlib_SOURCE_DIR}"
 )
 
 #excel
@@ -110,12 +116,12 @@ if (NOT expat)
     VERSION 2.7.4
     GITHUB_REPOSITORY libexpat/libexpat
     GIT_TAG R_2_7_4
-    # DOWNLOAD_ONLY
-    OPTIONS
-      "EXPAT_BUILD_TOOLS OFF"
-      "EXPAT_SHARED_LIBS OFF"
-      "EXPAT_BUILD_EXAMPLES OFF"
-      "EXPAT_ENABLE_INSTALL OFF"
+    DOWNLOAD_ONLY
+    # OPTIONS
+    #   "EXPAT_BUILD_TOOLS OFF"
+    #   "EXPAT_SHARED_LIBS OFF"
+    #   "EXPAT_BUILD_EXAMPLES OFF"
+    #   "EXPAT_ENABLE_INSTALL OFF"
   )
 
   set(EXPAT_BUILD_TOOLS OFF)
@@ -125,7 +131,7 @@ if (NOT expat)
 
   set(EXPAT_DIR_ "EXPAT_DIR ${expat_SOURCE_DIR}/expat")
 
-  # add_subdirectory(${expat_SOURCE_DIR}/expat ${CMAKE_BINARY_DIR}/expat.dir)
+  add_subdirectory(${expat_SOURCE_DIR}/expat ${CMAKE_BINARY_DIR}/expat.dir)
 endif()
 
 macro (install)
@@ -161,8 +167,13 @@ CPMAddPackage(
 target_include_directories(zip PUBLIC ${libzip_SOURCE_DIR})
 
 get_target_property(LIBZIP_INCLUDES libzip::zip INCLUDE_DIRECTORIES)
+get_target_property(EXPAT_INCLUDES expat::expat INCLUDE_DIRECTORIES)
+get_target_property(ZLIB_INCLUDES zlibstatic INCLUDE_DIRECTORIES)
+message(includes, ${ZLIB_INCLUDES})
 # set(LIPZIPINC ${LIBZIP_INCLUDES})
 list(APPEND LIBZIP_INCLUDES $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps> $<BUILD_INTERFACE:${libzip_BINARY_DIR}>)
+
+set(EXPATEXPAT $<TARGET_FILE:expat::expat>)
 
 message(xlsxio)
 CPMAddPackage(
@@ -181,6 +192,12 @@ CPMAddPackage(
     # "WITH_MINIZIP_NG ON"
     "WITH_LIBZIP ON"
 
+    "EXPAT_INCLUDE_DIR ${EXPAT_INCLUDES}"
+    "EXPAT_LIBRARIES expat"
+    "EXPAT_DIR ${expat_SOURCE_DIR}"
+    # "ZLIB_INCLUDE_DIR ${ZLIB_INCLUDES}"
+    # "ZLIB_DIR ${zlib_SOURCE_DIR}"
+
     "LIBZIP_INCLUDE_DIRS ${LIBZIP_INCLUDES}"
 )
 
@@ -189,3 +206,5 @@ target_include_directories(xlsxio_read_STATIC PUBLIC $<BUILD_INTERFACE:${CMAKE_C
 
 target_link_libraries(xlsxio_write_STATIC zip)
 target_include_directories(xlsxio_write_STATIC PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps>)
+
+message("gexu")
