@@ -15,12 +15,12 @@ add_subdirectory(src/rendering)
 imgpack(cubemap2Img src/cubemap2.png cubemap2.png y 4)
 imgpack(icon_data src/icon.png icon.png n 4)
 imgpack(iconsImg src/icons.png icons.png y 4)
-bytepack(skybox_vertex_text src/shaders/skybox.vertex.glsl skybox.vertex.glsl)
-bytepack(skybox_fragment_text src/shaders/skybox.frag.glsl skybox.frag.glsl)
-bytepack(model_vertex_text src/shaders/model.vertex.glsl model.vertex.glsl)
-bytepack(model_fragment_text src/shaders/model.frag.glsl model.frag.glsl)
-bytepack(composite_vertex_text src/shaders/composite.vertex.glsl composite.vertex.glsl)
-bytepack(composite_fragment_text src/shaders/composite.frag.glsl composite.frag.glsl)
+betterGL_bytepack(skybox_vertex_text src/shaders/skybox.vertex.glsl skybox.vertex.glsl d)
+betterGL_bytepack(skybox_fragment_text src/shaders/skybox.frag.glsl skybox.frag.glsl d)
+betterGL_bytepack(model_vertex_text src/shaders/model.vertex.glsl model.vertex.glsl d)
+betterGL_bytepack(model_fragment_text src/shaders/model.frag.glsl model.frag.glsl d)
+betterGL_bytepack(composite_vertex_text src/shaders/composite.vertex.glsl composite.vertex.glsl d)
+betterGL_bytepack(composite_fragment_text src/shaders/composite.frag.glsl composite.frag.glsl d)
 
 # add_library(tinyobjloader OBJECT src/tinyobjloader/tiny_obj_loader.cc)
 # target_include_directories(tinyobjloader PUBLIC src/tinyobjloader/)
@@ -43,6 +43,9 @@ target_link_libraries(main PUBLIC
   glm::glm-header-only
   # tinyobjloader
   assimp::assimp
+  imgui
+  imguizmo
+  betterGL
 
 #prebuilt assets
   cubemap2Img
@@ -58,4 +61,3 @@ target_link_libraries(main PUBLIC
   pfd
 )
 target_precompile_headers(main REUSE_FROM pfd)
-target_link_libraries(main PUBLIC imgui imguizmo)

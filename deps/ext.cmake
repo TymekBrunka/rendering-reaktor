@@ -38,9 +38,18 @@ CPMAddPackage(
     "GLFW_BUILD_DOCS OFF"
 )
 
-message(glad)
-add_library(glad OBJECT deps/glad/src/glad.c)
-target_include_directories(glad PUBLIC deps/glad/include)
+message(bettergl)
+CPMAddPackage(
+  NAME bettergl
+  GITHUB_REPOSITORY tymekbrunka/bettyergl
+  GIT_TAG main
+  OPTIONS
+    "BETTERGL_BUILD_TEST_EXAMPLE OFF"
+)
+
+# message(glad)
+# add_library(glad OBJECT deps/glad/src/glad.c)
+# target_include_directories(glad PUBLIC deps/glad/include)
 
 file(GLOB imgui_SRC
   deps/imgui/*.hpp
