@@ -13,12 +13,12 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +49 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+badd +26 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
 badd +49 ~/Documents/kody/rendering-reaktor/deps/zipconf.h
 badd +4 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/config.h
 badd +1 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/zipconf.h
-badd +160 ~/.cache/CPM/xlsxio/f803/CMakeLists.txt
-badd +370 ~/Documents/kody/rendering-reaktor/src/main.cpp
+badd +159 ~/.cache/CPM/xlsxio/f803/CMakeLists.txt
+badd +364 ~/Documents/kody/rendering-reaktor/src/main.cpp
 badd +40 ~/Documents/kody/rendering-reaktor/CMakeLists.txt
 badd +1 ~/Documents/kody/rendering-reaktor/build/composite.vertex.glsl.cpp
 badd +5 ~/Documents/kody/rendering-reaktor/build/composite.vertex.glsl.hpp
@@ -28,24 +28,6 @@ tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabrewind
 edit ~/Documents/kody/rendering-reaktor/src/main.cpp
-let s:save_splitbelow = &splitbelow
-let s:save_splitright = &splitright
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-let &splitbelow = s:save_splitbelow
-let &splitright = s:save_splitright
-wincmd t
-let s:save_winminheight = &winminheight
-let s:save_winminwidth = &winminwidth
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe '1resize ' . ((&lines * 41 + 27) / 55)
-exe '2resize ' . ((&lines * 10 + 27) / 55)
 argglobal
 balt ~/Documents/kody/rendering-reaktor/build/composite.vertex.glsl.hpp
 setlocal foldmethod=manual
@@ -58,27 +40,12 @@ setlocal foldnestmax=20
 setlocal nofoldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 364 - ((34 * winheight(0) + 20) / 41)
+let s:l = 355 - ((34 * winheight(0) + 26) / 52)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 364
-normal! 02|
-wincmd w
-argglobal
-enew
-balt ~/Documents/kody/rendering-reaktor/src/main.cpp
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=99
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal nofoldenable
-wincmd w
-exe '1resize ' . ((&lines * 41 + 27) / 55)
-exe '2resize ' . ((&lines * 10 + 27) / 55)
+keepjumps 355
+normal! 0
 tabnext
 edit ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/zipconf.h
 argglobal
@@ -100,8 +67,9 @@ normal! zt
 keepjumps 1
 normal! 0
 tabnext
-edit ~/.cache/CPM/xlsxio/f803/CMakeLists.txt
+edit ~/Documents/kody/rendering-reaktor/deps/ext.cmake
 argglobal
+balt ~/.cache/CPM/xlsxio/f803/CMakeLists.txt
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -112,13 +80,13 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 159 - ((33 * winheight(0) + 26) / 52)
+let s:l = 40 - ((16 * winheight(0) + 26) / 52)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 159
-normal! 053|
-tabnext 1
+keepjumps 40
+normal! 0
+tabnext 3
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif
