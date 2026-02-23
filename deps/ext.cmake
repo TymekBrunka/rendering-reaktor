@@ -101,8 +101,8 @@ CPMAddPackage(
     # "ZLIB_DIR ${zlib_SOURCE_DIR}"
 )
 
-# find_package(ZLIB 1.3.1.3)
-# if (NOT ZLIB)
+find_package(ZLIB 1.3.1.3)
+if (NOT ZLIB)
   #   CPMAddPackage( #just couse frikin assimp doesnt let other targets use zlib if compiled from source
   #     NAME zlib
   #     VERSION 1.3.1.2
@@ -117,7 +117,7 @@ CPMAddPackage(
 
   add_library(ZLIB::ZLIB ALIAS zlibstatic)
   set(ZLIB_FOUND CACHE BOOL TRUE)
-# endif()
+endif()
 
 # get_target_property(ZLIBLIB $<TARGET_FILE:zlibstatic> LOCATION)
 # message("zliublib " ${})
