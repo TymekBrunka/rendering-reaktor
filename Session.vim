@@ -13,7 +13,7 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +120 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+badd +4 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
 badd +49 ~/Documents/kody/rendering-reaktor/deps/zipconf.h
 badd +4 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/config.h
 badd +1 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/zipconf.h
@@ -81,12 +81,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 120 - ((35 * winheight(0) + 26) / 52)
+let s:l = 4 - ((3 * winheight(0) + 26) / 52)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 120
-normal! 07|
+keepjumps 4
+normal! 013|
 tabnext 3
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
