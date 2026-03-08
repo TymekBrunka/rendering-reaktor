@@ -13,7 +13,7 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +26 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+badd +120 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
 badd +49 ~/Documents/kody/rendering-reaktor/deps/zipconf.h
 badd +4 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/config.h
 badd +1 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/zipconf.h
@@ -22,6 +22,7 @@ badd +364 ~/Documents/kody/rendering-reaktor/src/main.cpp
 badd +40 ~/Documents/kody/rendering-reaktor/CMakeLists.txt
 badd +1 ~/Documents/kody/rendering-reaktor/build/composite.vertex.glsl.cpp
 badd +5 ~/Documents/kody/rendering-reaktor/build/composite.vertex.glsl.hpp
+badd +133 ~/.cache/CPM/expat/9fe2/expat/CMakeLists.txt
 argglobal
 %argdel
 tabnew +setlocal\ bufhidden=wipe
@@ -80,12 +81,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 40 - ((16 * winheight(0) + 26) / 52)
+let s:l = 120 - ((35 * winheight(0) + 26) / 52)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 40
-normal! 0
+keepjumps 120
+normal! 07|
 tabnext 3
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
