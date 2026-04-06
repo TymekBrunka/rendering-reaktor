@@ -13,7 +13,7 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +177 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+badd +108 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
 badd +49 ~/Documents/kody/rendering-reaktor/deps/zipconf.h
 badd +4 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/config.h
 badd +1 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/zipconf.h
@@ -24,13 +24,6 @@ tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabrewind
 edit ~/Documents/kody/rendering-reaktor/deps/ext.cmake
-wincmd t
-let s:save_winminheight = &winminheight
-let s:save_winminwidth = &winminwidth
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
 argglobal
 balt ~/Documents/kody/rendering-reaktor/deps/zipconf.h
 setlocal foldmethod=manual
@@ -43,12 +36,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 177 - ((24 * winheight(0) + 26) / 52)
+let s:l = 108 - ((24 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 177
-normal! 016|
+keepjumps 108
+normal! 07|
 tabnext
 edit ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/zipconf.h
 argglobal
@@ -63,7 +56,7 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 26) / 52)
+let s:l = 1 - ((0 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -82,7 +75,7 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 159 - ((33 * winheight(0) + 26) / 52)
+let s:l = 159 - ((35 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt

@@ -28,7 +28,7 @@ CPMAddPackage(
 # rendering
 message(glfw)
 CPMAddPackage(
-  NAME glfw
+  NAME glfw3
   VERSION 3.4
   GITHUB_REPOSITORY glfw/glfw
   GIT_TAG 3.4
@@ -86,27 +86,25 @@ CPMAddPackage(
     "ASSIMP_BUILD_TESTS OFF"
     "ASSIMP_INSTALL OFF"
     "ASSIMP_BUILD_DOCS OFF"
-    "ASSIMP_BUILD_ZLIB ON"
-    "ZLIB_LIBRARY ${ZLIBLIB}"
-    "ZLIB_INCLUDE_DIR ${ZLIB_INCLUDES}"
-    "ZLIB_DIR ${zlib_SOURCE_DIR}"
+    "ASSIMP_BUILD_ZLIB OFF"
+    # "ZLIB_LIBRARY ${ZLIBLIB}"
+    # "ZLIB_INCLUDE_DIR ${ZLIB_INCLUDES}"
+    # "ZLIB_DIR ${zlib_SOURCE_DIR}"
 )
 
 find_package(ZLIB 1.3.1.3)
 if (NOT ZLIB)
-  #   CPMAddPackage( #just couse frikin assimp doesnt let other targets use zlib if compiled from source
-  #     NAME zlib
-  #     VERSION 1.3.1.2
-  #     GITHUB_REPOSITORY madler/zlib
-  #     GIT_TAG v1.3.1.2
-  #     OPTIONS
-  #       "ZLIB_BUILD_STATIC ON"
-  #       "ZLIB_BUILD_TESTING OFF"
-  #       "ZLIB_BUILD_SHARED OFF"
-  #       "ZLIB_INSTALL OFF"
-  #   )
-
-  add_library(ZLIB::ZLIB ALIAS zlibstatic)
+  CPMAddPackage( #just couse frikin assimp doesnt let other targets use zlib if compiled from source
+    NAME zlib
+    VERSION 1.3.1.2
+    GITHUB_REPOSITORY madler/zlib
+    GIT_TAG v1.3.1.2
+    OPTIONS
+      "ZLIB_BUILD_STATIC ON"
+      "ZLIB_BUILD_TESTING OFF"
+      "ZLIB_BUILD_SHARED OFF"
+      "ZLIB_INSTALL OFF"
+  )
 endif()
 
 # get_target_property(ZLIBLIB $<TARGET_FILE:zlibstatic> LOCATION)
