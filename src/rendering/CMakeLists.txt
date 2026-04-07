@@ -6,7 +6,7 @@ set (CMAKE_CXX_STANDARD 20)
 
 include_directories(.)
 
-add_library(stb_image stb_image.cpp)
+add_library(stb_image OBJECT stb_image.cpp)
 
 add_library(rr STATIC rr.cpp
   BufferBase.cpp

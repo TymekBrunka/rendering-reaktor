@@ -73,8 +73,27 @@ target_compile_options(imguizmo PRIVATE -DIMGUI_DEFINE_MATH_OPERATORS)
 target_compile_features(imguizmo PRIVATE cxx_std_11)
 target_link_libraries(imguizmo PUBLIC imgui)
 
-#loading models
+# find_package(ZLIB 1.3.1.3)
+# # if (NOT ZLIB)
+#   CPMAddPackage( #just couse frikin assimp doesnt let other targets use zlib if compiled from source
+#     NAME zlib
+#     VERSION 1.3.1.2
+#     GITHUB_REPOSITORY madler/zlib
+#     GIT_TAG v1.3.1.2
+#     OPTIONS
+#       "ZLIB_BUILD_STATIC ON"
+#       "ZLIB_BUILD_TESTING OFF"
+#       "ZLIB_BUILD_SHARED OFF"
+#       "ZLIB_INSTALL OFF"
+#   )
+#
+#   add_library(ZLIB::ZLIB UNKNOWN IMPORTED)
+#   set(CACHE{zlib_LIBRARIES} FORCE VALUE "${zlib_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}zlib${CMAKE_STATIC_LIBRARY_SUFFIX}")
+#   get_target_property(zlib_INCLUDE_DIRS zlibstatic INCLUDE_DIRECTORIES)
+#   set_target_properties(ZLIB::ZLIB PROPERTIES IMPORTED_LOCATION "${zlib_LIBRARIES}" INTERFACE_INCLUDE_DIRECTORIES "${zlib_INCLUDE_DIRS}")
+# # endif()
 
+#loading models
 message(assimp)
 CPMAddPackage(
   NAME assimp
@@ -86,26 +105,24 @@ CPMAddPackage(
     "ASSIMP_BUILD_TESTS OFF"
     "ASSIMP_INSTALL OFF"
     "ASSIMP_BUILD_DOCS OFF"
-    "ASSIMP_BUILD_ZLIB OFF"
-    # "ZLIB_LIBRARY ${ZLIBLIB}"
-    # "ZLIB_INCLUDE_DIR ${ZLIB_INCLUDES}"
-    # "ZLIB_DIR ${zlib_SOURCE_DIR}"
+    "ASSIMP_BUILD_ZLIB ON"
+    # "ZLIB_LIBRARY ${zlib_LIBRARIES}"
+    # "ZLIB_INCLUDE_DIR ${zlib_INCLUDE_DIRS}"
 )
 
-find_package(ZLIB 1.3.1.3)
-if (NOT ZLIB)
-  CPMAddPackage( #just couse frikin assimp doesnt let other targets use zlib if compiled from source
-    NAME zlib
-    VERSION 1.3.1.2
-    GITHUB_REPOSITORY madler/zlib
-    GIT_TAG v1.3.1.2
-    OPTIONS
-      "ZLIB_BUILD_STATIC ON"
-      "ZLIB_BUILD_TESTING OFF"
-      "ZLIB_BUILD_SHARED OFF"
-      "ZLIB_INSTALL OFF"
-  )
-endif()
+set(ZLIB_FOUND TRUE CACHE BOOL "" FORCE)
+# set(ZLIB_VERSION 1.3.1.2 CACHE VERSION "" FORCE)
+add_library(ZLIB::ZLIB UNKNOWN IMPORTED)
+set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}zlibstatic${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}" CACHE PATH "" FORCE)
+# get_target_property(zlib_INCLUDE_DIR zlibstatic INCLUDE_DIRECTORIES)
+set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR};${zlib_BINARY_DIR};${assimp_SOURCE_DIR}/contrib/unzip" CACHE ARRAY "" FORCE)
+set_target_properties(ZLIB::ZLIB PROPERTIES IMPORTED_LOCATION "${ZLIB_LIBRARY}" INTERFACE_INCLUDE_DIRECTORIES "${zlib_INCLUDE_DIR}")
+
+# set(ZLIB_LIBRARIES ${ZLIB_LIBRARY} CACHE ARRAY "" FORCE)
+# set(ZLIB_LIBRARY_DIRS ${zlib_BINARY_DIR} CACHE ARRAY "" FORCE)
+# set(ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDE_DIR} CACHE ARRAY "" FORCE)
+
+message(STATUS "ncdsncjksdnckjsdnckjsdncjksdnckjsdnkjs ${ZLIB_LIBRARY}")
 
 # get_target_property(ZLIBLIB $<TARGET_FILE:zlibstatic> LOCATION)
 # message("zliublib " ${})
@@ -137,6 +154,8 @@ set(EXPAT_DIR "EXPAT_DIR ${expat_SOURCE_DIR}/expat")
 message(STATUS expatsrc ${expat_SOURCE_DIR})
 add_subdirectory(${expat_SOURCE_DIR}/expat ${CMAKE_BINARY_DIR}/expat.dir)
 
+# add_library(ZLIB::ZLIB alias zlib_static)
+
 message(libzip)
 CPMAddPackage(
   NAME libzip
@@ -154,12 +173,15 @@ CPMAddPackage(
     "ENABLE_LZMA OFF"
     "ENABLE_FDOPEN OFF"
     "BUILD_SHARED_LIBS OFF"
+    "BUILD_TOOLS OFF"
     "BUILD_DOC OFF"
     "BUILD_EXAMPLES OFF"
     "BUILD_OSSFUZZ OFF"
     "BUILD_REGRESS OFF"
     "LIBZIP_DO_INSTALL OFF"
     "BUILD_SHARED_LIBS OFF"
+
+    "ZLIb::ZLIB zlib_static"
 
     "CFLAGS -I${libzip_SOURCE_DIR}"
 )
@@ -169,7 +191,6 @@ target_include_directories(zip PUBLIC ${libzip_SOURCE_DIR})
 get_target_property(LIBZIP_INCLUDES libzip::zip INCLUDE_DIRECTORIES)
 get_target_property(EXPAT_INCLUDES expat INCLUDE_DIRECTORIES)
 message(STATUS expat includes ${EXPAT_INCLUDES})
-get_target_property(ZLIB_INCLUDES zlibstatic INCLUDE_DIRECTORIES)
 list(APPEND LIBZIP_INCLUDES $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps> $<BUILD_INTERFACE:${libzip_BINARY_DIR}>)
 
 message(xlsxio)
@@ -192,7 +213,8 @@ CPMAddPackage(
     "EXPAT_INCLUDE_DIR ${EXPAT_INCLUDES}"
     "EXPAT_LIBRARIES expat"
     "EXPAT_DIR ${EXPAT_DIR}"
-    # "ZLIB_INCLUDE_DIR ${ZLIB_INCLUDES}"
+    "ZLIB_LIBRARY "
+    "ZLIB_INCLUDE_DIR ${ZLIB_INCLUDE_DIRS}"
     # "ZLIB_DIR ${zlib_SOURCE_DIR}"
 
     "LIBZIP_INCLUDE_DIRS ${LIBZIP_INCLUDES}"

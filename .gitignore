@@ -1,6 +1,7 @@
 Makefile
 compile_commands.json
 build/*
+build_windows/*
 .cache/
 vcpkg_installed/
 

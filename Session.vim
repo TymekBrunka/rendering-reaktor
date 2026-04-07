@@ -13,19 +13,24 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +108 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+badd +76 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
 badd +49 ~/Documents/kody/rendering-reaktor/deps/zipconf.h
 badd +4 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/config.h
 badd +1 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/zipconf.h
-badd +160 ~/.cache/CPM/xlsxio/f803/CMakeLists.txt
+badd +148 ~/.cache/CPM/xlsxio/f803/CMakeLists.txt
+badd +4 ~/Documents/kody/rendering-reaktor/.gitignore
+badd +1465 ~/Documents/kody/rendering-reaktor/build_windows/build.ninja
+badd +43 ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/imagePacker.cpp
+badd +1 term://~/Documents/kody/rendering-reaktor//7760:/usr/bin/zsh
 argglobal
 %argdel
+tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabrewind
 edit ~/Documents/kody/rendering-reaktor/deps/ext.cmake
 argglobal
-balt ~/Documents/kody/rendering-reaktor/deps/zipconf.h
+balt ~/Documents/kody/rendering-reaktor/.gitignore
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -36,16 +41,36 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 108 - ((24 * winheight(0) + 27) / 55)
+let s:l = 76 - ((6 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 108
-normal! 07|
+keepjumps 76
+normal! 010|
 tabnext
-edit ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/zipconf.h
+edit ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/imagePacker.cpp
 argglobal
-balt ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/config.h
+balt ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 43 - ((42 * winheight(0) + 27) / 55)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 43
+normal! 0
+tabnext
+edit ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/imagePacker.cpp
+argglobal
+balt ~/Documents/kody/rendering-reaktor/build_windows/build.ninja
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -63,8 +88,12 @@ normal! zt
 keepjumps 1
 normal! 0
 tabnext
-edit ~/.cache/CPM/xlsxio/f803/CMakeLists.txt
 argglobal
+if bufexists(fnamemodify("term://~/Documents/kody/rendering-reaktor//7760:/usr/bin/zsh", ":p")) | buffer term://~/Documents/kody/rendering-reaktor//7760:/usr/bin/zsh | else | edit term://~/Documents/kody/rendering-reaktor//7760:/usr/bin/zsh | endif
+if &buftype ==# 'terminal'
+  silent file term://~/Documents/kody/rendering-reaktor//7760:/usr/bin/zsh
+endif
+balt ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/imagePacker.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -73,14 +102,12 @@ setlocal foldlevel=0
 setlocal foldminlines=1
 setlocal foldnestmax=20
 setlocal foldenable
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 159 - ((35 * winheight(0) + 27) / 55)
+let s:l = 55 - ((54 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 159
-normal! 053|
+keepjumps 55
+normal! 0
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
