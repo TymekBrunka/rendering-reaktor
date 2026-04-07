@@ -4,8 +4,8 @@ set(CPM_USE_LOCAL_PACKAGES ON)
 macro (install)
 endmacro ()
 
-# macro (find_package)
-# endmacro ()
+macro (find_package)
+endmacro ()
 
 find_program(CCACHE_PROGRAM ccache)
 if (CCACHE_PROGRAM)
@@ -25,107 +25,95 @@ CPMAddPackage(
     "GLM_ENABLE_CXX_20 ON"
 )
 
-# rendering
-message(glfw)
+set(CPM_USE_LOCAL_PACKAGES OFF)
+
+function(original_add_library)
+  _add_library(${ARGV})
+endfunction()
+
+function(add_library target)
+  # if(target IN_LIST UNWANTED_TARGETS)
+  #   message(STATUS "Excluding library target: ${target}")
+  #   return()  # Skip creating the target
+  # endif()
+  if(target STREQUAL SDL2::SDL2 AND ARGV2 STREQUAL SDL2)
+    return()  # Skip creating the target
+  endif()
+  original_add_library(${ARGV})  # Create the target if allowed
+endfunction()
+
+#sdl
+# message(sdl3)
 CPMAddPackage(
-  NAME glfw3
-  VERSION 3.4
-  GITHUB_REPOSITORY glfw/glfw
-  GIT_TAG 3.4
+  NAME SDL2
+  VERSION 2.32.64
+  GITHUB_REPOSITORY libsdl-org/sdl2-compat
+  GIT_TAG release-2.32.64
   OPTIONS
-    "GLFW_BUILD_EXAMPLES OFF"
-    "GLFW_BUILD_TESTS OFF"
-    "GLFW_BUILD_DOCS OFF"
-)
-
-message(glad)
-add_library(glad OBJECT deps/glad/src/glad.c)
-target_include_directories(glad PUBLIC deps/glad/include)
-
-file(GLOB imgui_SRC
-  deps/imgui/*.hpp
-  deps/imgui/*.cpp
-)
-
-message(imgui)
-add_library(imgui OBJECT ${imgui_SRC})
-target_include_directories(imgui PUBLIC deps/imgui)
-target_compile_options(imgui PRIVATE "-DIMGUI_IMPL_OPENGL_LOADER_CUSTOM <glad/glad.h>")
-target_link_libraries(imgui glad glfw)
-
-message(imguizmo)
-CPMAddPackage(
-  NAME imguizmo
-  VERSION 1.83
-  GITHUB_REPOSITORY CedricGuillemet/ImGuizmo
-  GIT_TAG 1.83
-  DOWNLOAD_ONLY
-)
-
-file(GLOB imguizmo_SRC
-  "${imguizmo_SOURCE_DIR}/*.h"
-  "${imguizmo_SOURCE_DIR}/*.cpp"
-)
-
-add_library(imguizmo "${imguizmo_SOURCE_DIR}/ImGuizmo.cpp" ${imguizmo_SRC})
-target_include_directories(imguizmo PUBLIC ${imguizmo_SOURCE_DIR})
-target_compile_options(imguizmo PRIVATE -DIMGUI_DEFINE_MATH_OPERATORS)
-target_compile_features(imguizmo PRIVATE cxx_std_11)
-target_link_libraries(imguizmo PUBLIC imgui)
-
-# find_package(ZLIB 1.3.1.3)
-# # if (NOT ZLIB)
-#   CPMAddPackage( #just couse frikin assimp doesnt let other targets use zlib if compiled from source
-#     NAME zlib
-#     VERSION 1.3.1.2
-#     GITHUB_REPOSITORY madler/zlib
-#     GIT_TAG v1.3.1.2
-#     OPTIONS
-#       "ZLIB_BUILD_STATIC ON"
-#       "ZLIB_BUILD_TESTING OFF"
-#       "ZLIB_BUILD_SHARED OFF"
-#       "ZLIB_INSTALL OFF"
-#   )
-#
-#   add_library(ZLIB::ZLIB UNKNOWN IMPORTED)
-#   set(CACHE{zlib_LIBRARIES} FORCE VALUE "${zlib_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}zlib${CMAKE_STATIC_LIBRARY_SUFFIX}")
-#   get_target_property(zlib_INCLUDE_DIRS zlibstatic INCLUDE_DIRECTORIES)
-#   set_target_properties(ZLIB::ZLIB PROPERTIES IMPORTED_LOCATION "${zlib_LIBRARIES}" INTERFACE_INCLUDE_DIRECTORIES "${zlib_INCLUDE_DIRS}")
-# # endif()
-
-#loading models
-message(assimp)
-CPMAddPackage(
-  NAME assimp
-  VERSION 6.0.4
-  GITHUB_REPOSITORY assimp/assimp
-  GIT_TAG v6.0.4
-  OPTIONS
+    "SDL2COMPAT_STATIC ON"
     "BUILD_SHARED_LIBS OFF"
-    "ASSIMP_BUILD_TESTS OFF"
-    "ASSIMP_INSTALL OFF"
-    "ASSIMP_BUILD_DOCS OFF"
-    "ASSIMP_BUILD_ZLIB ON"
-    # "ZLIB_LIBRARY ${zlib_LIBRARIES}"
-    # "ZLIB_INCLUDE_DIR ${zlib_INCLUDE_DIRS}"
+    "SDL_STATIC ON"
+    "SDL_STATIC_DEFAULT ON"
+    "SDL_SHARED OFF"
+    "SDL_EXAMPLES OFF"
+)
+set(CPM_USE_LOCAL_PACKAGES ON)
+
+set(SDL2_FOUND TRUE CACHE BOOL "" FORCE)
+# add_library(SDL2::SDL2 ALIAS SDL2-static)
+
+#rendering
+message(raylib)
+CPMAddPackage(
+  NAME raylib
+  GITHUB_REPOSITORY raysan5/raylib
+  GIT_TAG 5.5
+  OPTIONS
+    "PLATFORM SDL"
+    "OPENGL_VERSION 3.3"
+    "USE_AUDIO OFF"
+    "GLFW_BUILD_WAYLAND ON"
+    "GLFW_BUILD_X11 ON"
+    "BUILD_SHARED_LIBS OFF"
+)
+
+CPMAddPackage(
+  NAME zlib
+  VERSION 1.3.1.2
+  GITHUB_REPOSITORY madler/zlib
+  GIT_TAG v1.3.1.2
+  OPTIONS
+    "ZLIB_BUILD_SHARED OFF"
+    "ZLIB_BUILD_STATIC ON"
+    "ZLIB_BUILD_TESTING OFF"
+    "ZLIB_INSTALL OFF"
 )
 
 set(ZLIB_FOUND TRUE CACHE BOOL "" FORCE)
-# set(ZLIB_VERSION 1.3.1.2 CACHE VERSION "" FORCE)
-add_library(ZLIB::ZLIB UNKNOWN IMPORTED)
-set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}zlibstatic${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}" CACHE PATH "" FORCE)
-# get_target_property(zlib_INCLUDE_DIR zlibstatic INCLUDE_DIRECTORIES)
-set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR};${zlib_BINARY_DIR};${assimp_SOURCE_DIR}/contrib/unzip" CACHE ARRAY "" FORCE)
-set_target_properties(ZLIB::ZLIB PROPERTIES IMPORTED_LOCATION "${ZLIB_LIBRARY}" INTERFACE_INCLUDE_DIRECTORIES "${zlib_INCLUDE_DIR}")
+add_library(ZLIB::ZLIB ALIAS zlibstatic)
 
-# set(ZLIB_LIBRARIES ${ZLIB_LIBRARY} CACHE ARRAY "" FORCE)
-# set(ZLIB_LIBRARY_DIRS ${zlib_BINARY_DIR} CACHE ARRAY "" FORCE)
-# set(ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDE_DIR} CACHE ARRAY "" FORCE)
+# #loading models
+# message(assimp)
+# CPMAddPackage(
+#   NAME assimp
+#   VERSION 6.0.4
+#   GITHUB_REPOSITORY assimp/assimp
+#   GIT_TAG v6.0.4
+#   OPTIONS
+#     "BUILD_SHARED_LIBS OFF"
+#     "ASSIMP_BUILD_TESTS OFF"
+#     "ASSIMP_INSTALL OFF"
+#     "ASSIMP_BUILD_DOCS OFF"
+#     "ASSIMP_BUILD_ZLIB ON"
+#     # "ZLIB_LIBRARY ${zlib_LIBRARIES}"
+#     # "ZLIB_INCLUDE_DIR ${zlib_INCLUDE_DIRS}"
+# )
 
-message(STATUS "ncdsncjksdnckjsdnckjsdncjksdnckjsdnkjs ${ZLIB_LIBRARY}")
-
-# get_target_property(ZLIBLIB $<TARGET_FILE:zlibstatic> LOCATION)
-# message("zliublib " ${})
+# set(ZLIB_FOUND TRUE CACHE BOOL "" FORCE)
+# add_library(ZLIB::ZLIB UNKNOWN IMPORTED)
+# set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}zlibstatic${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}" CACHE PATH "" FORCE)
+# set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR};${zlib_BINARY_DIR};${assimp_SOURCE_DIR}/contrib/unzip" CACHE ARRAY "" FORCE)
+# set_target_properties(ZLIB::ZLIB PROPERTIES IMPORTED_LOCATION "${ZLIB_LIBRARY}" INTERFACE_INCLUDE_DIRECTORIES "${zlib_INCLUDE_DIR}")
 
 #excel
 set(CPM_USE_LOCAL_PACKAGES OFF)
@@ -136,11 +124,6 @@ CPMAddPackage(
   GITHUB_REPOSITORY libexpat/libexpat
   GIT_TAG R_2_7_4
   DOWNLOAD_ONLY
-  # OPTIONS
-  #   "EXPAT_BUILD_TOOLS OFF"
-  #   "EXPAT_SHARED_LIBS OFF"
-  #   "EXPAT_BUILD_EXAMPLES OFF"
-  #   "EXPAT_ENABLE_INSTALL OFF"
 )
 set(CPM_USE_LOCAL_PACKAGES ON)
 
@@ -181,8 +164,6 @@ CPMAddPackage(
     "LIBZIP_DO_INSTALL OFF"
     "BUILD_SHARED_LIBS OFF"
 
-    "ZLIb::ZLIB zlib_static"
-
     "CFLAGS -I${libzip_SOURCE_DIR}"
 )
 
@@ -190,7 +171,6 @@ target_include_directories(zip PUBLIC ${libzip_SOURCE_DIR})
 
 get_target_property(LIBZIP_INCLUDES libzip::zip INCLUDE_DIRECTORIES)
 get_target_property(EXPAT_INCLUDES expat INCLUDE_DIRECTORIES)
-message(STATUS expat includes ${EXPAT_INCLUDES})
 list(APPEND LIBZIP_INCLUDES $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps> $<BUILD_INTERFACE:${libzip_BINARY_DIR}>)
 
 message(xlsxio)
