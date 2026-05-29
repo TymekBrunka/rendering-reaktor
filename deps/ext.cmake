@@ -4,8 +4,8 @@ set(CPM_USE_LOCAL_PACKAGES ON)
 macro (install)
 endmacro ()
 
-macro (find_package)
-endmacro ()
+# macro (find_package)
+# endmacro ()
 
 find_program(CCACHE_PROGRAM ccache)
 if (CCACHE_PROGRAM)
@@ -14,68 +14,100 @@ if (CCACHE_PROGRAM)
   set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM} base_dir=${PROJECT_SOURCE_DIR} hash_dir=false)
 endif()
 
-#math
-message(glm)
-CPMAddPackage(
-  NAME glm
-  VERSION 1.0.3
-  GITHUB_REPOSITORY g-truc/glm
-  GIT_TAG 1.0.3
-  OPTIONS
-    "GLM_ENABLE_CXX_20 ON"
-)
+# #math
+# message(glm)
+# CPMAddPackage(
+#   NAME glm
+#   VERSION 1.0.3
+#   GITHUB_REPOSITORY g-truc/glm
+#   GIT_TAG 1.0.3
+#   OPTIONS
+#     "GLM_ENABLE_CXX_20 ON"
+# )
 
 set(CPM_USE_LOCAL_PACKAGES OFF)
-
-function(original_add_library)
-  _add_library(${ARGV})
-endfunction()
-
-function(add_library target)
-  # if(target IN_LIST UNWANTED_TARGETS)
-  #   message(STATUS "Excluding library target: ${target}")
-  #   return()  # Skip creating the target
-  # endif()
-  if(target STREQUAL SDL2::SDL2 AND ARGV2 STREQUAL SDL2)
-    return()  # Skip creating the target
-  endif()
-  original_add_library(${ARGV})  # Create the target if allowed
-endfunction()
-
+#
+# function(original_add_library)
+#   _add_library(${ARGV})
+# endfunction()
+#
+# function(add_library target)
+#   # if(target IN_LIST UNWANTED_TARGETS)
+#   #   message(STATUS "Excluding library target: ${target}")
+#   #   return()  # Skip creating the target
+#   # endif()
+#   if (target STREQUAL "SDL3::SDL3")
+#     message("cnsdcnsdkjncdsc>>>>>>> sdl3 : ${ARGV2}")
+#   endif()
+#   if(target STREQUAL "SDL3::SDL3" AND ARGV2 STREQUAL "SDL3")
+#     return()  # Skip creating the target
+#   endif()
+#   original_add_library(${ARGV})  # Create the target if allowed
+# endfunction()
+#
 #sdl
-# message(sdl3)
+message(sdl3)
 CPMAddPackage(
-  NAME SDL2
-  VERSION 2.32.64
-  GITHUB_REPOSITORY libsdl-org/sdl2-compat
-  GIT_TAG release-2.32.64
+  NAME SDL3
+  VERSION 3.2.28
+  GITHUB_REPOSITORY libsdl-org/sdl
+  GIT_TAG "release-3.2.28"
   OPTIONS
-    "SDL2COMPAT_STATIC ON"
-    "BUILD_SHARED_LIBS OFF"
     "SDL_STATIC ON"
-    "SDL_STATIC_DEFAULT ON"
     "SDL_SHARED OFF"
     "SDL_EXAMPLES OFF"
+    # "SDL_RENDER_D3D OFF"
 )
 set(CPM_USE_LOCAL_PACKAGES ON)
 
-set(SDL2_FOUND TRUE CACHE BOOL "" FORCE)
-# add_library(SDL2::SDL2 ALIAS SDL2-static)
+# set(SDL3_FOUND TRUE CACHE BOOL "" FORCE)
+# if (NOT TARGET SDL3::SDL3)
+#   add_library(SDL3::SDL3 ALIAS SDL3-static)
+# endif()
+
+set(THREADS_PREFER_PTHREAD_FLAG TRUE CACHE BOOL "" FORCE)
+# find_package(Threads REQUIRED)
+# message(${CMAKE_THREAD_LIBS_INIT})
 
 #rendering
 message(raylib)
 CPMAddPackage(
   NAME raylib
   GITHUB_REPOSITORY raysan5/raylib
-  GIT_TAG 5.5
+  GIT_TAG 970531d112fd535c13b45442468dded784b9779e
   OPTIONS
     "PLATFORM SDL"
     "OPENGL_VERSION 3.3"
     "USE_AUDIO OFF"
-    "GLFW_BUILD_WAYLAND ON"
-    "GLFW_BUILD_X11 ON"
+    # "GLFW_BUILD_WAYLAND ON"
+    # "GLFW_BUILD_X11 ON"
     "BUILD_SHARED_LIBS OFF"
 )
+
+file(GLOB imgui_SRC
+  deps/imgui/*.h
+  deps/imgui/*.cpp
+)
+add_library(
+  imgui STATIC ${imgui_SRC}
+)
+target_include_directories(imgui INTERFACE deps/imgui)
+CPMAddPackage(
+  NAME rlimgui
+  GITHUB_REPOSITORY raylib-extras/rlImGui
+  GIT_TAG 286e11acd6c785004c9550c7ed3762add2ae3d47
+  DOWNLOAD_ONLY
+)
+add_library(rlimgui STATIC ${rlimgui_SOURCE_DIR}/rlImGui.cpp)
+target_link_libraries(rlimgui PRIVATE imgui raylib)
+target_include_directories(rlimgui INTERFACE ${rlimgui_SOURCE_DIR})
+
+# add_library(yyjson src/yyjson/yyjson.c)
+# target_include_directories(yyjson PUBLIC src/yyjson/)
+
+add_library(raygizmo deps/raygizmo/raygizmo.c)
+target_include_directories(raygizmo PUBLIC deps/raygizmo/)
+target_link_libraries(raygizmo PRIVATE raylib)
 
 CPMAddPackage(
   NAME zlib
@@ -125,11 +157,12 @@ CPMAddPackage(
   GIT_TAG R_2_7_4
   DOWNLOAD_ONLY
 )
-set(CPM_USE_LOCAL_PACKAGES ON)
+# set(CPM_USE_LOCAL_PACKAGES ON)
 
 set(EXPAT_BUILD_TOOLS OFF)
 set(EXPAT_SHARED_LIBS OFF)
 set(EXPAT_BUILD_EXAMPLES OFF)
+set(EXPAT_BUILD_TESTS OFF)
 set(EXPAT_ENABLE_INSTALL OFF)
 
 set(EXPAT_DIR "EXPAT_DIR ${expat_SOURCE_DIR}/expat")

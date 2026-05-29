@@ -3,34 +3,66 @@ let s:so_save = &g:so | let s:siso_save = &g:siso | setg so=0 siso=0 | setl so=-
 let v:this_session=expand("<sfile>:p")
 silent only
 silent tabonly
-cd ~/Documents/kody/rendering-reaktor
+cd ~/Documents/rendering-reaktor
 if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 let s:shortmess_save = &shortmess
-if &shortmess =~ 'A'
-  set shortmess=aoOA
-else
-  set shortmess=aoO
-endif
-badd +76 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
-badd +49 ~/Documents/kody/rendering-reaktor/deps/zipconf.h
-badd +4 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/config.h
-badd +1 ~/Documents/kody/rendering-reaktor/build/_deps/libzip-build/zipconf.h
-badd +148 ~/.cache/CPM/xlsxio/f803/CMakeLists.txt
-badd +4 ~/Documents/kody/rendering-reaktor/.gitignore
-badd +1465 ~/Documents/kody/rendering-reaktor/build_windows/build.ninja
-badd +43 ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/imagePacker.cpp
-badd +1 term://~/Documents/kody/rendering-reaktor//7760:/usr/bin/zsh
+set shortmess+=aoO
+badd +4 ~/Documents/kody/awaria/hmm.json
+badd +2 ~/Documents/kody/awaria/.gitignore
+badd +119 ~/Documents/kody/awaria/src/Main.hx
+badd +3 ~/Documents/kody/awaria/compile.hx
+badd +3 ~/Documents/kody/awaria/compile.hxml
+badd +18 ~/Documents/kody/awaria/res/style.css
+badd +135 ~/Documents/kody/awaria/.haxelib/domkit/git/domkit/Component.hx
+badd +5 ~/Documents/kody/awaria/.haxelib/heaps/git/h2d/domkit/Object.hx
+badd +1196 ~/Documents/kody/awaria/.haxelib/heaps/git/h2d/domkit/BaseComponents.hx
+badd +1 ~/Documents/kody/awaria/.haxelib/domkit/git/domkit/Object.hx
+badd +49 ~/Documents/kody/awaria/.haxelib/domkit/git/domkit/Properties.hx
+badd +16 ~/Documents/kody/awaria/.haxelib/domkit/git/domkit/CssParser.hx
+badd +6 ~/Documents/kody/awaria/.haxelib/domkit/git/sample/CustomComponent.hx
+badd +68 ~/Documents/kody/awaria-cpp/deps/ext.cmake
+badd +95 ~/Documents/kody/awaria-cpp/src/main.cpp
+badd +2 ~/Documents/kody/awaria-cpp/CMakeLists.txt
+badd +3 ~/Documents/bettyergl/CMakeLists.txt
+badd +17 ~/Documents/bettyergl/src/bettergl/CMakeLists.txt
+badd +110 ~/Documents/bettyergl/src/main.cpp
+badd +36 ~/Documents/bettyergl/src/bettergl/include/bettergl/Assets.hpp
+badd +30 ~/Documents/bettyergl/src/bettergl/Assets.cpp
+badd +36 ~/Documents/bettyergl/src/bettergl/assetPackers/bytePacker.cpp
+badd +41 ~/Documents/bettyergl/src/bettergl/assetPackers/imagePacker.cpp
+badd +6 ~/Documents/bettyergl/gexignored.hpp
+badd +6 ~/Documents/bettyergl/src/shaders/vertex.glsl
+badd +3 ~/Documents/bettyergl/deps/ext.cmake
+badd +22 ~/Documents/bettyergl/deps/CPM.cmake
+badd +134 ~/Documents/bettyergl/src/bettergl/Debugging.cpp
+badd +8 ~/Documents/bettyergl/gex.ping.hpp
+badd +322 ~/Documents/rendering-reaktor/src/main.cpp
+badd +3 ~/Documents/rendering-reaktor/src/shaders/composite.vertex.glsl
+badd +4 ~/Documents/rendering-reaktor/src/shaders/composite.frag.glsl
+badd +5 ~/Documents/rendering-reaktor/CMakeLists.txt
+badd +6 ~/Documents/rendering-reaktor/src/input_handling.cpp
+badd +4 ~/Documents/rendering-reaktor/src/shaders/skybox.frag.glsl
+badd +21 ~/Documents/rendering-reaktor/src/rendering/FrameBuffer.cpp
+badd +10 ~/Documents/rendering-reaktor/.gitignore
+badd +5 ~/Documents/rendering-reaktor/src/rendering/CMakeLists.txt
+badd +112 ~/Documents/rendering-reaktor/deps/ext.cmake
+badd +182 ~/scoop/apps/mingw-winlibs-llvm-msvcrt/14.2.0-19.1.7-12.0.0-r3/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake
+badd +1 ~/Documents/rendering-reaktor/build/CMakeFiles/pkgRedirects/zlib-config.cmake
+badd +1 ~/Documents/rendering-reaktor/deps/raygizmo/raygizmo.c
+badd +1 ~/Documents/rendering-reaktor/deps/raygizmo/raygizmo.h
+badd +130 ~/Documents/rendering-reaktor/src2/raygizmo_test.cpp
+badd +1 ~/Documents/rendering-reaktor/src2/fps.cpp
+badd +7 ~/Documents/rendering-reaktor/src2/main.cpp
 argglobal
 %argdel
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
-tabnew +setlocal\ bufhidden=wipe
 tabrewind
-edit ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+edit ~/Documents/rendering-reaktor/deps/ext.cmake
 argglobal
-balt ~/Documents/kody/rendering-reaktor/.gitignore
+balt ~/Documents/rendering-reaktor/src2/main.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -41,16 +73,15 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 76 - ((6 * winheight(0) + 27) / 55)
+let s:l = 112 - ((58 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 76
-normal! 010|
+keepjumps 112
+normal! 013|
 tabnext
-edit ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/imagePacker.cpp
+edit ~/Documents/rendering-reaktor/CMakeLists.txt
 argglobal
-balt ~/Documents/kody/rendering-reaktor/deps/ext.cmake
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -61,16 +92,15 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 43 - ((42 * winheight(0) + 27) / 55)
+let s:l = 5 - ((4 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 43
-normal! 0
+keepjumps 5
+normal! 023|
 tabnext
-edit ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/imagePacker.cpp
+edit ~/Documents/rendering-reaktor/src2/main.cpp
 argglobal
-balt ~/Documents/kody/rendering-reaktor/build_windows/build.ninja
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -81,34 +111,13 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 27) / 55)
+let s:l = 7 - ((6 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 1
-normal! 0
-tabnext
-argglobal
-if bufexists(fnamemodify("term://~/Documents/kody/rendering-reaktor//7760:/usr/bin/zsh", ":p")) | buffer term://~/Documents/kody/rendering-reaktor//7760:/usr/bin/zsh | else | edit term://~/Documents/kody/rendering-reaktor//7760:/usr/bin/zsh | endif
-if &buftype ==# 'terminal'
-  silent file term://~/Documents/kody/rendering-reaktor//7760:/usr/bin/zsh
-endif
-balt ~/Documents/kody/rendering-reaktor/src/rendering/assetPackers/imagePacker.cpp
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-let s:l = 55 - ((54 * winheight(0) + 27) / 55)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 55
-normal! 0
-tabnext 1
+keepjumps 7
+normal! 011|
+tabnext 3
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif
