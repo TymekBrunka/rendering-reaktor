@@ -14,6 +14,16 @@ if (CCACHE_PROGRAM)
   set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM} base_dir=${PROJECT_SOURCE_DIR} hash_dir=false)
 endif()
 
+CPMAddPackage(
+  NAME gifdec
+  GITHUB_REPOSITORY lecram/gifdec
+  GIT_TAG 1dcbae19363597314f6623010cc80abad4e47f7c
+  DOWNLOAD_ONLY
+)
+
+add_library(gifdec OBJECT ${gifdec_SOURCE_DIR}/gifdec.c)
+target_include_directories(gifdec PUBLIC ${gifdec_SOURCE_DIR})
+
 # #math
 # message(glm)
 # CPMAddPackage(
