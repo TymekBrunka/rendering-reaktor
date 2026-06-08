@@ -18,8 +18,24 @@ struct Gif {
   Image data;
 };
 
+#define MAX_SPEED 50.0f
+#define MAX_ACCEL 250.0f
+// Grounded drag
+#define FRICTION 0.86f
+// Increasing air drag, increases strafing speed
+// #define AIR_DRAG 0.98f
+#define AIR_DRAG 0.97f
+// Responsiveness for turning movement direction to looked direction
+#define CONTROL 10.0f
+
 class App {
 public:
+  float headTimer = 0.0f;
+  float walkLerp = 0.0f;
+  Vector2 sensitivity = {0.003f, 0.003f};
+  Vector2 orientation = {0};
+  Vector2 lean = {0};
+  Camera camera = {0};
   struct {
     Texture2D icon;
     Texture2D icons;
@@ -29,12 +45,15 @@ public:
     Vector3 position;
     Vector3 velocity;
     Vector3 dir;
-  } Body;
+  } body;
   std::vector<uint16_t> sparse_texture_list;
   std::vector<Texture2D> static_textures;
   std::vector<Gif> dynamic_textures;
   std::vector<Model> models;
   std::vector<WorldObject> objects;
+  Mesh cube;
+
+  Model skybox;
 
   App() = default;
   void initialise();
@@ -43,4 +62,7 @@ public:
 
   void panel_ui();
   void render_scene();
+
+  void updateCamera();
+  void updateBody();
 };

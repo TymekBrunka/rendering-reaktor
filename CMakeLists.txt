@@ -4,9 +4,12 @@ set (CMAKE_CXX_STANDARD 20)
 
 include(deps/ext.cmake)
 
-add_executable(main src2/App.cpp src2/main.cpp)
-target_link_libraries(main raylib raygizmo rlimgui imgui SDL3::SDL3-static xlsxio_write_STATIC)
-target_include_directories(main PRIVATE src2/embeded src2)
+add_library(static_assets src2/StaticAssets.cpp)
+target_include_directories(static_assets PRIVATE src2 PUBLIC src2/embeded)
+
+add_executable(main src2/App.cpp src2/main.cpp src2/App.hpp)
+target_link_libraries(main raylib raygizmo rlimgui imgui SDL3::SDL3-static xlsxio_write_STATIC static_assets)
+target_include_directories(main PRIVATE src2)
 
 # add_subdirectory(src/rendering)
 #

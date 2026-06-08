@@ -1,9 +1,0 @@
-{
-    "dependencies": [
-        "glfw3",
-        "xlsxio",
-        "imguizmo",
-        "glm",
-        "assimp"
-    ]
-}
