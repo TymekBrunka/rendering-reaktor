@@ -62,6 +62,7 @@ CPMAddPackage(
   VERSION 3.2.28
   GITHUB_REPOSITORY libsdl-org/sdl
   GIT_TAG "release-3.2.28"
+  # GIT_TAG "release-3.4.10"
   OPTIONS
     "SDL_STATIC ON"
     "SDL_SHARED OFF"
@@ -85,6 +86,7 @@ CPMAddPackage(
   NAME raylib
   GITHUB_REPOSITORY raysan5/raylib
   GIT_TAG 970531d112fd535c13b45442468dded784b9779e
+  # GIT_TAG 6.0
   OPTIONS
     "PLATFORM SDL"
     "OPENGL_VERSION 3.3"

@@ -54,11 +54,12 @@ void App::initialise() {
   ImGuiIO &io = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-  BlendMode(BLEND_ALPHA);
+  // BlendMode(BLEND_ALPHA);
+  rlSetBlendMode(BLEND_ALPHA);
 
   camera.fovy = 60.0f;
   camera.projection = CAMERA_PERSPECTIVE;
-  camera.position = (Vector3){
+  camera.position = Vector3{
       body.position.x,
       body.position.y + 1,
       body.position.z,
@@ -84,7 +85,7 @@ void App::run() {
 
     float delta = GetFrameTime();
     // headLerp = Lerp(headLerp, (crouching ? CROUCH_HEIGHT : STAND_HEIGHT), 20.0f * delta);
-    camera.position = (Vector3){
+    camera.position = Vector3{
         body.position.x,
         body.position.y + 1,
         body.position.z,
@@ -130,8 +131,8 @@ void App::run() {
 
 void App::updateCamera() {
 
-  const Vector3 up = (Vector3){0.0f, 1.0f, 0.0f};
-  const Vector3 targetOffset = (Vector3){0.0f, 0.0f, -1.0f};
+  const Vector3 up = Vector3{0.0f, 1.0f, 0.0f};
+  const Vector3 targetOffset = Vector3{0.0f, 0.0f, -1.0f};
 
   // Left and right
   Vector3 yaw = Vector3RotateByAxisAngle(targetOffset, up, orientation.x);
@@ -181,7 +182,7 @@ void App::updateBody() {
   char forward = (IsKeyDown(KEY_W) - IsKeyDown(KEY_S));
   bool jumpPressed = IsKeyDown(KEY_SPACE);
   bool crouchHold = IsKeyDown(KEY_LEFT_SHIFT);
-  Vector2 input = (Vector2){(float)side, (float)-forward};
+  Vector2 input = Vector2{(float)side, (float)-forward};
 
   float delta = GetFrameTime();
 
@@ -193,10 +194,10 @@ void App::updateBody() {
     body.velocity.y = 0.0f;
   }
 
-  Vector3 front = (Vector3){sinf(orientation.x), 0.f, cosf(orientation.x)};
-  Vector3 right = (Vector3){cosf(-orientation.x), 0.f, sinf(-orientation.x)};
+  Vector3 front = Vector3{sinf(orientation.x), 0.f, cosf(orientation.x)};
+  Vector3 right = Vector3{cosf(-orientation.x), 0.f, sinf(-orientation.x)};
 
-  Vector3 desiredDir = (Vector3){
+  Vector3 desiredDir = Vector3{
       input.x * right.x + input.y * front.x,
       0.0f,
       input.x * right.z + input.y * front.z,
@@ -204,11 +205,11 @@ void App::updateBody() {
   body.dir = Vector3Lerp(body.dir, desiredDir, CONTROL * delta);
 
   float decel = AIR_DRAG;
-  Vector3 hvel = (Vector3){body.velocity.x * decel, 0.0f, body.velocity.z * decel};
+  Vector3 hvel = Vector3{body.velocity.x * decel, 0.0f, body.velocity.z * decel};
 
   float hvelLength = Vector3Length(hvel); // Magnitude
   if (hvelLength < (MAX_SPEED * 0.01f))
-    hvel = (Vector3){0};
+    hvel = Vector3{0};
 
   // This is what creates strafing
   float speed = Vector3DotProduct(hvel, body.dir);
@@ -242,20 +243,16 @@ void App::render_scene() {
   DrawText("Reaktory", 20, 20, 20, BLUE);
   DrawTexture(assets.icon, 30, 30, WHITE);
 
-  Vector3 pos = camera.position;
-
-  camera.position = {0,0,0};
   BeginMode3D(camera);
   rlDisableBackfaceCulling();
-  DrawModel(skybox, (Vector3){0, 0, 0}, 1.0f, WHITE);
+  rlDisableDepthMask();
+  DrawModel(skybox, camera.position, 1.0f, WHITE);
   rlEnableBackfaceCulling();
   rlEnableDepthMask();
-  rlDisableDepthMask();
   EndMode3D();
-  camera.position = pos;
 
   BeginMode3D(camera);
-  DrawCube({0, 0, 0}, 20, 30, 40, RED);
+  DrawCube({-10, -15, -20}, 20, 30, 40, RED);
   EndMode3D();
 }
 

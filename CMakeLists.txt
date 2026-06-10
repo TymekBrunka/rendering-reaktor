@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.25)
 project(reaktory LANGUAGES C CXX)
 set (CMAKE_CXX_STANDARD 20)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  # if (DEFINED CMAKE_STATIC_LINKER_FLAGS OR CMAKE_STATIC_LINKER_FLAGS)
+  #   set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS},")
+  # endif()
+    # set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -fsanitize=undefined -fsanitize-undefined-trap-on-error")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
+endif()
+
 include(deps/ext.cmake)
 
 add_library(static_assets src2/StaticAssets.cpp)
@@ -10,6 +18,13 @@ target_include_directories(static_assets PRIVATE src2 PUBLIC src2/embeded)
 add_executable(main src2/App.cpp src2/main.cpp src2/App.hpp)
 target_link_libraries(main raylib raygizmo rlimgui imgui SDL3::SDL3-static xlsxio_write_STATIC static_assets)
 target_include_directories(main PRIVATE src2)
+
+message(${CMAKE_CURRENT_SOURCE_DIR})
+message(${CMAKE_SOURCE_DIR})
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_options(main PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
+  target_link_options(main PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
+endif()
 
 # add_subdirectory(src/rendering)
 #
