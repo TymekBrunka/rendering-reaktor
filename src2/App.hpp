@@ -3,6 +3,7 @@
 #include <memory>
 #include <raylib.h>
 #include <vector>
+#include <imgui.h>
 
 struct WorldObject {
   Model model;
@@ -18,8 +19,8 @@ struct Gif {
   Image data;
 };
 
-#define MAX_SPEED 50.0f
-#define MAX_ACCEL 250.0f
+#define MAX_SPEED 300.0f
+#define MAX_ACCEL 500.0f
 // Grounded drag
 #define FRICTION 0.86f
 // Increasing air drag, increases strafing speed
@@ -39,19 +40,18 @@ public:
   struct {
     Texture2D icon;
     Texture2D icons;
-    Texture2D skybox;
+    // Texture2D skybox;
   } assets;
   struct {
-    Vector3 position;
-    Vector3 velocity;
-    Vector3 dir;
+    Vector3 position = {0};
+    Vector3 velocity = {0};
+    Vector3 dir = {0};
   } body;
   std::vector<uint16_t> sparse_texture_list;
   std::vector<Texture2D> static_textures;
   std::vector<Gif> dynamic_textures;
   std::vector<Model> models;
   std::vector<WorldObject> objects;
-  Mesh cube;
 
   Model skybox;
 
@@ -65,4 +65,6 @@ public:
 
   void updateCamera();
   void updateBody();
+
+  bool IconButton(const char *label, int idx = 1, ImVec2 size = ImVec2(30, 30));
 };

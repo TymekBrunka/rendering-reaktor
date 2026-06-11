@@ -41,13 +41,13 @@ badd +8 ~/Documents/bettyergl/gex.ping.hpp
 badd +322 ~/Documents/rendering-reaktor/src/main.cpp
 badd +3 ~/Documents/rendering-reaktor/src/shaders/composite.vertex.glsl
 badd +4 ~/Documents/rendering-reaktor/src/shaders/composite.frag.glsl
-badd +9 ~/Documents/rendering-reaktor/CMakeLists.txt
+badd +26 ~/Documents/rendering-reaktor/CMakeLists.txt
 badd +6 ~/Documents/rendering-reaktor/src/input_handling.cpp
 badd +4 ~/Documents/rendering-reaktor/src/shaders/skybox.frag.glsl
 badd +21 ~/Documents/rendering-reaktor/src/rendering/FrameBuffer.cpp
 badd +6 ~/Documents/rendering-reaktor/.gitignore
 badd +5 ~/Documents/rendering-reaktor/src/rendering/CMakeLists.txt
-badd +24 ~/Documents/rendering-reaktor/deps/ext.cmake
+badd +89 ~/Documents/rendering-reaktor/deps/ext.cmake
 badd +182 ~/scoop/apps/mingw-winlibs-llvm-msvcrt/14.2.0-19.1.7-12.0.0-r3/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake
 badd +1 ~/Documents/rendering-reaktor/build/CMakeFiles/pkgRedirects/zlib-config.cmake
 badd +1 ~/Documents/rendering-reaktor/deps/raygizmo/raygizmo.c
@@ -63,10 +63,10 @@ badd +82 ~/Documents/rendering-reaktor/src2/main2.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/icon.png.hpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/icons.png.hpp
 badd +48 ~/Documents/rendering-reaktor/src2/App.hpp
-badd +249 ~/Documents/rendering-reaktor/src2/App.cpp
+badd +51 ~/Documents/rendering-reaktor/src2/App.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/StaticAssets.cpp
 badd +1 ~/Documents/rendering-reaktor/.gitmodules
-badd +221 ~/cacheCPM/raylib/c846/src/raylib.h
+badd +924 ~/cacheCPM/raylib/c846/src/raylib.h
 argglobal
 %argdel
 tabnew +setlocal\ bufhidden=wipe
@@ -75,6 +75,13 @@ tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabrewind
 edit ~/Documents/rendering-reaktor/src2/App.cpp
+wincmd t
+let s:save_winminheight = &winminheight
+let s:save_winminwidth = &winminwidth
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 argglobal
 balt ~/cacheCPM/raylib/c846/src/raylib.h
 setlocal foldmethod=manual
@@ -87,12 +94,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 249 - ((39 * winheight(0) + 29) / 59)
+let s:l = 51 - ((38 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 249
-normal! 061|
+keepjumps 51
+normal! 03|
 tabnext
 edit ~/Documents/rendering-reaktor/src2/main.cpp
 argglobal
@@ -199,15 +206,8 @@ keepjumps 56
 normal! 015|
 tabnext
 edit ~/Documents/rendering-reaktor/CMakeLists.txt
-wincmd t
-let s:save_winminheight = &winminheight
-let s:save_winminwidth = &winminwidth
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
 argglobal
-balt ~/Documents/rendering-reaktor/.gitignore
+balt ~/Documents/rendering-reaktor/deps/ext.cmake
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -218,13 +218,13 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 9 - ((8 * winheight(0) + 29) / 59)
+let s:l = 26 - ((25 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 9
-normal! 063|
-tabnext 5
+keepjumps 26
+normal! 07|
+tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif
