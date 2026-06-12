@@ -15,8 +15,26 @@ include(deps/ext.cmake)
 add_library(static_assets src2/StaticAssets.cpp)
 target_include_directories(static_assets PRIVATE src2 PUBLIC src2/embeded)
 
+add_library(ModelMgr
+  src2/AssetMgr/ModelMgr.cpp
+  src2/AssetMgr/ModelMgr.hpp
+)
+target_include_directories(ModelMgr PRIVATE src2/AssetMgr)
+target_link_libraries(ModelMgr PUBLIC raylib)
+
 add_executable(main src2/App.cpp src2/main.cpp src2/App.hpp)
-target_link_libraries(main raylib raygizmo rlimgui imgui SDL3::SDL3-static xlsxio_write_STATIC static_assets)
+target_link_libraries(main
+  raylib
+  raygizmo
+  rlimgui
+  imgui
+  SDL3::SDL3-static
+  xlsxio_write_STATIC
+
+  static_assets
+  ModelMgr
+)
+
 target_include_directories(main PRIVATE src2)
 
 message(${CMAKE_CURRENT_SOURCE_DIR})

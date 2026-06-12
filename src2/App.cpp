@@ -1,10 +1,12 @@
+#include "AssetMgr/ModelMgr.hpp"
+#include "SDL3/SDL_dialog.h"
 #include "raylib.h"
 #include <App.hpp>
+#include <SDL3/SDL.h>
 #include <imgui.h>
 #include <iostream>
 #include <rlImGui.h>
 #include <rlgl.h>
-#include <SDL3/SDL.h>
 
 #include <FPSControler.cpp>
 
@@ -169,7 +171,7 @@ void App::run() {
     ImGui::PopFont();
     rlImGuiEnd();
 
-    DrawFPS(0, 0);
+    DrawFPS(GetRenderWidth() - MeasureText("60 FPS", 20) - 10, 10);
     EndDrawing();
   }
 }
@@ -192,6 +194,20 @@ bool App::IconButton(const char *label, int idx, ImVec2 size) {
   return ret;
 }
 
+static void SDLCALL load_model_callback(void *userdata, const char *const *filelist, int filter) {
+  if (!filelist) {
+    return;
+  } else if (!*filelist) {
+    return;
+  }
+
+  ModelMgr* model_mgr = (ModelMgr*)userdata;
+  while (*filelist) {
+    model_mgr->load_model(std::string{*filelist});
+    filelist++;
+  }
+}
+
 void App::panel_ui() {
   if (ImGui::Begin("ThePanel")) {
     rlImGuiImageSize(&assets.icon, 20, 20);
@@ -199,7 +215,10 @@ void App::panel_ui() {
     ImGui::Text("reaktory");
 
     ImGui::PushID(0);
-    IconButton("model", 4);
+    if (IconButton("model", 5)) {
+      static const SDL_DialogFileFilter ofd_filters[] = {{"Modele obj (.obj)", "obj"}, {"Wszystkie pliki", "*"}};
+      SDL_ShowOpenFileDialog(load_model_callback, &this->model_mgr, nullptr, ofd_filters, 1, NULL, true);
+    }
     ImGui::PopID();
     ImGui::SameLine();
     ImGui::PushID(1);
@@ -207,6 +226,13 @@ void App::panel_ui() {
     ImGui::PopID();
   }
   ImGui::End();
+
+  if (ImGui::Begin("Modele")) {
+    for (const auto& [name, model] : model_mgr.models) {
+      ImGui::Button(name.c_str());
+    }
+    ImGui::End();
+  }
 }
 
 void App::render_scene() {

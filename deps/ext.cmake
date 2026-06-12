@@ -136,6 +136,9 @@ CPMAddPackage(
 set(ZLIB_FOUND TRUE CACHE BOOL "" FORCE)
 add_library(ZLIB::ZLIB ALIAS zlibstatic)
 
+get_target_property(zlibincludes zlibstatic INCLUDE_DIRECTORIES)
+set(ZLIB_INCLUDE_DIR ${zlibincludes} CACHE PATH "" FORCE)
+
 # #loading models
 # message(assimp)
 # CPMAddPackage(
@@ -182,6 +185,25 @@ set(EXPAT_DIR "EXPAT_DIR ${expat_SOURCE_DIR}/expat")
 message(STATUS expatsrc ${expat_SOURCE_DIR})
 add_subdirectory(${expat_SOURCE_DIR}/expat ${CMAKE_BINARY_DIR}/expat.dir)
 
+get_target_property(EXPAT_INCLUDES expat INCLUDE_DIRECTORIES)
+set(EXPAT_INCLUDE_DIR ${zlibincludes} CACHE PATH "" FORCE)
+
+# CPMAddPackage(
+#   NAME libarchive
+#   VERSION 3.8.7
+#   GITHUB_REPOSITORY libarchive/libarchive
+#   GIT_TAG v3.8.7
+#   OPTIONS
+#     "BUILD_SHARED_LIBS OFF"
+#     "ENABLE_INSTALL OFF"
+#     "ENABLE_TEST OFF"
+#     "ENABLE_BZip2 OFF"
+#     "ENABLE_LIBXML2 OFF"
+#     "ENABLE_EXPAT OFF"
+# )
+#
+# target_link_libraries(archive_static zlibstatic)
+
 # add_library(ZLIB::ZLIB alias zlib_static)
 
 message(libzip)
@@ -191,6 +213,7 @@ CPMAddPackage(
   GITHUB_REPOSITORY nih-at/libzip
   GIT_TAG v1.11.4
   OPTIONS
+    "ENABLE_LZMA ON"
     "ENABLE_OPENSSL OFF"
     "ENABLE_COVERAGE OFF"
     "ENABLE_ZSTD OFF"
@@ -198,7 +221,6 @@ CPMAddPackage(
     "ENABLE_GNUTLS OFF"
     "ENABLE_MBEDTLS OFF"
     "ENABLE_BZIP2 OFF"
-    "ENABLE_LZMA OFF"
     "ENABLE_FDOPEN OFF"
     "BUILD_SHARED_LIBS OFF"
     "BUILD_TOOLS OFF"
@@ -215,7 +237,6 @@ CPMAddPackage(
 target_include_directories(zip PUBLIC ${libzip_SOURCE_DIR})
 
 get_target_property(LIBZIP_INCLUDES libzip::zip INCLUDE_DIRECTORIES)
-get_target_property(EXPAT_INCLUDES expat INCLUDE_DIRECTORIES)
 list(APPEND LIBZIP_INCLUDES $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps> $<BUILD_INTERFACE:${libzip_BINARY_DIR}>)
 
 message(xlsxio)

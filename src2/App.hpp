@@ -1,15 +1,10 @@
 #pragma once
 #include <cstdint>
 #include <memory>
-#include <raylib.h>
-#include <vector>
 #include <imgui.h>
+#include <vector>
 
-struct WorldObject {
-  Model model;
-  Texture2D texture;
-  Matrix transform;
-};
+#include <AssetMgr/ModelMgr.hpp>
 
 struct Gif {
   uint16_t numOfFrames;
@@ -47,11 +42,11 @@ public:
     Vector3 velocity = {0};
     Vector3 dir = {0};
   } body;
-  std::vector<uint16_t> sparse_texture_list;
+  // std::vector<uint16_t> sparse_texture_list;
   std::vector<Texture2D> static_textures;
   std::vector<Gif> dynamic_textures;
-  std::vector<Model> models;
-  std::vector<WorldObject> objects;
+  ModelMgr model_mgr;
+  std::vector<Model> objects;
 
   Model skybox;
 

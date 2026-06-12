@@ -25,7 +25,7 @@ badd +6 ~/Documents/kody/awaria/.haxelib/domkit/git/sample/CustomComponent.hx
 badd +68 ~/Documents/kody/awaria-cpp/deps/ext.cmake
 badd +95 ~/Documents/kody/awaria-cpp/src/main.cpp
 badd +2 ~/Documents/kody/awaria-cpp/CMakeLists.txt
-badd +3 ~/Documents/bettyergl/CMakeLists.txt
+badd +1 ~/Documents/bettyergl/CMakeLists.txt
 badd +17 ~/Documents/bettyergl/src/bettergl/CMakeLists.txt
 badd +110 ~/Documents/bettyergl/src/main.cpp
 badd +36 ~/Documents/bettyergl/src/bettergl/include/bettergl/Assets.hpp
@@ -41,49 +41,49 @@ badd +8 ~/Documents/bettyergl/gex.ping.hpp
 badd +322 ~/Documents/rendering-reaktor/src/main.cpp
 badd +3 ~/Documents/rendering-reaktor/src/shaders/composite.vertex.glsl
 badd +4 ~/Documents/rendering-reaktor/src/shaders/composite.frag.glsl
-badd +26 ~/Documents/rendering-reaktor/CMakeLists.txt
+badd +35 ~/Documents/rendering-reaktor/CMakeLists.txt
 badd +6 ~/Documents/rendering-reaktor/src/input_handling.cpp
 badd +4 ~/Documents/rendering-reaktor/src/shaders/skybox.frag.glsl
 badd +21 ~/Documents/rendering-reaktor/src/rendering/FrameBuffer.cpp
-badd +6 ~/Documents/rendering-reaktor/.gitignore
+badd +1 ~/Documents/rendering-reaktor/.gitignore
 badd +5 ~/Documents/rendering-reaktor/src/rendering/CMakeLists.txt
-badd +89 ~/Documents/rendering-reaktor/deps/ext.cmake
+badd +198 ~/Documents/rendering-reaktor/deps/ext.cmake
 badd +182 ~/scoop/apps/mingw-winlibs-llvm-msvcrt/14.2.0-19.1.7-12.0.0-r3/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake
 badd +1 ~/Documents/rendering-reaktor/build/CMakeFiles/pkgRedirects/zlib-config.cmake
 badd +1 ~/Documents/rendering-reaktor/deps/raygizmo/raygizmo.c
 badd +1 ~/Documents/rendering-reaktor/deps/raygizmo/raygizmo.h
 badd +136 ~/Documents/rendering-reaktor/src2/raygizmo_test.cpp
-badd +153 ~/Documents/rendering-reaktor/src2/fps.cpp
+badd +145 ~/Documents/rendering-reaktor/src2/fps.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/main3.cpp
-badd +7 ~/Documents/rendering-reaktor/src2/main.cpp
+badd +6 ~/Documents/rendering-reaktor/src2/main.cpp
 badd +9 ~/Documents/rendering-reaktor/src2/Texture2d.hpp
 badd +2 ~/Documents/rendering-reaktor/src2/embeded/cubemap.png.cpp
 badd +3 ~/Documents/rendering-reaktor/src2/embeded/cubemap.png.hpp
 badd +82 ~/Documents/rendering-reaktor/src2/main2.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/icon.png.hpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/icons.png.hpp
-badd +48 ~/Documents/rendering-reaktor/src2/App.hpp
-badd +51 ~/Documents/rendering-reaktor/src2/App.cpp
-badd +1 ~/Documents/rendering-reaktor/src2/StaticAssets.cpp
+badd +45 ~/Documents/rendering-reaktor/src2/App.hpp
+badd +2 ~/Documents/rendering-reaktor/src2/App.cpp
+badd +8 ~/Documents/rendering-reaktor/src2/StaticAssets.cpp
 badd +1 ~/Documents/rendering-reaktor/.gitmodules
-badd +924 ~/cacheCPM/raylib/c846/src/raylib.h
+badd +421 ~/cacheCPM/raylib/c846/src/raylib.h
+badd +1 ~/Documents/rendering-reaktor/src2/embeded/cubemap.fs.hpp
+badd +69 ~/Documents/rendering-reaktor/src2/FPScontroler.cpp
+badd +2 ~/Documents/rendering-reaktor/src2/embeded/RobotoRegular.h
+badd +3 ~/Documents/rendering-reaktor/src2/embeded/RobotoRegular.cpp
+badd +6 ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
+badd +20 ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
 argglobal
 %argdel
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
+tabnew +setlocal\ bufhidden=wipe
 tabrewind
-edit ~/Documents/rendering-reaktor/src2/App.cpp
-wincmd t
-let s:save_winminheight = &winminheight
-let s:save_winminwidth = &winminwidth
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
+edit ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
 argglobal
-balt ~/cacheCPM/raylib/c846/src/raylib.h
+balt ~/Documents/rendering-reaktor/src2/App.hpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -94,16 +94,16 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 51 - ((38 * winheight(0) + 29) / 59)
+let s:l = 17 - ((16 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 51
-normal! 03|
+keepjumps 17
+normal! 04|
 tabnext
-edit ~/Documents/rendering-reaktor/src2/main.cpp
+edit ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
 argglobal
-balt ~/Documents/rendering-reaktor/src2/main2.cpp
+balt ~/cacheCPM/raylib/c846/src/raylib.h
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -119,18 +119,69 @@ if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
 keepjumps 6
-normal! 012|
+normal! 03|
 tabnext
-edit ~/Documents/rendering-reaktor/src2/fps.cpp
-let s:save_splitbelow = &splitbelow
-let s:save_splitright = &splitright
-set splitbelow splitright
-wincmd _ | wincmd |
-vsplit
-1wincmd h
-wincmd w
-let &splitbelow = s:save_splitbelow
-let &splitright = s:save_splitright
+edit ~/Documents/rendering-reaktor/src2/App.cpp
+argglobal
+balt ~/Documents/rendering-reaktor/src2/StaticAssets.cpp
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 195 - ((24 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 195
+normal! 022|
+tabnext
+edit ~/Documents/rendering-reaktor/src2/FPScontroler.cpp
+argglobal
+balt ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 7 - ((6 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 7
+normal! 033|
+tabnext
+edit ~/Documents/rendering-reaktor/CMakeLists.txt
+argglobal
+balt ~/Documents/bettyergl/CMakeLists.txt
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 37 - ((36 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 37
+normal! 0
+tabnext
+edit ~/Documents/rendering-reaktor/deps/ext.cmake
 wincmd t
 let s:save_winminheight = &winminheight
 let s:save_winminwidth = &winminwidth
@@ -138,10 +189,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe 'vert 1resize ' . ((&columns * 119 + 120) / 240)
-exe 'vert 2resize ' . ((&columns * 120 + 120) / 240)
 argglobal
-balt ~/Documents/rendering-reaktor/src2/App.hpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -152,79 +200,13 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 113 - ((12 * winheight(0) + 29) / 59)
+let s:l = 198 - ((49 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 113
-normal! 0
-wincmd w
-argglobal
-if bufexists(fnamemodify("~/Documents/rendering-reaktor/src2/fps.cpp", ":p")) | buffer ~/Documents/rendering-reaktor/src2/fps.cpp | else | edit ~/Documents/rendering-reaktor/src2/fps.cpp | endif
-if &buftype ==# 'terminal'
-  silent file ~/Documents/rendering-reaktor/src2/fps.cpp
-endif
-balt ~/Documents/rendering-reaktor/src2/App.hpp
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 145 - ((35 * winheight(0) + 29) / 59)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 145
+keepjumps 198
 normal! 05|
-wincmd w
-exe 'vert 1resize ' . ((&columns * 119 + 120) / 240)
-exe 'vert 2resize ' . ((&columns * 120 + 120) / 240)
-tabnext
-edit ~/Documents/rendering-reaktor/src2/App.hpp
-argglobal
-balt ~/Documents/rendering-reaktor/CMakeLists.txt
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal nofoldenable
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 56 - ((49 * winheight(0) + 29) / 59)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 56
-normal! 015|
-tabnext
-edit ~/Documents/rendering-reaktor/CMakeLists.txt
-argglobal
-balt ~/Documents/rendering-reaktor/deps/ext.cmake
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 26 - ((25 * winheight(0) + 29) / 59)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 26
-normal! 07|
-tabnext 1
+tabnext 6
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif
