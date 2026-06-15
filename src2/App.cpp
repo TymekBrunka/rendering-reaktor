@@ -156,7 +156,9 @@ void App::run() {
     BeginDrawing();
     ClearBackground(BLANK);
 
+    global_lock.lock();
     render_scene();
+    global_lock.unlock();
 
     rlImGuiBegin();
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(0x5f151515)); // workaround to make docked windows transparent
@@ -269,7 +271,7 @@ void App::render_scene() {
   // }
 
   // DrawModelEx(testmodel, Vector3{0,0,0}, Vector3{0,1,0}, GetTime() * 100, Vector3{100, 100, 100}, WHITE);
-  
+
   for (const auto &[name, model] : model_mgr.models) {
     DrawModel(model.model, Vector3{0, 0, 0}, 100, WHITE);
   }
