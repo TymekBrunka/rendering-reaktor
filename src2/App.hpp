@@ -3,8 +3,11 @@
 #include <memory>
 #include <imgui.h>
 #include <vector>
+#include <mutex>
 
 #include <AssetMgr/ModelMgr.hpp>
+
+extern std::mutex global_lock;
 
 struct Gif {
   uint16_t numOfFrames;

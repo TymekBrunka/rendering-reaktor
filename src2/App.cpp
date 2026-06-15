@@ -21,6 +21,8 @@
 #include <embeded/skybox.png.hpp>
 #include <embeded/skybox.vertex.glsl.hpp>
 
+std::mutex global_lock{};
+
 static ImFont *font1;
 
 void App::initialise() {
@@ -51,6 +53,9 @@ void App::initialise() {
       .mipmaps = 1,
       .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
   };
+
+  // model_mgr.load_model("C:\\Users\\Operator\\Downloads\\CesiumMan.m3d");
+  model_mgr.load_model("C:\\Users\\Operator\\Downloads\\Cat_v1_L3.123cb1b1943a-2f48-4e44-8f71-6bbe19a3ab64\\Cat_v1_L3.123cb1b1943a-2f48-4e44-8f71-6bbe19a3ab64\\12221_Cat_v1_l3.obj");
 
   SetWindowIcon(icon_);
 
@@ -201,11 +206,14 @@ static void SDLCALL load_model_callback(void *userdata, const char *const *filel
     return;
   }
 
-  ModelMgr* model_mgr = (ModelMgr*)userdata;
+  ModelMgr *model_mgr = (ModelMgr *)userdata;
+  global_lock.lock();
   while (*filelist) {
+    std::cout << std::string{*filelist} << "\n";
     model_mgr->load_model(std::string{*filelist});
     filelist++;
   }
+  global_lock.unlock();
 }
 
 void App::panel_ui() {
@@ -217,22 +225,32 @@ void App::panel_ui() {
     ImGui::PushID(0);
     if (IconButton("model", 5)) {
       static const SDL_DialogFileFilter ofd_filters[] = {{"Modele obj (.obj)", "obj"}, {"Wszystkie pliki", "*"}};
-      SDL_ShowOpenFileDialog(load_model_callback, &this->model_mgr, nullptr, ofd_filters, 1, NULL, true);
+      SDL_ShowOpenFileDialog(load_model_callback, &this->model_mgr, nullptr, ofd_filters, 2, NULL, true);
     }
     ImGui::PopID();
+
     ImGui::SameLine();
     ImGui::PushID(1);
     IconButton("arkusz", 7);
     ImGui::PopID();
+
+    ImGui::SameLine();
+    ImGui::PushID(2);
+    IconButton("załaduj", 9);
+    ImGui::PopID();
   }
   ImGui::End();
 
+  global_lock.lock();
   if (ImGui::Begin("Modele")) {
-    for (const auto& [name, model] : model_mgr.models) {
-      ImGui::Button(name.c_str());
+    for (const auto &[name, model] : model_mgr.models) {
+      if (ImGui::Button(name.c_str())) {
+        objects.push_back(model.model);
+      }
     }
-    ImGui::End();
   }
+  ImGui::End();
+  global_lock.unlock();
 }
 
 void App::render_scene() {
@@ -246,6 +264,15 @@ void App::render_scene() {
 
   BeginMode3D(camera);
   DrawCube({-10, -15, -20}, 20, 30, 40, RED);
+  // for (const auto &object : objects) {
+  //   DrawModel(object, Vector3{0, 0, 0}, 1, WHITE);
+  // }
+
+  // DrawModelEx(testmodel, Vector3{0,0,0}, Vector3{0,1,0}, GetTime() * 100, Vector3{100, 100, 100}, WHITE);
+  
+  for (const auto &[name, model] : model_mgr.models) {
+    DrawModel(model.model, Vector3{0, 0, 0}, 100, WHITE);
+  }
   EndMode3D();
 }
 

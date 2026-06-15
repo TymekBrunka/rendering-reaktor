@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "raymath.h"
 #include <ModelMgr.hpp>
 #include <cstddef>
 #include <cstring>
@@ -32,11 +33,15 @@ void ModelMgr::load_model(const std::string &filepath) {
     }
   }
 
-  char* name_ = new char[filepath.size() - start + 1];
-  memcpy(name_, &filepath[start+1], filepath.size() - start);
-  std::string name{(const char*)name_, size_t(filepath.size() - start)};
+  char *name_ = new char[filepath.size() - start + 1];
+  memcpy(name_, &filepath[start + 1], filepath.size() - start);
+  std::string name{(const char *)name_, size_t(filepath.size() - start)};
 
-  AnimatedModel model{.model = LoadModel(filepath.c_str()), .animations = nullptr, .animations_count = 0};
+  AnimatedModel model{
+      .model = LoadModel(filepath.c_str()),
+      .animations = nullptr,
+      .animations_count = 0,
+  };
   model.animations = LoadModelAnimations(filepath.c_str(), &model.animations_count);
   models[name] = model;
 }
