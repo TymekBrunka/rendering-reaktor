@@ -210,7 +210,7 @@ static void SDLCALL load_model_callback(void *userdata, const char *const *filel
   global_lock.lock();
   while (*filelist) {
     std::cout << std::string{*filelist} << "\n";
-    model_mgr->load_model(std::string{*filelist});
+    model_mgr->load_model(*filelist);
     filelist++;
   }
   global_lock.unlock();

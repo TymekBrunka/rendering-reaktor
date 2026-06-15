@@ -19,10 +19,11 @@ void ModelMgr::unload_model(const std::string &name) {
     models.erase(idx);
 }
 
-void ModelMgr::load_model(const std::string &filepath) {
+std::string ModelMgr::load_model(const char* filepath) {
   // i just hate the c++ way to split path string by last separator
   int start = 0;
-  for (int i = filepath.size() - 1; i >= 0; i--) {
+  int filepath_size = strlen(filepath);
+  for (int i = filepath_size - 1; i >= 0; i--) {
     if (filepath[i] == '/' ||
 #ifdef _WIN32
         filepath[i] == '\\'
@@ -33,15 +34,17 @@ void ModelMgr::load_model(const std::string &filepath) {
     }
   }
 
-  char *name_ = new char[filepath.size() - start + 1];
-  memcpy(name_, &filepath[start + 1], filepath.size() - start);
-  std::string name{(const char *)name_, size_t(filepath.size() - start)};
+  char *name_ = new char[filepath_size - start + 1];
+  memcpy(name_, &filepath[start + 1], filepath_size - start);
+  std::string name{(const char *)name_, size_t(filepath_size - start)};
 
   AnimatedModel model{
-      .model = LoadModel(filepath.c_str()),
+      .model = LoadModel(filepath),
       .animations = nullptr,
       .animations_count = 0,
   };
-  model.animations = LoadModelAnimations(filepath.c_str(), &model.animations_count);
+  model.animations = LoadModelAnimations(filepath, &model.animations_count);
   models[name] = model;
+
+  return name;
 }

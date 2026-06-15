@@ -1,11 +1,11 @@
 #pragma once
 #include <raylib.h>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 struct AnimatedModel {
   Model model;
-  ModelAnimation* animations;
+  ModelAnimation *animations;
   int animations_count;
 };
 
@@ -16,6 +16,6 @@ public:
   ModelMgr() = default;
   ~ModelMgr();
 
-  void load_model(const std::string& filepath);
-  void unload_model(const std::string& name);
+  std::string load_model(const char *filepath);
+  void unload_model(const std::string &name);
 };
