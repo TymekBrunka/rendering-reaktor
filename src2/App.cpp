@@ -8,7 +8,7 @@
 #include <rlImGui.h>
 #include <rlgl.h>
 
-#include <FPSControler.cpp>
+#include <FPScontroler.cpp>
 
 // #include <GLFW/glfw3.h>
 #include <embeded/IconsFontAwesome6.h>
