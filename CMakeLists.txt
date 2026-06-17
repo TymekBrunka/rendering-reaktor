@@ -10,6 +10,14 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
 endif()
 
+if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
+  # bc of windows using different main
+  if (DEFINED CMAKE_CXX_FLAGS AND NOT CMAKE_CXX_FLAGS STREQUAL "")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS},")
+  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}-Wl,-subsystem,windows")
+endif()
+
 include(deps/ext.cmake)
 
 add_library(static_assets src2/StaticAssets.cpp)
@@ -20,9 +28,16 @@ add_library(ModelMgr
   src2/AssetMgr/ModelMgr.hpp
 )
 target_include_directories(ModelMgr PRIVATE src2/AssetMgr)
-target_link_libraries(ModelMgr PUBLIC raylib)
+target_link_libraries(ModelMgr PUBLIC raylib PRIVATE static_assets)
 
-add_executable(main src2/App.cpp src2/main.cpp src2/App.hpp)
+if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
+  add_executable(main WIN32 src2/main.cpp src2/App.cpp src2/App.hpp)
+  target_compile_options(main PRIVATE -static)
+  target_link_options(main PRIVATE -static)
+else()
+add_executable(main src2/main.cpp src2/App.cpp src2/App.hpp)
+endif()
+
 target_link_libraries(main
   raylib
   raygizmo

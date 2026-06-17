@@ -5,5 +5,8 @@
 #include "embeded/skybox.vertex.glsl.cpp"
 #include "embeded/cubemap.vs.cpp"
 #include "embeded/cubemap.fs.cpp"
+#include "embeded/skinning.vs.cpp"
+#include "embeded/skinning.fs.cpp"
+
 #include "embeded/fa.h"
 #include "embeded/RobotoRegular.cpp"

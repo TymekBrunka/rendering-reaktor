@@ -11,21 +11,25 @@
 #include <FPScontroler.cpp>
 
 // #include <GLFW/glfw3.h>
-#include <embeded/IconsFontAwesome6.h>
-#include <embeded/RobotoRegular.h>
-#include <embeded/cubemap.fs.hpp>
-#include <embeded/cubemap.vs.hpp>
-#include <embeded/icon.png.hpp>
-#include <embeded/icons.png.hpp>
-#include <embeded/skybox.frag.glsl.hpp>
-#include <embeded/skybox.png.hpp>
-#include <embeded/skybox.vertex.glsl.hpp>
+#include <IconsFontAwesome6.h>
+#include <RobotoRegular.h>
+#include <cubemap.fs.hpp>
+#include <cubemap.vs.hpp>
+#include <icon.png.hpp>
+#include <icons.png.hpp>
+#include <skybox.frag.glsl.hpp>
+#include <skybox.png.hpp>
+#include <skybox.vertex.glsl.hpp>
+
+#include <Renderdoc.cpp>
 
 std::mutex global_lock{};
 
 static ImFont *font1;
 
 void App::initialise() {
+  LoadRenderDoc();
+
   SetConfigFlags(FLAG_MSAA_4X_HINT);
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(800, 600, "reaktory");
@@ -53,9 +57,6 @@ void App::initialise() {
       .mipmaps = 1,
       .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
   };
-
-  // model_mgr.load_model("C:\\Users\\Operator\\Downloads\\CesiumMan.m3d");
-  model_mgr.load_model("C:\\Users\\Operator\\Downloads\\Cat_v1_L3.123cb1b1943a-2f48-4e44-8f71-6bbe19a3ab64\\Cat_v1_L3.123cb1b1943a-2f48-4e44-8f71-6bbe19a3ab64\\12221_Cat_v1_l3.obj");
 
   SetWindowIcon(icon_);
 
@@ -110,7 +111,18 @@ void App::run() {
   bool mouse_locked = false;
   Vector2 last_mouse_pos = Vector2{0, 0};
   while (!WindowShouldClose()) {
+    // process file dialog actions
     SDL_PumpEvents();
+    global_lock.lock();
+    if (models_to_load.size() > 0) {
+      for (const auto &model : models_to_load) {
+        model_mgr.load_model(model);
+      }
+      models_to_load.clear();
+    }
+    global_lock.unlock();
+
+    // scene rendering and 3d character controler
     Vector2 mouseDelta;
     if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
       if (!mouse_locked) {
@@ -153,12 +165,13 @@ void App::run() {
 
     updateCamera();
 
+    if (RenderDocIsFrameCapturing())
+      RenderDocBeginFrameCapture();
+
     BeginDrawing();
     ClearBackground(BLANK);
 
-    global_lock.lock();
     render_scene();
-    global_lock.unlock();
 
     rlImGuiBegin();
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(0x5f151515)); // workaround to make docked windows transparent
@@ -180,6 +193,9 @@ void App::run() {
 
     DrawFPS(GetRenderWidth() - MeasureText("60 FPS", 20) - 10, 10);
     EndDrawing();
+
+    if (RenderDocIsFrameCapturing())
+      RenderDocEndFrameCapture();
   }
 }
 
@@ -208,11 +224,10 @@ static void SDLCALL load_model_callback(void *userdata, const char *const *filel
     return;
   }
 
-  ModelMgr *model_mgr = (ModelMgr *)userdata;
+  std::vector<std::string> *models_to_load = (std::vector<std::string> *)userdata;
   global_lock.lock();
   while (*filelist) {
-    std::cout << std::string{*filelist} << "\n";
-    model_mgr->load_model(*filelist);
+    models_to_load->push_back(std::string{*filelist});
     filelist++;
   }
   global_lock.unlock();
@@ -227,7 +242,7 @@ void App::panel_ui() {
     ImGui::PushID(0);
     if (IconButton("model", 5)) {
       static const SDL_DialogFileFilter ofd_filters[] = {{"Modele obj (.obj)", "obj"}, {"Wszystkie pliki", "*"}};
-      SDL_ShowOpenFileDialog(load_model_callback, &this->model_mgr, nullptr, ofd_filters, 2, NULL, true);
+      SDL_ShowOpenFileDialog(load_model_callback, &this->models_to_load, nullptr, ofd_filters, 2, NULL, true);
     }
     ImGui::PopID();
 
@@ -243,7 +258,6 @@ void App::panel_ui() {
   }
   ImGui::End();
 
-  global_lock.lock();
   if (ImGui::Begin("Modele")) {
     for (const auto &[name, model] : model_mgr.models) {
       if (ImGui::Button(name.c_str())) {
@@ -252,7 +266,6 @@ void App::panel_ui() {
     }
   }
   ImGui::End();
-  global_lock.unlock();
 }
 
 void App::render_scene() {
@@ -266,19 +279,20 @@ void App::render_scene() {
 
   BeginMode3D(camera);
   DrawCube({-10, -15, -20}, 20, 30, 40, RED);
-  // for (const auto &object : objects) {
-  //   DrawModel(object, Vector3{0, 0, 0}, 1, WHITE);
-  // }
+  for (const auto &object : objects) {
+    DrawModel(object, Vector3{0, 0, 0}, 100, WHITE);
+  }
 
   // DrawModelEx(testmodel, Vector3{0,0,0}, Vector3{0,1,0}, GetTime() * 100, Vector3{100, 100, 100}, WHITE);
 
-  for (const auto &[name, model] : model_mgr.models) {
-    DrawModel(model.model, Vector3{0, 0, 0}, 100, WHITE);
-  }
+  // for (const auto &[name, model] : model_mgr.models) {
+  //   DrawModel(model.model, Vector3{0, 0, 0}, 100, WHITE);
+  // }
   EndMode3D();
 }
 
 void App::cleanup() {
   rlImGuiShutdown();
   CloseWindow();
+  UnloadRenderDoc();
 }

@@ -50,8 +50,13 @@ public:
   std::vector<Gif> dynamic_textures;
   ModelMgr model_mgr;
   std::vector<Model> objects;
+  int new_obj_id = 0;
 
   Model skybox;
+
+private:
+  std::vector<std::string> models_to_load;
+public:
 
   App() = default;
   void initialise();

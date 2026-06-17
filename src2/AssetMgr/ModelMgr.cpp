@@ -3,12 +3,23 @@
 #include <ModelMgr.hpp>
 #include <cstddef>
 #include <cstring>
+#include <iostream>
+
+#include <skinning.fs.hpp>
+#include <skinning.vs.hpp>
+
+void ModelMgr::setup_shader() {
+  shader = LoadShaderFromMemory(skinning_vs_text, skinning_fs_text);
+  if (!IsShaderValid(shader))
+    std::cout << "failed to load model(skinning) shaders from raylib\n";
+}
 
 ModelMgr::~ModelMgr() {
   for (auto &[name, model] : models) {
     UnloadModelAnimations(model.animations, model.animations_count);
     UnloadModel(model.model);
   }
+  UnloadShader(shader);
 }
 
 void ModelMgr::unload_model(const std::string &name) {
@@ -19,11 +30,10 @@ void ModelMgr::unload_model(const std::string &name) {
     models.erase(idx);
 }
 
-std::string ModelMgr::load_model(const char *filepath) {
+std::string ModelMgr::load_model(const std::string& filepath) {
   // i just hate the c++ way to split path string by last separator
   int start = 0;
-  int filepath_size = strlen(filepath);
-  for (int i = filepath_size - 1; i >= 0; i--) {
+  for (int i = filepath.size() - 1; i >= 0; i--) {
     if (filepath[i] == '/'
 #ifdef _WIN32
         || filepath[i] == '\\'
@@ -34,16 +44,20 @@ std::string ModelMgr::load_model(const char *filepath) {
     }
   }
 
-  char *name_ = new char[filepath_size - start + 1];
-  memcpy(name_, &filepath[start + 1], filepath_size - start);
-  std::string name{(const char *)name_, size_t(filepath_size - start)};
+  char *name_ = new char[filepath.size() - start + 1];
+  memcpy(name_, &filepath[start + 1], filepath.size() - start);
+  std::string name{(const char *)name_, size_t(filepath.size() - start)};
 
   AnimatedModel model{
-      .model = LoadModel(filepath),
+      .model = LoadModel(filepath.c_str()),
       .animations = nullptr,
       .animations_count = 0,
   };
-  model.animations = LoadModelAnimations(filepath, &model.animations_count);
+  model.animations = LoadModelAnimations(filepath.c_str(), &model.animations_count);
+  for (int i = 0; i < model.model.materialCount; i++) {
+    model.model.materials[i].shader = shader;
+  }
+
   models[name] = model;
 
   return name;

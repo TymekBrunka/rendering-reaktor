@@ -8,3 +8,6 @@ CMakeCache.txt
 CMakeFiles/
 imgui.ini
 Session.vim
+
+renderdoc.dll
+build/renderdoc.dll
