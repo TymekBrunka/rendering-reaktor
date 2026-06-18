@@ -28,7 +28,8 @@ std::mutex global_lock{};
 static ImFont *font1;
 
 void App::initialise() {
-  LoadRenderDoc();
+  if (!LoadRenderDoc())
+    std::cout << "Couldn't load renderdoc\n";
 
   SetConfigFlags(FLAG_MSAA_4X_HINT);
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);

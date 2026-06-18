@@ -32,11 +32,13 @@ target_link_libraries(ModelMgr PUBLIC raylib PRIVATE static_assets)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
   add_executable(main WIN32 src2/main.cpp src2/App.cpp src2/App.hpp)
-  target_compile_options(main PRIVATE -static)
-  target_link_options(main PRIVATE -static)
 else()
 add_executable(main src2/main.cpp src2/App.cpp src2/App.hpp)
 endif()
+
+# bc otherwise it depends on compiler libs in release mode and crashes in renderdoc
+target_compile_options(main PRIVATE -static)
+target_link_options(main PRIVATE -static)
 
 target_link_libraries(main
   raylib
@@ -58,6 +60,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_options(main PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
   target_link_options(main PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
 endif()
+
+# add_executable(ziptest src2/Zip/zip.cpp)
+# target_link_libraries(ziptest PRIVATE libzip::zip)
 
 # add_subdirectory(src/rendering)
 #

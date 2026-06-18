@@ -38,41 +38,45 @@ badd +3 ~/Documents/bettyergl/deps/ext.cmake
 badd +22 ~/Documents/bettyergl/deps/CPM.cmake
 badd +134 ~/Documents/bettyergl/src/bettergl/Debugging.cpp
 badd +8 ~/Documents/bettyergl/gex.ping.hpp
-badd +1 ~/Documents/rendering-reaktor/src/main.cpp
-badd +3 ~/Documents/rendering-reaktor/src/shaders/composite.vertex.glsl
-badd +4 ~/Documents/rendering-reaktor/src/shaders/composite.frag.glsl
-badd +13 ~/Documents/rendering-reaktor/CMakeLists.txt
-badd +6 ~/Documents/rendering-reaktor/src/input_handling.cpp
-badd +4 ~/Documents/rendering-reaktor/src/shaders/skybox.frag.glsl
-badd +21 ~/Documents/rendering-reaktor/src/rendering/FrameBuffer.cpp
-badd +1 ~/Documents/rendering-reaktor/.gitignore
-badd +5 ~/Documents/rendering-reaktor/src/rendering/CMakeLists.txt
-badd +159 ~/Documents/rendering-reaktor/deps/ext.cmake
+badd +1 src/main.cpp
+badd +3 src/shaders/composite.vertex.glsl
+badd +4 src/shaders/composite.frag.glsl
+badd +38 CMakeLists.txt
+badd +6 src/input_handling.cpp
+badd +4 src/shaders/skybox.frag.glsl
+badd +21 src/rendering/FrameBuffer.cpp
+badd +1 .gitignore
+badd +5 src/rendering/CMakeLists.txt
+badd +71 deps/ext.cmake
 badd +182 ~/scoop/apps/mingw-winlibs-llvm-msvcrt/14.2.0-19.1.7-12.0.0-r3/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake
-badd +1 ~/Documents/rendering-reaktor/build/CMakeFiles/pkgRedirects/zlib-config.cmake
-badd +1 ~/Documents/rendering-reaktor/deps/raygizmo/raygizmo.c
-badd +1 ~/Documents/rendering-reaktor/deps/raygizmo/raygizmo.h
-badd +1 ~/Documents/rendering-reaktor/src2/raygizmo_test.cpp
-badd +145 ~/Documents/rendering-reaktor/src2/fps.cpp
-badd +1 ~/Documents/rendering-reaktor/src2/main3.cpp
-badd +9 ~/Documents/rendering-reaktor/src2/main.cpp
-badd +9 ~/Documents/rendering-reaktor/src2/Texture2d.hpp
-badd +2 ~/Documents/rendering-reaktor/src2/embeded/cubemap.png.cpp
-badd +3 ~/Documents/rendering-reaktor/src2/embeded/cubemap.png.hpp
-badd +82 ~/Documents/rendering-reaktor/src2/main2.cpp
-badd +1 ~/Documents/rendering-reaktor/src2/embeded/icon.png.hpp
-badd +1 ~/Documents/rendering-reaktor/src2/embeded/icons.png.hpp
-badd +57 ~/Documents/rendering-reaktor/src2/App.hpp
-badd +273 ~/Documents/rendering-reaktor/src2/App.cpp
-badd +8 ~/Documents/rendering-reaktor/src2/StaticAssets.cpp
-badd +1 ~/Documents/rendering-reaktor/.gitmodules
+badd +1 build/CMakeFiles/pkgRedirects/zlib-config.cmake
+badd +1 deps/raygizmo/raygizmo.c
+badd +1 deps/raygizmo/raygizmo.h
+badd +198 src2/raygizmo_test.cpp
+badd +145 src2/fps.cpp
+badd +1 src2/main3.cpp
+badd +9 src2/main.cpp
+badd +9 src2/Texture2d.hpp
+badd +2 src2/embeded/cubemap.png.cpp
+badd +3 src2/embeded/cubemap.png.hpp
+badd +82 src2/main2.cpp
+badd +1 src2/embeded/icon.png.hpp
+badd +1 src2/embeded/icons.png.hpp
+badd +8 src2/App.hpp
+badd +297 src2/App.cpp
+badd +9 src2/StaticAssets.cpp
+badd +1 .gitmodules
 badd +243 ~/cacheCPM/raylib/c846/src/raylib.h
-badd +1 ~/Documents/rendering-reaktor/src2/embeded/cubemap.fs.hpp
-badd +7 ~/Documents/rendering-reaktor/src2/FPScontroler.cpp
-badd +2 ~/Documents/rendering-reaktor/src2/embeded/RobotoRegular.h
-badd +3 ~/Documents/rendering-reaktor/src2/embeded/RobotoRegular.cpp
-badd +19 ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
-badd +37 ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
+badd +1 src2/embeded/cubemap.fs.hpp
+badd +7 src2/FPScontroler.cpp
+badd +2 src2/embeded/RobotoRegular.h
+badd +3 src2/embeded/RobotoRegular.cpp
+badd +11 src2/AssetMgr/ModelMgr.hpp
+badd +57 src2/AssetMgr/ModelMgr.cpp
+badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.fs.hpp
+badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.vs.hpp
+badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.vs.cpp
+badd +68 ~/Documents/rendering-reaktor/src2/Renderdoc.cpp
 argglobal
 %argdel
 tabnew +setlocal\ bufhidden=wipe
@@ -80,10 +84,11 @@ tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
+tabnew +setlocal\ bufhidden=wipe
 tabrewind
-edit ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
+edit ~/Documents/rendering-reaktor/src2/Renderdoc.cpp
 argglobal
-balt ~/Documents/rendering-reaktor/src2/App.hpp
+balt src2/AssetMgr/ModelMgr.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -91,79 +96,86 @@ setlocal foldignore=#
 setlocal foldlevel=0
 setlocal foldminlines=1
 setlocal foldnestmax=20
-setlocal foldenable
+setlocal nofoldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 37 - ((36 * winheight(0) + 29) / 59)
+let s:l = 67 - ((51 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 37
-normal! 025|
-tabnext
-edit ~/Documents/rendering-reaktor/src2/raygizmo_test.cpp
-argglobal
-balt ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 198 - ((17 * winheight(0) + 29) / 59)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 198
-normal! 06|
-tabnext
-edit ~/Documents/rendering-reaktor/src2/App.hpp
-argglobal
-balt ~/Documents/rendering-reaktor/src2/App.cpp
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 57 - ((47 * winheight(0) + 29) / 59)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 57
-normal! 042|
-tabnext
-edit ~/Documents/rendering-reaktor/src2/App.cpp
-argglobal
-balt ~/Documents/rendering-reaktor/.gitignore
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 101 - ((47 * winheight(0) + 29) / 59)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 101
+keepjumps 67
 normal! 0
 tabnext
-edit ~/Documents/rendering-reaktor/src2/main.cpp
+edit src2/AssetMgr/ModelMgr.hpp
 argglobal
-balt ~/Documents/rendering-reaktor/src/main.cpp
+balt src2/StaticAssets.cpp
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal nofoldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 14 - ((13 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 14
+normal! 03|
+tabnext
+edit src2/App.hpp
+argglobal
+balt src2/App.cpp
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 9 - ((8 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 9
+normal! 0
+tabnext
+edit src2/App.cpp
+wincmd t
+let s:save_winminheight = &winminheight
+let s:save_winminwidth = &winminwidth
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+balt .gitignore
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 297 - ((58 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 297
+normal! 020|
+tabnext
+edit src2/main.cpp
+argglobal
+balt src/main.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -181,9 +193,29 @@ normal! zt
 keepjumps 9
 normal! 016|
 tabnext
-edit ~/Documents/rendering-reaktor/CMakeLists.txt
+edit ~/Documents/rendering-reaktor/src2/embeded/skinning.fs.hpp
 argglobal
-balt ~/Documents/rendering-reaktor/deps/ext.cmake
+balt ~/Documents/rendering-reaktor/src2/embeded/skinning.vs.hpp
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal nofoldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 1 - ((0 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 1
+normal! 0
+tabnext
+edit CMakeLists.txt
+argglobal
+balt ~/Documents/rendering-reaktor/src2/embeded/skinning.vs.hpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -194,19 +226,21 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 13 - ((12 * winheight(0) + 29) / 59)
+let s:l = 38 - ((37 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 13
-normal! 02|
-tabnext 6
+keepjumps 38
+normal! 059|
+tabnext 4
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
 set winheight=1 winwidth=20
 let &shortmess = s:shortmess_save
+let &winminheight = s:save_winminheight
+let &winminwidth = s:save_winminwidth
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
