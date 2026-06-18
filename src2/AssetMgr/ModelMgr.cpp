@@ -54,9 +54,9 @@ std::string ModelMgr::load_model(const std::string& filepath) {
       .animations_count = 0,
   };
   model.animations = LoadModelAnimations(filepath.c_str(), &model.animations_count);
-  for (int i = 0; i < model.model.materialCount; i++) {
-    model.model.materials[i].shader = shader;
-  }
+  // for (int i = 0; i < model.model.materialCount; i++) {
+  //   model.model.materials[i].shader = shader;
+  // }
 
   models[name] = model;
 

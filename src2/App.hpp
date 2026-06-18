@@ -70,4 +70,6 @@ public:
   void updateBody();
 
   bool IconButton(const char *label, int idx = 1, ImVec2 size = ImVec2(30, 30));
+
+  bool import_scene_zip(const char* fielpath);
 };

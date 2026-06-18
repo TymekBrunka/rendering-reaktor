@@ -31,9 +31,9 @@ target_include_directories(ModelMgr PRIVATE src2/AssetMgr)
 target_link_libraries(ModelMgr PUBLIC raylib PRIVATE static_assets)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
-  add_executable(main WIN32 src2/main.cpp src2/App.cpp src2/App.hpp)
+  add_executable(main WIN32 src2/main.cpp src2/App.cpp src2/App.hpp src2/SaveMod.cpp)
 else()
-add_executable(main src2/main.cpp src2/App.cpp src2/App.hpp)
+  add_executable(main src2/main.cpp src2/App.cpp src2/App.hpp src2/SaveMod.cpp)
 endif()
 
 # bc otherwise it depends on compiler libs in release mode and crashes in renderdoc
@@ -47,6 +47,7 @@ target_link_libraries(main
   imgui
   SDL3::SDL3-static
   xlsxio_write_STATIC
+  libzip::zip
 
   static_assets
   ModelMgr
