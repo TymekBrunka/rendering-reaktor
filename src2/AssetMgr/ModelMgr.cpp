@@ -11,7 +11,7 @@
 void ModelMgr::setup_shader() {
   shader = LoadShaderFromMemory(skinning_vs_text, skinning_fs_text);
   if (!IsShaderValid(shader))
-    std::cout << "failed to load model(skinning) shaders from raylib\n";
+    std::cerr << "failed to load model(skinning) shaders from raylib\n";
 }
 
 ModelMgr::~ModelMgr() {
