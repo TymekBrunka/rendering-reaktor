@@ -17,6 +17,10 @@
 #include <stdlib.h>
 #endif
 
+#ifdef __linux__
+#include <dlfcn.h>
+#endif
+
 #include <assert.h>
 
 RENDERDOC_API_1_1_2 *renderdoc = NULL;

@@ -1,5 +1,7 @@
 include(deps/CPM.cmake)
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Release")
 set(CPM_USE_LOCAL_PACKAGES ON)
+endif()
 
 macro (install)
 endmacro ()
@@ -70,7 +72,10 @@ CPMAddPackage(
     "SDL_RENDER_D3D OFF"
     "SDL_WAYLAND OFF"
 )
+
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Release")
 set(CPM_USE_LOCAL_PACKAGES ON)
+endif()
 
 # set(SDL3_FOUND TRUE CACHE BOOL "" FORCE)
 # if (NOT TARGET SDL3::SDL3)

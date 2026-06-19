@@ -36,9 +36,11 @@ else()
   add_executable(main src2/main.cpp src2/App.cpp src2/App.hpp src2/SaveMod.cpp)
 endif()
 
-# bc otherwise it depends on compiler libs in release mode and crashes in renderdoc
-target_compile_options(main PRIVATE -static)
-target_link_options(main PRIVATE -static)
+if (CMAKE_SYSTEM_NAME MATCHES "Windows" OR CMAKE_BUILD_TYPE STREQUAL "Release")
+  # bc otherwise it depends on compiler libs in release mode and crashes(on windows) in renderdoc
+  target_compile_options(main PRIVATE -static)
+  target_link_options(main PRIVATE -static)
+endif()
 
 target_link_libraries(main
   raylib
