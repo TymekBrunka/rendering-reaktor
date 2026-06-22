@@ -7,6 +7,7 @@
 #include <iostream>
 #include <rlImGui.h>
 #include <rlgl.h>
+#include <cstdlib>
 
 #include <FPScontroler.cpp>
 
@@ -25,9 +26,20 @@
 
 std::mutex global_lock{};
 
+extern char* home_dir;
+
 static ImFont *font1;
 
 void App::initialise() {
+#ifdef _WIN32
+  home_dir = getenv("USERPROFILE");
+#else
+  home_dir = getenv("HOME");
+#endif
+
+  if (!home_dir)
+    throw "Cannot find home";
+
   if (!LoadRenderDoc())
     std::cout << "Couldn't load renderdoc\n";
 

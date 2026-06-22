@@ -1,5 +1,16 @@
+set(APP_MAJOR 0)
+set(APP_MINOR 0)
+set(APP_PATCH 1)
+
+set(FORMAT_MAJOR 0)
+set(FORMAT_MINOR 0)
+set(FORMAT_PATCH 1)
+
 cmake_minimum_required(VERSION 3.25)
-project(reaktory LANGUAGES C CXX)
+project(reaktory
+  LANGUAGES C CXX
+  VERSION ${APP_MAJOR}.${APP_MINOR}.${APP_PATCH}
+)
 set (CMAKE_CXX_STANDARD 20)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -31,10 +42,26 @@ target_include_directories(ModelMgr PRIVATE src2/AssetMgr)
 target_link_libraries(ModelMgr PUBLIC raylib PRIVATE static_assets)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
-  add_executable(main WIN32 src2/main.cpp src2/App.cpp src2/App.hpp src2/SaveMod.cpp)
+  add_executable(main WIN32 src2/main.cpp src2/App.cpp src2/App.hpp src2/SaveLoad/SaveMod.cpp)
 else()
-  add_executable(main src2/main.cpp src2/App.cpp src2/App.hpp src2/SaveMod.cpp)
+  add_executable(main src2/main.cpp src2/App.cpp src2/App.hpp src2/SaveLoad/SaveMod.cpp)
 endif()
+
+# if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
+#   add_executable(main WIN32 src2/main.cpp)
+# else()
+#   add_executable(main src2/main.cpp)
+# endif()
+
+target_compile_options(main PRIVATE
+  -DAPP_MAJOR=${APP_MAJOR}
+  -DAPP_MINOR=${APP_MINOR}
+  -DAPP_PATCH=${APP_PATCH}
+
+  -DFORMAT_MAJOR=${FORMAT_MAJOR}
+  -DFORMAT_MINOR=${FORMAT_MINOR}
+  -DFORMAT_PATCH=${FORMAT_PATCH}
+)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows" OR CMAKE_BUILD_TYPE STREQUAL "Release")
   # bc otherwise it depends on compiler libs in release mode and crashes(on windows) in renderdoc

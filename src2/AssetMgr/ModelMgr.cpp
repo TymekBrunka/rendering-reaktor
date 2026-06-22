@@ -30,7 +30,7 @@ void ModelMgr::unload_model(const std::string &name) {
     models.erase(idx);
 }
 
-std::string ModelMgr::load_model(const std::string& filepath) {
+bool ModelMgr::load_model(const std::string& filepath) {
   // i just hate the c++ way to split path string by last separator
   int start = 0;
   for (int i = filepath.size() - 1; i >= 0; i--) {
@@ -59,6 +59,5 @@ std::string ModelMgr::load_model(const std::string& filepath) {
   // }
 
   models[name] = model;
-
-  return name;
+  return true;
 }

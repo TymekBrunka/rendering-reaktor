@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <raylib.h>
 #include <string>
 #include <unordered_map>
@@ -21,6 +22,6 @@ public:
 
   void setup_shader();
 
-  std::string load_model(const std::string &filepath);
+  bool load_model(const std::string &filepath);
   void unload_model(const std::string &name);
 };
