@@ -60,12 +60,12 @@ bool ModelMgr::load_model(const std::string& filepath) {
   //   model.model.materials[i].shader = shader;
   // }
 
-  Camera model_preview_camera = {0};
+  Camera model_preview_camera{};
   model.target = LoadRenderTexture(100, 100);
 
   Vector3 bb = GetModelBoundingBox(model.model).max;
   model_preview_camera.position = Vector3Scale(bb, 1.2);
-  model_preview_camera.up = Vector3{0,-1,0}; // y=-1 is up for the models, idk why but it is
+  model_preview_camera.up = Vector3{0,1,0};
   model_preview_camera.target = Vector3{0,0,0};
   model_preview_camera.fovy = 90;
   model_preview_camera.projection = CAMERA_PERSPECTIVE;
@@ -73,7 +73,7 @@ bool ModelMgr::load_model(const std::string& filepath) {
   BeginTextureMode(model.target);
   BeginMode3D(model_preview_camera);
   ClearBackground(BLANK);
-  DrawModel(model.model, Vector3(0,0,0), 1.0f, WHITE);
+  DrawModel(model.model, Vector3{0,0,0}, 1.0f, DARKBLUE);
   EndMode3D();
   EndTextureMode();
 

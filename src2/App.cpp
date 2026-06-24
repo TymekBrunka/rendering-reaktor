@@ -231,6 +231,22 @@ static void SDLCALL load_zip_callback(void *userdata, const char *const *filelis
   global_lock.unlock();
 }
 
+static void SDLCALL load_model_callback(void *userdata, const char *const *filelist, int filter) {
+  if (!filelist) {
+    return;
+  } else if (!*filelist) {
+    return;
+  }
+
+  std::vector<std::string> *models_to_load = (std::vector<std::string> *)userdata;
+  global_lock.lock();
+  while (*filelist) {
+    models_to_load->push_back(std::string{*filelist});
+    filelist++;
+  }
+  global_lock.unlock();
+}
+
 #define ICONS_MODULO 4
 #define ICONS_IDX_HEIGHT 4
 
@@ -247,21 +263,6 @@ bool App::IconButton(const char *label, int idx, ImVec2 size) {
   ImGui::TextUnformatted(label);
   ImGui::EndGroup();
   return ret;
-}
-static void SDLCALL load_model_callback(void *userdata, const char *const *filelist, int filter) {
-  if (!filelist) {
-    return;
-  } else if (!*filelist) {
-    return;
-  }
-
-  std::vector<std::string> *models_to_load = (std::vector<std::string> *)userdata;
-  global_lock.lock();
-  while (*filelist) {
-    models_to_load->push_back(std::string{*filelist});
-    filelist++;
-  }
-  global_lock.unlock();
 }
 
 void App::panel_ui() {
@@ -296,7 +297,7 @@ void App::panel_ui() {
     int i = 0;
     for (const auto &[name, model] : model_mgr.models) {
       ImGui::PushID(i);
-      if (rlImGuiImageButtonSize("##preview", &model.target.texture, Vector2{100, 100})) {
+      if (ImGui::ImageButton("##preview", (ImTextureID)model.target.texture.id, ImVec2(100, 100), ImVec2(0,1), ImVec2(1,0))) {
         objects.push_back(model.model);
       }
       ImGui::PopID();
