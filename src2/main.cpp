@@ -4,9 +4,6 @@
 #include <stdio.h>
 
 int main(int argc, const char *argv[]) {
-
-
-
   App app;
   app.initialise();
 

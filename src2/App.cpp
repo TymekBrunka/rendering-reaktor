@@ -25,6 +25,7 @@
 #include <Renderdoc.cpp>
 
 std::mutex global_lock{};
+std::string imported_zip_file{};
 
 extern char* home_dir;
 
@@ -127,12 +128,18 @@ void App::run() {
     // process file dialog actions
     SDL_PumpEvents();
     global_lock.lock();
+    
     if (models_to_load.size() > 0) {
       for (const auto &model : models_to_load) {
         model_mgr.load_model(model);
       }
       models_to_load.clear();
     }
+    if (!imported_zip_file.empty()) {
+      import_scene_zip(imported_zip_file.c_str());
+      imported_zip_file.clear();
+    }
+
     global_lock.unlock();
 
     // scene rendering and 3d character controler
@@ -212,6 +219,18 @@ void App::run() {
   }
 }
 
+static void SDLCALL load_zip_callback(void *userdata, const char *const *filelist, int filter) {
+  if (!filelist) {
+    return;
+  } else if (!*filelist) {
+    return;
+  }
+
+  global_lock.lock();
+  imported_zip_file = *filelist;
+  global_lock.unlock();
+}
+
 #define ICONS_MODULO 4
 #define ICONS_IDX_HEIGHT 4
 
@@ -229,7 +248,6 @@ bool App::IconButton(const char *label, int idx, ImVec2 size) {
   ImGui::EndGroup();
   return ret;
 }
-
 static void SDLCALL load_model_callback(void *userdata, const char *const *filelist, int filter) {
   if (!filelist) {
     return;
@@ -266,16 +284,23 @@ void App::panel_ui() {
 
     ImGui::SameLine();
     ImGui::PushID(2);
-    IconButton("załaduj", 9);
+    if (IconButton("załaduj", 9)) {
+      static const SDL_DialogFileFilter ofd_filters[] = {{"Archiwum zip (.zip)", "zip"}, {"Wszystkie pliki", "*"}};
+      SDL_ShowOpenFileDialog(load_zip_callback, NULL, nullptr, ofd_filters, 2, NULL, false);
+    }
     ImGui::PopID();
   }
   ImGui::End();
 
   if (ImGui::Begin("Modele")) {
+    int i = 0;
     for (const auto &[name, model] : model_mgr.models) {
-      if (ImGui::Button(name.c_str())) {
+      ImGui::PushID(i);
+      if (rlImGuiImageButtonSize("##preview", &model.target.texture, Vector2{100, 100})) {
         objects.push_back(model.model);
       }
+      ImGui::PopID();
+      i++;
     }
   }
   ImGui::End();

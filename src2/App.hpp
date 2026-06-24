@@ -1,13 +1,16 @@
 #pragma once
+#include "raylib.h"
 #include <cstdint>
-#include <memory>
 #include <imgui.h>
-#include <vector>
+#include <memory>
 #include <mutex>
+#include <string>
+#include <vector>
 
 #include <AssetMgr/ModelMgr.hpp>
 
 extern std::mutex global_lock;
+extern std::string imported_zip_file;
 
 struct Gif {
   uint16_t numOfFrames;
@@ -40,6 +43,8 @@ public:
     Texture2D icons;
     // Texture2D skybox;
   } assets;
+
+public:
   struct {
     Vector3 position = {0};
     Vector3 velocity = {0};
@@ -56,8 +61,8 @@ public:
 
 private:
   std::vector<std::string> models_to_load;
-public:
 
+public:
   App() = default;
   void initialise();
   void run();
@@ -71,5 +76,5 @@ public:
 
   bool IconButton(const char *label, int idx = 1, ImVec2 size = ImVec2(30, 30));
 
-  bool import_scene_zip(const char* fielpath);
+  bool import_scene_zip(const char *fielpath);
 };

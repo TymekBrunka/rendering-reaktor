@@ -60,7 +60,7 @@ badd +3 src2/embeded/cubemap.png.hpp
 badd +1 src2/embeded/icon.png.hpp
 badd +1 src2/embeded/icons.png.hpp
 badd +5 src2/App.hpp
-badd +235 src2/App.cpp
+badd +40 src2/App.cpp
 badd +9 src2/StaticAssets.cpp
 badd +1 .gitmodules
 badd +243 ~/cacheCPM/raylib/c846/src/raylib.h
@@ -81,9 +81,9 @@ badd +1303 dap-src://2/1000/
 badd +24 dap-src://3/1000/
 badd +1 ~/Documents/rendering-reaktor/src2/main2.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/main.cpp
-badd +56 ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
-badd +16 ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
-badd +2 ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
+badd +13 ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
+badd +19 ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
+badd +5 ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
 argglobal
 %argdel
 tabnew +setlocal\ bufhidden=wipe
@@ -165,33 +165,14 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 102 - ((0 * winheight(0) + 29) / 59)
+let s:l = 43 - ((42 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 102
-normal! 0
+keepjumps 43
+normal! 07|
 tabnext
-edit ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
-argglobal
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal nofoldenable
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 10 - ((9 * winheight(0) + 29) / 59)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 10
-normal! 063|
-tabnext
-edit ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
+edit ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
 argglobal
 balt ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
 setlocal foldmethod=manual
@@ -201,15 +182,42 @@ setlocal foldignore=#
 setlocal foldlevel=0
 setlocal foldminlines=1
 setlocal foldnestmax=20
-setlocal nofoldenable
+setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 16 - ((15 * winheight(0) + 29) / 59)
+let s:l = 6 - ((5 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 16
-normal! 032|
+keepjumps 6
+normal! 0
+tabnext
+edit ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
+wincmd t
+let s:save_winminheight = &winminheight
+let s:save_winminwidth = &winminwidth
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+balt ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal nofoldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 19 - ((18 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 19
+normal! 058|
 tabnext 6
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
@@ -217,6 +225,8 @@ endif
 unlet! s:wipebuf
 set winheight=1 winwidth=20
 let &shortmess = s:shortmess_save
+let &winminheight = s:save_winminheight
+let &winminwidth = s:save_winminwidth
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)

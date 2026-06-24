@@ -23,11 +23,13 @@ ModelMgr::~ModelMgr() {
 }
 
 void ModelMgr::unload_model(const std::string &name) {
-  UnloadModelAnimations(models[name].animations, models[name].animations_count);
-  UnloadModel(models[name].model);
   auto idx = models.find(name);
-  if (idx != models.end())
+  if (idx != models.end()) {
+    UnloadModelAnimations(models[name].animations, models[name].animations_count);
+    UnloadModel(models[name].model);
+    UnloadRenderTexture(models[name].target);
     models.erase(idx);
+  }
 }
 
 bool ModelMgr::load_model(const std::string& filepath) {
@@ -49,14 +51,31 @@ bool ModelMgr::load_model(const std::string& filepath) {
   std::string name{(const char *)name_, size_t(filepath.size() - start)};
 
   AnimatedModel model{
-      .model = LoadModel(filepath.c_str()),
-      .animations = nullptr,
       .animations_count = 0,
+      .animations = nullptr,
+      .model = LoadModel(filepath.c_str()),
   };
   model.animations = LoadModelAnimations(filepath.c_str(), &model.animations_count);
   // for (int i = 0; i < model.model.materialCount; i++) {
   //   model.model.materials[i].shader = shader;
   // }
+
+  Camera model_preview_camera = {0};
+  model.target = LoadRenderTexture(100, 100);
+
+  Vector3 bb = GetModelBoundingBox(model.model).max;
+  model_preview_camera.position = Vector3Scale(bb, 1.2);
+  model_preview_camera.up = Vector3{0,-1,0}; // y=-1 is up for the models, idk why but it is
+  model_preview_camera.target = Vector3{0,0,0};
+  model_preview_camera.fovy = 90;
+  model_preview_camera.projection = CAMERA_PERSPECTIVE;
+
+  BeginTextureMode(model.target);
+  BeginMode3D(model_preview_camera);
+  ClearBackground(BLANK);
+  DrawModel(model.model, Vector3(0,0,0), 1.0f, WHITE);
+  EndMode3D();
+  EndTextureMode();
 
   models[name] = model;
   return true;

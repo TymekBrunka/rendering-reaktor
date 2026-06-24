@@ -5,9 +5,10 @@
 #include <unordered_map>
 
 struct AnimatedModel {
-  Model model;
-  ModelAnimation *animations;
   int animations_count;
+  ModelAnimation *animations;
+  RenderTexture target;
+  Model model;
 };
 
 class ModelMgr {

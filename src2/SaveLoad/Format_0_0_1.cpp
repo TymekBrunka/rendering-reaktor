@@ -14,11 +14,16 @@ bool zip_loader_0_0_1(App *app, zip_t *za, zip_stat_t *stat, zip_error_t *error)
     }
 
     size_t name_length = strlen(stat->name);
-    snprintf(formated_path, 1024, "%s%s%s", home_dir, "/reaktory/tmp/models/", stat->name);
+    snprintf(formated_path, 1024, "%s%s%s", home_dir, MODELS_TMPDIR, &stat->name[sizeof("models/")-1]);
 
     fprintf(stderr, "Saving to file %s\n", formated_path);
 
-    FILE *file = fopen(formated_path, "w");
+    FILE *file = fopen(formated_path, "wb");
+    if (file == NULL) {
+      fprintf(stderr, "Couldn't open file %s for writing; exited with ferror = %d\n", formated_path, ferror(file));
+      return false;
+    }
+
     fwrite(data, 1, stat->size, file);
     fclose(file);
 
