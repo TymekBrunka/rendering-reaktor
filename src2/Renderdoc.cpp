@@ -1,6 +1,7 @@
 #ifndef NDEBUG
 
 #include <renderdoc_app.h>
+#include <cstddef>
 #define WIN32_LEAN_AND_MEAN
 #if defined(_WIN64)
 #define _AMD64_
