@@ -13,6 +13,7 @@ struct AnimatedModel {
 
 class ModelMgr {
 private:
+  Texture2D placeholder_texture;
   Shader shader;
 
 public:
@@ -21,7 +22,7 @@ public:
   ModelMgr() = default;
   ~ModelMgr();
 
-  void setup_shader();
+  void setup();
 
   bool load_model(const std::string &filepath);
   void unload_model(const std::string &name);

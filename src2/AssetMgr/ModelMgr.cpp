@@ -7,11 +7,23 @@
 
 #include <skinning.fs.hpp>
 #include <skinning.vs.hpp>
+#include <placeholder.png.hpp>
 
-void ModelMgr::setup_shader() {
+void ModelMgr::setup() {
+  std::cerr << "Loading skinning shader\n";
   shader = LoadShaderFromMemory(skinning_vs_text, skinning_fs_text);
   if (!IsShaderValid(shader))
     std::cerr << "failed to load model(skinning) shaders from raylib\n";
+
+  Image placeholder_ = {
+      .data = placeholder_img_data.data,
+      .width = placeholder_img_data.width,
+      .height = placeholder_img_data.height,
+      .mipmaps = 1,
+      .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+  };
+
+  placeholder_texture = LoadTextureFromImage(placeholder_);
 }
 
 ModelMgr::~ModelMgr() {
@@ -55,16 +67,28 @@ bool ModelMgr::load_model(const std::string& filepath) {
       .animations = nullptr,
       .model = LoadModel(filepath.c_str()),
   };
+
+  if (!IsModelValid(model.model) && strncmp(&name[name.size()-5], ".m3d", 4)) // if model is invalid and is not m3d model (raylib flags fully loaded m3d model as invalid at the time of writing this)
+    return false;
+
   model.animations = LoadModelAnimations(filepath.c_str(), &model.animations_count);
-  // for (int i = 0; i < model.model.materialCount; i++) {
-  //   model.model.materials[i].shader = shader;
-  // }
+  for (int i = 0; i < model.model.materialCount; i++) {
+    model.model.materials[i].shader = shader;
+    model.model.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = placeholder_texture;
+  }
 
   Camera model_preview_camera{};
   model.target = LoadRenderTexture(100, 100);
+  SetTextureFilter(model.target.texture, TEXTURE_FILTER_BILINEAR); // blurry instead of pixelated
 
   Vector3 bb = GetModelBoundingBox(model.model).max;
-  model_preview_camera.position = Vector3Scale(bb, 1.2);
+  // model_preview_camera.position = Vector3Scale(bb, 1.2);
+  float furtherest_axis = bb.x;
+  if (bb.y > bb.x)
+    furtherest_axis = bb.y;
+  if (bb.z > bb.y)
+    furtherest_axis = bb.z;
+  model_preview_camera.position = Vector3{furtherest_axis + 0.1f, furtherest_axis + 0.1f, furtherest_axis + 0.1f};
   model_preview_camera.up = Vector3{0,1,0};
   model_preview_camera.target = Vector3{0,0,0};
   model_preview_camera.fovy = 90;
@@ -73,7 +97,7 @@ bool ModelMgr::load_model(const std::string& filepath) {
   BeginTextureMode(model.target);
   BeginMode3D(model_preview_camera);
   ClearBackground(BLANK);
-  DrawModel(model.model, Vector3{0,0,0}, 1.0f, DARKBLUE);
+  DrawModel(model.model, Vector3{0,0,0}, 1.0f, WHITE);
   EndMode3D();
   EndTextureMode();
 

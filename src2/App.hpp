@@ -32,6 +32,7 @@ struct Gif {
 
 class App {
 public:
+  int location_id = 0;
   float headTimer = 0.0f;
   float walkLerp = 0.0f;
   Vector2 sensitivity = {0.003f, 0.003f};
@@ -42,6 +43,7 @@ public:
     Texture2D icon;
     Texture2D icons;
     // Texture2D skybox;
+    Shader colorpicker_shader;
   } assets;
 
 public:
@@ -58,8 +60,6 @@ public:
   int new_obj_id = 0;
 
   Model skybox;
-
-private:
   std::vector<std::string> models_to_load;
 
 public:

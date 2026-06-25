@@ -3,11 +3,11 @@
 #include "raylib.h"
 #include <App.hpp>
 #include <SDL3/SDL.h>
+#include <cstdlib>
 #include <imgui.h>
 #include <iostream>
 #include <rlImGui.h>
 #include <rlgl.h>
-#include <cstdlib>
 
 #include <FPScontroler.cpp>
 
@@ -21,13 +21,17 @@
 #include <skybox.frag.glsl.hpp>
 #include <skybox.png.hpp>
 #include <skybox.vertex.glsl.hpp>
+#include <placeholder.png.hpp>
+
+#include <skinning.vs.hpp>
+#include <skinning_colorpicker.fs.hpp>
 
 #include <Renderdoc.cpp>
 
 std::mutex global_lock{};
 std::string imported_zip_file{};
 
-extern char* home_dir;
+extern char *home_dir;
 
 static ImFont *font1;
 
@@ -81,7 +85,7 @@ void App::initialise() {
   skybox = LoadModelFromMesh(cube);
   skybox.materialCount = 1;
 
-  std::cout << "Loading skybox shader\n";
+  std::cerr << "Loading skybox shader\n";
 
   Shader skybox_shader = LoadShaderFromMemory(skybox_vertex_text, skybox_fragment_text);
   skybox.materials[0].shader = skybox_shader;
@@ -92,9 +96,16 @@ void App::initialise() {
   skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(skybox_, CUBEMAP_LAYOUT_AUTO_DETECT);
   SetTextureFilter(skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture, TEXTURE_FILTER_POINT); // pixelated instead of blurry
 
+
+  assets.colorpicker_shader = LoadShaderFromMemory(skinning_vs_text, skinning_fs_colorpicker_text);
+  if (!IsShaderValid(assets.colorpicker_shader))
+    std::cerr << "failed to load model(skinning+colorpicker) shader\n";
+  location_id = GetShaderLocation(assets.colorpicker_shader, "ID");
+
   rlImGuiSetup(true);
   ImGuiIO &io = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  ImGui::GetStyle().AntiAliasedLines = false;
 
   ImFontConfig fontcfg;
   // fontcfg.PixelSnapH = true;
@@ -105,7 +116,6 @@ void App::initialise() {
   font1 = io.Fonts->AddFontFromMemoryCompressedTTF(RobotoRegular_compressed_data, RobotoRegular_compressed_size, 16.0f);
   io.Fonts->AddFontFromMemoryCompressedTTF(FA_compressed_data, FA_compressed_size, 16.0f, &fontcfg, icons_ranges);
 
-  // BlendMode(BLEND_ALPHA);
   rlSetBlendMode(BLEND_ALPHA);
 
   camera.fovy = 90.0f;
@@ -118,6 +128,8 @@ void App::initialise() {
 
   updateCamera();
 
+  model_mgr.setup();
+
   SetTargetFPS(60); // Set our game to run at 60 frames-per-second
 }
 
@@ -128,7 +140,7 @@ void App::run() {
     // process file dialog actions
     SDL_PumpEvents();
     global_lock.lock();
-    
+
     if (models_to_load.size() > 0) {
       for (const auto &model : models_to_load) {
         model_mgr.load_model(model);
@@ -247,6 +259,28 @@ static void SDLCALL load_model_callback(void *userdata, const char *const *filel
   global_lock.unlock();
 }
 
+struct PanelIcon {
+  int icon;
+  const char *label;
+  void (*onclick)(App *);
+};
+
+PanelIcon panel_icons[] = {
+    {5, "model",
+     [](App *app) {
+       static const SDL_DialogFileFilter ofd_filters[] = {{"Modele obj (.obj)", "obj"}, {"Wszystkie pliki", "*"}};
+       SDL_ShowOpenFileDialog(load_model_callback, &app->models_to_load, nullptr, ofd_filters, 2, NULL, true);
+     }},
+
+    {7, "arkusz", [](App *app) {}},
+
+    {9, "załaduj",
+     [](App *app) {
+       static const SDL_DialogFileFilter ofd_filters[] = {{"Archiwum zip (.zip)", "zip"}, {"Wszystkie pliki", "*"}};
+       SDL_ShowOpenFileDialog(load_zip_callback, NULL, nullptr, ofd_filters, 2, NULL, false);
+     }},
+};
+
 #define ICONS_MODULO 4
 #define ICONS_IDX_HEIGHT 4
 
@@ -271,38 +305,60 @@ void App::panel_ui() {
     ImGui::SameLine();
     ImGui::Text("reaktory");
 
-    ImGui::PushID(0);
-    if (IconButton("model", 5)) {
-      static const SDL_DialogFileFilter ofd_filters[] = {{"Modele obj (.obj)", "obj"}, {"Wszystkie pliki", "*"}};
-      SDL_ShowOpenFileDialog(load_model_callback, &this->models_to_load, nullptr, ofd_filters, 2, NULL, true);
-    }
-    ImGui::PopID();
+    int i = 0;
+    float width_sum = 0;
+    for (const auto &icon : panel_icons) {
+      ImGui::PushID(i);
+      if (IconButton(icon.label, icon.icon)) {
+        icon.onclick(this);
+      }
+      ImGui::PopID();
 
-    ImGui::SameLine();
-    ImGui::PushID(1);
-    IconButton("arkusz", 7);
-    ImGui::PopID();
-
-    ImGui::SameLine();
-    ImGui::PushID(2);
-    if (IconButton("załaduj", 9)) {
-      static const SDL_DialogFileFilter ofd_filters[] = {{"Archiwum zip (.zip)", "zip"}, {"Wszystkie pliki", "*"}};
-      SDL_ShowOpenFileDialog(load_zip_callback, NULL, nullptr, ofd_filters, 2, NULL, false);
+      if (ImGui::GetContentRegionAvail().x - width_sum > 90 - 5) { // 2 elements - 5px
+        ImGui::SameLine();
+        width_sum += 45;
+      } else {
+        width_sum = 0;
+      }
+      i++;
     }
-    ImGui::PopID();
   }
   ImGui::End();
 
   if (ImGui::Begin("Modele")) {
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
+    ImGui::PushStyleColor(ImGuiCol_Border, ImU32(0xffaa5511));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(0x00000000));
+    font1->Scale = 0.75;
+    ImGui::PushFont(font1);
     int i = 0;
+    float width_sum = 0;
     for (const auto &[name, model] : model_mgr.models) {
+      ImGui::BeginGroup();
+
       ImGui::PushID(i);
-      if (ImGui::ImageButton("##preview", (ImTextureID)model.target.texture.id, ImVec2(100, 100), ImVec2(0,1), ImVec2(1,0))) {
+      if (ImGui::ImageButton("##preview", (ImTextureID)model.target.texture.id, ImVec2(75, 75), ImVec2(0, 1), ImVec2(1, 0))) {
         objects.push_back(model.model);
       }
       ImGui::PopID();
+
+      ImGui::SetNextItemWidth(80);
+      ImGui::LabelText("##", name.c_str());
+      ImGui::EndGroup();
+
+      if (ImGui::GetContentRegionAvail().x - width_sum > 180 - 5) { // 2 elements - 5px
+        ImGui::SameLine();
+        width_sum += 90;
+      } else {
+        width_sum = 0;
+      }
       i++;
     }
+    font1->Scale = 1;
+    ImGui::PopFont();
+    ImGui::PopStyleVar(2);
+    ImGui::PopStyleColor(2);
   }
   ImGui::End();
 }
@@ -318,8 +374,23 @@ void App::render_scene() {
 
   BeginMode3D(camera);
   DrawCube({-10, -15, -20}, 20, 30, 40, RED);
+  size_t i = 0;
   for (const auto &object : objects) {
-    DrawModel(object, Vector3{0, 0, 0}, 100, WHITE);
+    // clang-format off
+    Vector4 id
+    {
+      ((float)((i+1) & 0x00FF0000)) * (1.0/256.0) * (1.0/256.0) * (1.0/256.0),
+      ((float)((i+1) & 0x0000FF00)) * (1.0/256.0) * (1.0/256.0),
+      ((float)((i+1) & 0x000000FF)) * (1.0/256.0),
+      0
+    };
+    // clang-format on
+    SetShaderValue(assets.colorpicker_shader, location_id, &id, SHADER_UNIFORM_VEC4);
+    for (int i = 0; i < object.materialCount; i++) {
+      object.materials[i].shader = assets.colorpicker_shader;
+    }
+    DrawModel(object, Vector3{i, i, i}, 1, WHITE);
+    i++;
   }
 
   // DrawModelEx(testmodel, Vector3{0,0,0}, Vector3{0,1,0}, GetTime() * 100, Vector3{100, 100, 100}, WHITE);

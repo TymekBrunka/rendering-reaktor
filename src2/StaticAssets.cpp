@@ -7,6 +7,8 @@
 #include "embeded/cubemap.fs.cpp"
 #include "embeded/skinning.vs.cpp"
 #include "embeded/skinning.fs.cpp"
+#include "embeded/skinning_colorpicker.fs.cpp"
+#include "embeded/placeholder.png.cpp"
 
 #include "embeded/fa.h"
 #include "embeded/RobotoRegular.cpp"
