@@ -13,7 +13,7 @@ bool zip_loader_0_0_1(App *app, zip_t *za, zip_stat_t *stat, zip_error_t *error)
       return false;
     }
 
-    size_t name_length = strlen(stat->name);
+    // size_t name_length = strlen(stat->name);
     snprintf(formated_path, 1024, "%s%s%s", home_dir, MODELS_TMPDIR, &stat->name[sizeof("models/")-1]);
 
     fprintf(stderr, "Saving to file %s\n", formated_path);

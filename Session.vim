@@ -41,13 +41,13 @@ badd +8 ~/Documents/bettyergl/gex.ping.hpp
 badd +1 src/main.cpp
 badd +3 src/shaders/composite.vertex.glsl
 badd +4 src/shaders/composite.frag.glsl
-badd +47 CMakeLists.txt
+badd +42 CMakeLists.txt
 badd +6 src/input_handling.cpp
 badd +4 src/shaders/skybox.frag.glsl
 badd +21 src/rendering/FrameBuffer.cpp
 badd +1 .gitignore
 badd +5 src/rendering/CMakeLists.txt
-badd +212 deps/ext.cmake
+badd +135 deps/ext.cmake
 badd +182 ~/scoop/apps/mingw-winlibs-llvm-msvcrt/14.2.0-19.1.7-12.0.0-r3/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake
 badd +1 build/CMakeFiles/pkgRedirects/zlib-config.cmake
 badd +1 deps/raygizmo/raygizmo.c
@@ -59,17 +59,17 @@ badd +2 src2/embeded/cubemap.png.cpp
 badd +3 src2/embeded/cubemap.png.hpp
 badd +1 src2/embeded/icon.png.hpp
 badd +1 src2/embeded/icons.png.hpp
-badd +45 src2/App.hpp
-badd +298 src2/App.cpp
-badd +9 src2/StaticAssets.cpp
+badd +35 src2/App.hpp
+badd +26 src2/App.cpp
+badd +10 src2/StaticAssets.cpp
 badd +1 .gitmodules
 badd +243 ~/cacheCPM/raylib/c846/src/raylib.h
 badd +1 src2/embeded/cubemap.fs.hpp
 badd +7 src2/FPScontroler.cpp
 badd +2 src2/embeded/RobotoRegular.h
 badd +3 src2/embeded/RobotoRegular.cpp
-badd +10 src2/AssetMgr/ModelMgr.hpp
-badd +67 src2/AssetMgr/ModelMgr.cpp
+badd +17 src2/AssetMgr/ModelMgr.hpp
+badd +76 src2/AssetMgr/ModelMgr.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.fs.hpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.vs.hpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.vs.cpp
@@ -82,7 +82,7 @@ badd +24 dap-src://3/1000/
 badd +1 ~/Documents/rendering-reaktor/src2/main2.cpp
 badd +7 ~/Documents/rendering-reaktor/src2/main.cpp
 badd +131 ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
-badd +23 ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
+badd +30 ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
 badd +8 ~/Documents/rendering-reaktor/src2/AssetMgr/TextureMgr.hpp
 argglobal
@@ -125,12 +125,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 10 - ((9 * winheight(0) + 29) / 59)
+let s:l = 18 - ((17 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 10
-normal! 023|
+keepjumps 18
+normal! 0
 wincmd w
 argglobal
 if bufexists(fnamemodify("~/Documents/rendering-reaktor/src2/AssetMgr/TextureMgr.hpp", ":p")) | buffer ~/Documents/rendering-reaktor/src2/AssetMgr/TextureMgr.hpp | else | edit ~/Documents/rendering-reaktor/src2/AssetMgr/TextureMgr.hpp | endif
@@ -159,13 +159,6 @@ exe 'vert 1resize ' . ((&columns * 119 + 120) / 240)
 exe 'vert 2resize ' . ((&columns * 120 + 120) / 240)
 tabnext
 edit src2/AssetMgr/ModelMgr.cpp
-wincmd t
-let s:save_winminheight = &winminheight
-let s:save_winminwidth = &winminwidth
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
 argglobal
 balt src2/AssetMgr/ModelMgr.hpp
 setlocal foldmethod=manual
@@ -178,12 +171,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 67 - ((43 * winheight(0) + 29) / 59)
+let s:l = 9 - ((8 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 67
-normal! 054|
+keepjumps 9
+normal! 026|
 tabnext
 edit src2/App.hpp
 argglobal
@@ -198,14 +191,21 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 46 - ((32 * winheight(0) + 29) / 59)
+let s:l = 35 - ((15 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 46
-normal! 0
+keepjumps 35
+normal! 06|
 tabnext
 edit src2/App.cpp
+wincmd t
+let s:save_winminheight = &winminheight
+let s:save_winminwidth = &winminwidth
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 argglobal
 balt src2/App.hpp
 setlocal foldmethod=manual
@@ -218,12 +218,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 302 - ((26 * winheight(0) + 29) / 59)
+let s:l = 26 - ((25 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 302
-normal! 021|
+keepjumps 26
+normal! 026|
 tabnext
 edit src2/FPScontroler.cpp
 argglobal
@@ -238,35 +238,16 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 40 - ((39 * winheight(0) + 29) / 59)
+let s:l = 4 - ((0 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 40
+keepjumps 4
 normal! 0
 tabnext
-edit ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
+edit src2/StaticAssets.cpp
 argglobal
-balt ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal nofoldenable
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 23 - ((22 * winheight(0) + 29) / 59)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 23
-normal! 0112|
-tabnext
-edit deps/ext.cmake
-argglobal
+balt ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -277,13 +258,33 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 212 - ((47 * winheight(0) + 29) / 59)
+let s:l = 10 - ((9 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 212
+keepjumps 10
+normal! 043|
+tabnext
+edit CMakeLists.txt
+argglobal
+balt deps/ext.cmake
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 42 - ((24 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 42
 normal! 0
-tabnext 2
+tabnext 4
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif

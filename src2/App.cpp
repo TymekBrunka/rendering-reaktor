@@ -46,7 +46,7 @@ void App::initialise() {
     throw "Cannot find home";
 
   if (!LoadRenderDoc())
-    std::cout << "Couldn't load renderdoc\n";
+    std::cerr << "Couldn't load renderdoc\n";
 
   SetConfigFlags(FLAG_MSAA_4X_HINT);
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -386,10 +386,10 @@ void App::render_scene() {
     };
     // clang-format on
     SetShaderValue(assets.colorpicker_shader, location_id, &id, SHADER_UNIFORM_VEC4);
-    for (int i = 0; i < object.materialCount; i++) {
-      object.materials[i].shader = assets.colorpicker_shader;
-    }
-    DrawModel(object, Vector3{i, i, i}, 1, WHITE);
+    // for (int i = 0; i < object.materialCount; i++) {
+    //   object.materials[i].shader = assets.colorpicker_shader;
+    // }
+    DrawModel(object, Vector3{i, i, i}, 100, WHITE);
     i++;
   }
 
