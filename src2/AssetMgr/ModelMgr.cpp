@@ -16,9 +16,9 @@ ModelRef::~ModelRef() {
     delete[] boneMatrices;
 }
 
-ModelRef::ModelRef(const Model &model, const ModelAnimation *animations, const std::string name) {
+ModelRef::ModelRef(const Model &model, ModelAnimation *animations, const std::string name) {
   (Model &)*this = model; // copy base
-  animations = animations;
+  this->animations = animations;
   currentPose = new Transform[model.skeleton.boneCount];
   boneMatrices = new Matrix[model.skeleton.boneCount];
   memcpy(currentPose, model.currentPose, sizeof(Transform) * model.skeleton.boneCount);

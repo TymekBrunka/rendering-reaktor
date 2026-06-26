@@ -12,7 +12,7 @@ public:
 
   ModelRef() = default;
   ~ModelRef();
-  ModelRef(const Model &model, const ModelAnimation *animations, const std::string name);
+  ModelRef(const Model &model, ModelAnimation *animations, const std::string name);
   ModelRef(const ModelRef &other);
   ModelRef &operator=(const ModelRef &other);
   ModelRef(ModelRef &&other) noexcept;

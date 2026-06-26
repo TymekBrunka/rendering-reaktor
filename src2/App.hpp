@@ -56,7 +56,7 @@ public:
   std::vector<Texture2D> static_textures;
   std::vector<Gif> dynamic_textures;
   ModelMgr model_mgr;
-  std::vector<Model> objects;
+  std::vector<ModelRef> objects;
   int new_obj_id = 0;
 
   Model skybox;

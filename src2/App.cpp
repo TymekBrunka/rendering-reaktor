@@ -339,7 +339,7 @@ void App::panel_ui() {
 
       ImGui::PushID(i);
       if (ImGui::ImageButton("##preview", (ImTextureID)model.target.texture.id, ImVec2(75, 75), ImVec2(0, 1), ImVec2(1, 0))) {
-        objects.push_back(model.model);
+        objects.push_back(model_mgr.take_model(name, objects.size()));
       }
       ImGui::PopID();
 
@@ -389,7 +389,7 @@ void App::render_scene() {
     // for (int i = 0; i < object.materialCount; i++) {
     //   object.materials[i].shader = assets.colorpicker_shader;
     // }
-    DrawModel(object, Vector3{i, i, i}, 100, WHITE);
+    DrawModel(*(Model*)&object, Vector3{i, i, i}, 100, WHITE);
     i++;
   }
 
