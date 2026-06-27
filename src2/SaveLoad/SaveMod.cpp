@@ -61,13 +61,14 @@ bool alloc_read_file_from_zip(zip_t *za, zip_int64_t idx, char **data, zip_sourc
     return false;
   }
 
-  *data = new char[stat->size];
+  *data = new char[stat->size+1];
   if (zip_source_read(src, *data, stat->size) <= 0) {
     fprintf(stderr, "Cannot read contents of 'data.txt' from zip archive : %s\n", zip_error_strerror(zip_source_error(src)));
     zip_source_free(src);
     delete[] *data;
     return false;
   }
+  (*data)[stat->size] = '\0';
 
   return true;
 }

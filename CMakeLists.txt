@@ -63,6 +63,10 @@ target_compile_options(main PRIVATE
   -DFORMAT_PATCH=${FORMAT_PATCH}
 )
 
+if (SANS)
+  target_link_options(main PRIVATE -fsanitize=undefined,address)
+endif()
+
 if (CMAKE_SYSTEM_NAME MATCHES "Windows" OR CMAKE_BUILD_TYPE STREQUAL "Release")
   # bc otherwise it depends on compiler libs in release mode and crashes(on windows) in renderdoc
   target_compile_options(main PRIVATE -static)
