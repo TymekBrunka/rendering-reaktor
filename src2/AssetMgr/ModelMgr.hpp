@@ -5,8 +5,9 @@
 #include <unordered_map>
 #include <unordered_set>
 
-class ModelRef : Model {
+class ModelRef {
 public:
+  Model model;
   ModelAnimation *animations;
   std::string name;
 
@@ -32,7 +33,6 @@ struct AnimatedModel {
 class ModelMgr {
 private:
   Texture2D placeholder_texture;
-  Shader shader;
 
 public:
   std::unordered_map<std::string, AnimatedModel> models;
@@ -44,6 +44,7 @@ public:
 
   bool load_model(const std::string &filepath);
   void unload_model(const std::string &name);
+  void util_get_model_preview(Model model, RenderTexture target);
 
   AnimatedModel &get_model(const std::string &name);
   ModelRef take_model(const std::string &name, int obj_idx);

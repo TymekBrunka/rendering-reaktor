@@ -59,8 +59,8 @@ badd +2 src2/embeded/cubemap.png.cpp
 badd +3 src2/embeded/cubemap.png.hpp
 badd +1 src2/embeded/icon.png.hpp
 badd +1 src2/embeded/icons.png.hpp
-badd +35 src2/App.hpp
-badd +26 src2/App.cpp
+badd +41 src2/App.hpp
+badd +392 src2/App.cpp
 badd +10 src2/StaticAssets.cpp
 badd +1 .gitmodules
 badd +243 ~/cacheCPM/raylib/c846/src/raylib.h
@@ -68,8 +68,8 @@ badd +1 src2/embeded/cubemap.fs.hpp
 badd +7 src2/FPScontroler.cpp
 badd +2 src2/embeded/RobotoRegular.h
 badd +3 src2/embeded/RobotoRegular.cpp
-badd +17 src2/AssetMgr/ModelMgr.hpp
-badd +76 src2/AssetMgr/ModelMgr.cpp
+badd +9 src2/AssetMgr/ModelMgr.hpp
+badd +87 src2/AssetMgr/ModelMgr.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.fs.hpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.vs.hpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.vs.cpp
@@ -82,7 +82,7 @@ badd +24 dap-src://3/1000/
 badd +1 ~/Documents/rendering-reaktor/src2/main2.cpp
 badd +7 ~/Documents/rendering-reaktor/src2/main.cpp
 badd +131 ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
-badd +30 ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
+badd +16 ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
 badd +8 ~/Documents/rendering-reaktor/src2/AssetMgr/TextureMgr.hpp
 argglobal
@@ -125,17 +125,17 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 18 - ((17 * winheight(0) + 29) / 59)
+let s:l = 15 - ((14 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 18
-normal! 0
+keepjumps 15
+normal! 031|
 wincmd w
 argglobal
-if bufexists(fnamemodify("~/Documents/rendering-reaktor/src2/AssetMgr/TextureMgr.hpp", ":p")) | buffer ~/Documents/rendering-reaktor/src2/AssetMgr/TextureMgr.hpp | else | edit ~/Documents/rendering-reaktor/src2/AssetMgr/TextureMgr.hpp | endif
+if bufexists(fnamemodify("src2/AssetMgr/ModelMgr.cpp", ":p")) | buffer src2/AssetMgr/ModelMgr.cpp | else | edit src2/AssetMgr/ModelMgr.cpp | endif
 if &buftype ==# 'terminal'
-  silent file ~/Documents/rendering-reaktor/src2/AssetMgr/TextureMgr.hpp
+  silent file src2/AssetMgr/ModelMgr.cpp
 endif
 balt src2/AssetMgr/ModelMgr.hpp
 setlocal foldmethod=manual
@@ -148,12 +148,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 8 - ((7 * winheight(0) + 29) / 59)
+let s:l = 171 - ((52 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 8
-normal! 056|
+keepjumps 171
+normal! 010|
 wincmd w
 exe 'vert 1resize ' . ((&columns * 119 + 120) / 240)
 exe 'vert 2resize ' . ((&columns * 120 + 120) / 240)
@@ -171,12 +171,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 9 - ((8 * winheight(0) + 29) / 59)
+let s:l = 71 - ((42 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 9
-normal! 026|
+keepjumps 71
+normal! 0
 tabnext
 edit src2/App.hpp
 argglobal
@@ -191,12 +191,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 35 - ((15 * winheight(0) + 29) / 59)
+let s:l = 59 - ((37 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 35
-normal! 06|
+keepjumps 59
+normal! 022|
 tabnext
 edit src2/App.cpp
 wincmd t
@@ -218,12 +218,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 26 - ((25 * winheight(0) + 29) / 59)
+let s:l = 392 - ((42 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 26
-normal! 026|
+keepjumps 392
+normal! 029|
 tabnext
 edit src2/FPScontroler.cpp
 argglobal
@@ -245,9 +245,9 @@ normal! zt
 keepjumps 4
 normal! 0
 tabnext
-edit src2/StaticAssets.cpp
+edit ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
 argglobal
-balt ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
+balt src2/StaticAssets.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -258,12 +258,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 10 - ((9 * winheight(0) + 29) / 59)
+let s:l = 16 - ((15 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 10
-normal! 043|
+keepjumps 16
+normal! 0
 tabnext
 edit CMakeLists.txt
 argglobal

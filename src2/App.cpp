@@ -18,15 +18,17 @@
 #include <cubemap.vs.hpp>
 #include <icon.png.hpp>
 #include <icons.png.hpp>
+#include <placeholder.png.hpp>
 #include <skybox.frag.glsl.hpp>
 #include <skybox.png.hpp>
 #include <skybox.vertex.glsl.hpp>
-#include <placeholder.png.hpp>
 
+#include <skinning.fs.hpp>
 #include <skinning.vs.hpp>
 #include <skinning_colorpicker.fs.hpp>
 
 #include <Renderdoc.cpp>
+#include <unordered_set>
 
 std::mutex global_lock{};
 std::string imported_zip_file{};
@@ -81,12 +83,14 @@ void App::initialise() {
   assets.icon = LoadTextureFromImage(icon_);
   assets.icons = LoadTextureFromImage(icons_);
 
+  color_target = LoadRenderTexture(800, 600);
+  SetTextureFilter(color_target.texture, TEXTURE_FILTER_POINT);
+
   Mesh cube = GenMeshCube(1, 1, 1);
   skybox = LoadModelFromMesh(cube);
   skybox.materialCount = 1;
 
   std::cerr << "Loading skybox shader\n";
-
   Shader skybox_shader = LoadShaderFromMemory(skybox_vertex_text, skybox_fragment_text);
   skybox.materials[0].shader = skybox_shader;
 
@@ -95,8 +99,13 @@ void App::initialise() {
 
   skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(skybox_, CUBEMAP_LAYOUT_AUTO_DETECT);
   SetTextureFilter(skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture, TEXTURE_FILTER_POINT); // pixelated instead of blurry
+                                                                                                  //
+  std::cerr << "Loading model(skinning) shader\n";
+  assets.skinning_shader = LoadShaderFromMemory(skinning_vs_text, skinning_fs_text);
+  if (!IsShaderValid(assets.skinning_shader))
+    std::cerr << "failed to load model(skinning) shader\n";
 
-
+  std::cerr << "Loading model(skinning+colorpicker) shader\n";
   assets.colorpicker_shader = LoadShaderFromMemory(skinning_vs_text, skinning_fs_colorpicker_text);
   if (!IsShaderValid(assets.colorpicker_shader))
     std::cerr << "failed to load model(skinning+colorpicker) shader\n";
@@ -140,19 +149,27 @@ void App::run() {
     // process file dialog actions
     SDL_PumpEvents();
     global_lock.lock();
+    {
 
-    if (models_to_load.size() > 0) {
-      for (const auto &model : models_to_load) {
-        model_mgr.load_model(model);
+      if (models_to_load.size() > 0) {
+        for (const auto &model : models_to_load) {
+          model_mgr.load_model(model);
+        }
+        models_to_load.clear();
       }
-      models_to_load.clear();
+      if (!imported_zip_file.empty()) {
+        import_scene_zip(imported_zip_file.c_str());
+        imported_zip_file.clear();
+      }
     }
-    if (!imported_zip_file.empty()) {
-      import_scene_zip(imported_zip_file.c_str());
-      imported_zip_file.clear();
-    }
-
     global_lock.unlock();
+
+    // update *post-processing targets
+    if (IsWindowResized()) {
+      UnloadRenderTexture(color_target);
+      color_target = LoadRenderTexture(GetRenderWidth(), GetRenderHeight());
+      SetTextureFilter(color_target.texture, TEXTURE_FILTER_POINT);
+    }
 
     // scene rendering and 3d character controler
     Vector2 mouseDelta;
@@ -199,6 +216,8 @@ void App::run() {
 
     if (RenderDocIsFrameCapturing())
       RenderDocBeginFrameCapture();
+
+    render_color_scene();
 
     BeginDrawing();
     ClearBackground(BLANK);
@@ -336,15 +355,27 @@ void App::panel_ui() {
     float width_sum = 0;
     for (const auto &[name, model] : model_mgr.models) {
       ImGui::BeginGroup();
-
       ImGui::PushID(i);
       if (ImGui::ImageButton("##preview", (ImTextureID)model.target.texture.id, ImVec2(75, 75), ImVec2(0, 1), ImVec2(1, 0))) {
-        objects.push_back(model_mgr.take_model(name, objects.size()));
+        ModelRef modelRef = model_mgr.take_model(name, objects.size());
+        objects.push_back(std::move(modelRef));
       }
-      ImGui::PopID();
 
       ImGui::SetNextItemWidth(80);
       ImGui::LabelText("##", name.c_str());
+
+      if (ImGui::Button("usuń")) {
+        std::unordered_set<int> &objects_using_deleted_model = model_mgr.models[name].refs;
+        for (int idx : objects_using_deleted_model) {
+          objects[idx] = model_mgr.take_model("default", idx);
+        }
+        model_mgr.unload_model(name);
+
+        ImGui::PopID();
+        ImGui::EndGroup();
+        break;
+      }
+      ImGui::PopID();
       ImGui::EndGroup();
 
       if (ImGui::GetContentRegionAvail().x - width_sum > 180 - 5) { // 2 elements - 5px
@@ -361,6 +392,45 @@ void App::panel_ui() {
     ImGui::PopStyleColor(2);
   }
   ImGui::End();
+
+  if (ImGui::Begin("Objekty")) {
+    int i = 0;
+    for (const auto &object : objects) {
+      ImGui::PushID(i);
+      ImGui::Selectable("");
+      ImGui::SameLine();
+      ImGui::Text("Objekt #%d", i);
+      ImGui::PopID();
+      i++;
+    }
+  }
+  ImGui::End();
+}
+
+void App::render_color_scene() {
+  BeginTextureMode(color_target);
+  BeginMode3D(camera);
+  ClearBackground(BLANK);
+  size_t i = 0;
+  for (const auto &object : objects) {
+    // clang-format off
+    Vector4 id
+    {
+      ((float)((i+1) & 0x00FF0000)) * (1.0/256.0) * (1.0/256.0) * (1.0/256.0),
+      ((float)((i+1) & 0x0000FF00)) * (1.0/256.0) * (1.0/256.0),
+      ((float)((i+1) & 0x000000FF)) * (1.0/256.0),
+      0
+    };
+    // clang-format on
+    SetShaderValue(assets.colorpicker_shader, location_id, &id, SHADER_UNIFORM_VEC4);
+    for (int i = 0; i < object.model.materialCount; i++) {
+      object.model.materials[i].shader = assets.colorpicker_shader;
+    }
+    DrawModel(object.model, Vector3{i, i, i}, 100, WHITE);
+    i++;
+  }
+  EndMode3D();
+  EndTextureMode();
 }
 
 void App::render_scene() {
@@ -374,35 +444,25 @@ void App::render_scene() {
 
   BeginMode3D(camera);
   DrawCube({-10, -15, -20}, 20, 30, 40, RED);
-  size_t i = 0;
+  int i = 0;
   for (const auto &object : objects) {
-    // clang-format off
-    Vector4 id
-    {
-      ((float)((i+1) & 0x00FF0000)) * (1.0/256.0) * (1.0/256.0) * (1.0/256.0),
-      ((float)((i+1) & 0x0000FF00)) * (1.0/256.0) * (1.0/256.0),
-      ((float)((i+1) & 0x000000FF)) * (1.0/256.0),
-      0
-    };
-    // clang-format on
-    SetShaderValue(assets.colorpicker_shader, location_id, &id, SHADER_UNIFORM_VEC4);
-    // for (int i = 0; i < object.materialCount; i++) {
-    //   object.materials[i].shader = assets.colorpicker_shader;
-    // }
-    DrawModel(*(Model*)&object, Vector3{i, i, i}, 100, WHITE);
+    for (int i = 0; i < object.model.materialCount; i++) {
+      object.model.materials[i].shader = assets.skinning_shader;
+    }
+    DrawModel(object.model, Vector3{i, i, i}, 100, WHITE);
     i++;
   }
 
-  // DrawModelEx(testmodel, Vector3{0,0,0}, Vector3{0,1,0}, GetTime() * 100, Vector3{100, 100, 100}, WHITE);
-
-  // for (const auto &[name, model] : model_mgr.models) {
-  //   DrawModel(model.model, Vector3{0, 0, 0}, 100, WHITE);
-  // }
   EndMode3D();
+  DrawTextureEx(color_target.texture, Vector2{20, 20}, 0, 0.5, WHITE);
 }
 
 void App::cleanup() {
   rlImGuiShutdown();
+  UnloadRenderTexture(color_target);
+  UnloadTexture(assets.icon);
+  UnloadTexture(assets.icons);
+  UnloadModel(skybox);
   CloseWindow();
   UnloadRenderDoc();
 }

@@ -44,7 +44,11 @@ public:
     Texture2D icons;
     // Texture2D skybox;
     Shader colorpicker_shader;
+    Shader skinning_shader;
   } assets;
+
+private:
+  RenderTexture color_target;
 
 public:
   struct {
@@ -57,12 +61,12 @@ public:
   std::vector<Gif> dynamic_textures;
   ModelMgr model_mgr;
   std::vector<ModelRef> objects;
+  // std::vector<Model> objects;
   int new_obj_id = 0;
 
   Model skybox;
   std::vector<std::string> models_to_load;
 
-public:
   App() = default;
   void initialise();
   void run();
@@ -70,6 +74,7 @@ public:
 
   void panel_ui();
   void render_scene();
+  void render_color_scene();
 
   void updateCamera();
   void updateBody();
