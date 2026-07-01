@@ -12,6 +12,11 @@
 extern std::mutex global_lock;
 extern std::string imported_zip_file;
 
+struct WorldObject {
+  Transform transform;
+  ModelRef model_ref;
+};
+
 struct Gif {
   uint16_t numOfFrames;
   uint16_t current_frame;
@@ -62,7 +67,7 @@ public:
   std::vector<Texture2D> static_textures;
   std::vector<Gif> dynamic_textures;
   ModelMgr model_mgr;
-  std::vector<ModelRef> objects;
+  std::vector<WorldObject> objects;
   // std::vector<Model> objects;
   int new_obj_id = 0;
 
@@ -74,6 +79,7 @@ public:
   void run();
   void cleanup();
 
+  void handle_object_selection();
   void panel_ui();
   void render_scene();
   void render_color_scene();

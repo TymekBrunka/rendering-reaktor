@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include <App.hpp>
 #include <SDL3/SDL.h>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <imgui.h>
@@ -23,6 +24,8 @@
 #include <skybox.png.hpp>
 #include <skybox.vertex.glsl.hpp>
 
+#include "raygizmo.h"
+#include "raymath.h"
 #include <skinning.fs.hpp>
 #include <skinning.vs.hpp>
 #include <skinning_colorpicker.fs.hpp>
@@ -216,22 +219,6 @@ void App::run() {
     if (RenderDocIsFrameCapturing())
       RenderDocBeginFrameCapture();
 
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-      render_color_scene();
-      Image pixels = LoadImageFromTexture(color_target.texture);
-      unsigned char *pixel = &((unsigned char *)pixels.data)[(((pixels.height - GetMouseY()) * pixels.width) + GetMouseX()) * 4];
-      std::cerr << "size: " << pixels.width * pixels.height * 4 << "\n";
-      std::cerr << "pixel (buffer pos): " << pixel - (unsigned char *)pixels.data << "\n";
-      // clang-format off
-      int id =  pixel[2] + 
-               (pixel[1] * 256) + 
-               (pixel[0] * 256 * 256);
-      //clang-format on
-      std::cerr << "selected object #" << id - 1 << "\n";
-      selected_object = id - 1;
-      UnloadImage(pixels);
-    }
-
     BeginDrawing();
     ClearBackground(BLANK);
 
@@ -260,6 +247,24 @@ void App::run() {
 
     if (RenderDocIsFrameCapturing())
       RenderDocEndFrameCapture();
+  }
+}
+
+void App::handle_object_selection() {
+  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    render_color_scene();
+    Image pixels = LoadImageFromTexture(color_target.texture);
+    unsigned char *pixel = &((unsigned char *)pixels.data)[(((pixels.height - GetMouseY()) * pixels.width) + GetMouseX()) * 4];
+    std::cerr << "size: " << pixels.width * pixels.height * 4 << "\n";
+    std::cerr << "pixel (buffer pos): " << pixel - (unsigned char *)pixels.data << "\n";
+    // clang-format off
+    int id =  pixel[2] + 
+             (pixel[1] * 256) + 
+             (pixel[0] * 256 * 256);
+    // clang-format on
+    std::cerr << "selected object #" << id - 1 << "\n";
+    selected_object = id - 1;
+    UnloadImage(pixels);
   }
 }
 
@@ -371,7 +376,7 @@ void App::panel_ui() {
       ImGui::PushID(i);
       if (ImGui::ImageButton("##preview", (ImTextureID)model.target.texture.id, ImVec2(75, 75), ImVec2(0, 1), ImVec2(1, 0))) {
         ModelRef modelRef = model_mgr.take_model(name, objects.size());
-        objects.push_back(std::move(modelRef));
+        objects.push_back({GizmoIdentity(), std::move(modelRef)});
       }
 
       ImGui::SetNextItemWidth(80);
@@ -380,7 +385,7 @@ void App::panel_ui() {
       if (ImGui::Button("usuń")) {
         std::unordered_set<int> &objects_using_deleted_model = model_mgr.models[name].refs;
         for (int idx : objects_using_deleted_model) {
-          objects[idx] = model_mgr.take_model("default", idx);
+          objects[idx] = {GizmoIdentity(), model_mgr.take_model("default", idx)};
         }
         model_mgr.unload_model(name);
 
@@ -410,7 +415,7 @@ void App::panel_ui() {
     char formatted_text[16] = {0};
     ImVec2 window_padding = ImGui::GetStyle().WindowPadding;
     ImU32 active_button_bg = ImGui::GetColorU32(ImGuiCol_ButtonActive);
-    ImDrawList* drawlist = ImGui::GetWindowDrawList();
+    ImDrawList *drawlist = ImGui::GetWindowDrawList();
 
     int i = 0;
     ImGui::PushStyleColor(ImGuiCol_Button, ImU32(0x00000000));
@@ -425,7 +430,7 @@ void App::panel_ui() {
         selected_object = i;
       }
       ImVec2 pos = ImGui::GetItemRectMin();
-      drawlist->AddImage((ImTextureRef)object.texture_id, ImVec2(pos.x + 1, pos.y + 1), ImVec2(pos.x + 29, pos.y + 29), ImVec2(0,1), ImVec2(1,0));
+      drawlist->AddImage((ImTextureRef)object.model_ref.texture_id, ImVec2(pos.x + 1, pos.y + 1), ImVec2(pos.x + 29, pos.y + 29), ImVec2(0, 1), ImVec2(1, 0));
       drawlist->AddText(ImVec2(pos.x + 30, pos.y + 5), IM_COL32_WHITE, formatted_text);
       ImGui::PopID();
       if (i == selected_object) {
@@ -455,12 +460,12 @@ void App::render_color_scene() {
     };
     // clang-format on
     SetShaderValue(assets.colorpicker_shader, location_id, &id, SHADER_UNIFORM_VEC4);
-    for (int i = 0; i < object.model.materialCount; i++) {
-      object.model.materials[i].shader = assets.colorpicker_shader;
+    for (int i = 0; i < object.model_ref.model.materialCount; i++) {
+      object.model_ref.model.materials[i].shader = assets.colorpicker_shader;
     }
-    DrawModel(object.model, Vector3{0, 0, 0}, 1, WHITE);
-    for (int i = 0; i < object.model.materialCount; i++) {
-      object.model.materials[i].shader = assets.skinning_shader;
+    DrawModel(object.model_ref.model, Vector3{0, 0, 0}, 1, WHITE);
+    for (int i = 0; i < object.model_ref.model.materialCount; i++) {
+      object.model_ref.model.materials[i].shader = assets.skinning_shader;
     }
     i++;
   }
@@ -480,11 +485,27 @@ void App::render_scene() {
   BeginMode3D(camera);
   DrawCube({-10, -15, -20}, 20, 30, 40, RED);
   for (const auto &object : objects) {
-    DrawModel(object.model, Vector3{0, 0, 0}, 1, WHITE);
+    DrawModel(object.model_ref.model, Vector3{0, 0, 0}, 1, WHITE);
   }
+
   if (selected_object != -1) {
-    DrawBoundingBox(objects[selected_object].bounding_box, GREEN);
+    WorldObject &object = objects[selected_object];
+    DrawBoundingBox(object.model_ref.bounding_box, GREEN);
+    DrawGizmo3D(GIZMO_ALL, &object.transform);
+    Vector3 size = Vector3Subtract(object.model_ref.bounding_box.max, object.model_ref.bounding_box.min);
+    Vector3 scale = object.transform.scale;
+    float size_ = sqrt(Vector3Length(Vector3{size.x * scale.x, size.y * scale.y, size.z * scale.z}) / 2.0f) * 2;
+    if (size_ < 1.0f) {
+      size_ = 1.0f;
+    }
+    if (size_ > 4.0f) {
+      size_ = 4.0f;
+    }
+    SetGizmoSize(size_);
+    object.model_ref.model.transform = GizmoToMatrix(object.transform);
   }
+
+  // handle_object_selection();
 
   EndMode3D();
   // DrawTextureEx(color_target.texture, Vector2{20, 20}, 0, 0.5, WHITE);
