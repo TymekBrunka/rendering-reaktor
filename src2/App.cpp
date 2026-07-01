@@ -1,8 +1,8 @@
-#include "AssetMgr/ModelMgr.hpp"
 #include "SDL3/SDL_dialog.h"
 #include "raylib.h"
 #include <App.hpp>
 #include <SDL3/SDL.h>
+#include <cstdio>
 #include <cstdlib>
 #include <imgui.h>
 #include <iostream>
@@ -28,7 +28,6 @@
 #include <skinning_colorpicker.fs.hpp>
 
 #include <Renderdoc.cpp>
-#include <unordered_set>
 
 std::mutex global_lock{};
 std::string imported_zip_file{};
@@ -217,7 +216,21 @@ void App::run() {
     if (RenderDocIsFrameCapturing())
       RenderDocBeginFrameCapture();
 
-    render_color_scene();
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+      render_color_scene();
+      Image pixels = LoadImageFromTexture(color_target.texture);
+      unsigned char *pixel = &((unsigned char *)pixels.data)[(((pixels.height - GetMouseY()) * pixels.width) + GetMouseX()) * 4];
+      std::cerr << "size: " << pixels.width * pixels.height * 4 << "\n";
+      std::cerr << "pixel (buffer pos): " << pixel - (unsigned char *)pixels.data << "\n";
+      // clang-format off
+      int id =  pixel[2] + 
+               (pixel[1] * 256) + 
+               (pixel[0] * 256 * 256);
+      //clang-format on
+      std::cerr << "selected object #" << id - 1 << "\n";
+      selected_object = id - 1;
+      UnloadImage(pixels);
+    }
 
     BeginDrawing();
     ClearBackground(BLANK);
@@ -394,15 +407,34 @@ void App::panel_ui() {
   ImGui::End();
 
   if (ImGui::Begin("Objekty")) {
+    char formatted_text[16] = {0};
+    ImVec2 window_padding = ImGui::GetStyle().WindowPadding;
+    ImU32 active_button_bg = ImGui::GetColorU32(ImGuiCol_ButtonActive);
+    ImDrawList* drawlist = ImGui::GetWindowDrawList();
+
     int i = 0;
+    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(0x00000000));
     for (const auto &object : objects) {
+      if (i == selected_object) {
+        ImGui::PopStyleColor(1);
+        ImGui::PushStyleColor(ImGuiCol_Button, active_button_bg);
+      }
       ImGui::PushID(i);
-      ImGui::Selectable("");
-      ImGui::SameLine();
-      ImGui::Text("Objekt #%d", i);
+      snprintf(formatted_text, 15, "Objekt #%d", i);
+      if (ImGui::Button("##object", ImVec2(ImGui::GetWindowSize().x - (window_padding.x * 2), 30))) {
+        selected_object = i;
+      }
+      ImVec2 pos = ImGui::GetItemRectMin();
+      drawlist->AddImage((ImTextureRef)object.texture_id, ImVec2(pos.x + 1, pos.y + 1), ImVec2(pos.x + 29, pos.y + 29), ImVec2(0,1), ImVec2(1,0));
+      drawlist->AddText(ImVec2(pos.x + 30, pos.y + 5), IM_COL32_WHITE, formatted_text);
       ImGui::PopID();
+      if (i == selected_object) {
+        ImGui::PopStyleColor(1);
+        ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
+      }
       i++;
     }
+    ImGui::PopStyleColor(1);
   }
   ImGui::End();
 }
@@ -419,14 +451,17 @@ void App::render_color_scene() {
       ((float)((i+1) & 0x00FF0000)) * (1.0/256.0) * (1.0/256.0) * (1.0/256.0),
       ((float)((i+1) & 0x0000FF00)) * (1.0/256.0) * (1.0/256.0),
       ((float)((i+1) & 0x000000FF)) * (1.0/256.0),
-      0
+      1
     };
     // clang-format on
     SetShaderValue(assets.colorpicker_shader, location_id, &id, SHADER_UNIFORM_VEC4);
     for (int i = 0; i < object.model.materialCount; i++) {
       object.model.materials[i].shader = assets.colorpicker_shader;
     }
-    DrawModel(object.model, Vector3{i, i, i}, 100, WHITE);
+    DrawModel(object.model, Vector3{0, 0, 0}, 1, WHITE);
+    for (int i = 0; i < object.model.materialCount; i++) {
+      object.model.materials[i].shader = assets.skinning_shader;
+    }
     i++;
   }
   EndMode3D();
@@ -444,17 +479,15 @@ void App::render_scene() {
 
   BeginMode3D(camera);
   DrawCube({-10, -15, -20}, 20, 30, 40, RED);
-  int i = 0;
   for (const auto &object : objects) {
-    for (int i = 0; i < object.model.materialCount; i++) {
-      object.model.materials[i].shader = assets.skinning_shader;
-    }
-    DrawModel(object.model, Vector3{i, i, i}, 100, WHITE);
-    i++;
+    DrawModel(object.model, Vector3{0, 0, 0}, 1, WHITE);
+  }
+  if (selected_object != -1) {
+    DrawBoundingBox(objects[selected_object].bounding_box, GREEN);
   }
 
   EndMode3D();
-  DrawTextureEx(color_target.texture, Vector2{20, 20}, 0, 0.5, WHITE);
+  // DrawTextureEx(color_target.texture, Vector2{20, 20}, 0, 0.5, WHITE);
 }
 
 void App::cleanup() {

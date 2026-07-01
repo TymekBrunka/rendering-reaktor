@@ -20,8 +20,8 @@ struct Gif {
   Image data;
 };
 
-#define MAX_SPEED 300.0f
-#define MAX_ACCEL 500.0f
+#define MAX_SPEED 75.0f
+#define MAX_ACCEL 125.0f
 // Grounded drag
 #define FRICTION 0.86f
 // Increasing air drag, increases strafing speed
@@ -29,9 +29,11 @@ struct Gif {
 #define AIR_DRAG 0.97f
 // Responsiveness for turning movement direction to looked direction
 #define CONTROL 10.0f
+#define VERTICAL_SPEED 30.0f
 
 class App {
 public:
+  int selected_object = -1;
   int location_id = 0;
   float headTimer = 0.0f;
   float walkLerp = 0.0f;

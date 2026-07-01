@@ -59,9 +59,9 @@ void App::updateBody() {
   float delta = GetFrameTime();
 
   if (jumpPressed) {
-    body.velocity.y = 100.0f;
+    body.velocity.y = VERTICAL_SPEED;
   } else if (crouchHold) {
-    body.velocity.y = -100.0f;
+    body.velocity.y = -VERTICAL_SPEED;
   } else {
     body.velocity.y = 0.0f;
   }

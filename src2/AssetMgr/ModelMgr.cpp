@@ -14,20 +14,26 @@ ModelRef::~ModelRef() {
     delete[] model.boneMatrices;
 }
 
-ModelRef::ModelRef(const Model &model_, ModelAnimation *animations, const std::string name) {
-  model = model_;
-  this->animations = animations;
+ModelRef::ModelRef(const AnimatedModel &model_, const std::string &name) {
+  model = model_.model;
+  texture_id = model_.target.texture.id;
+  animations = model_.animations;
+  animations_count = model_.animations_count;
+  bounding_box = model_.bounding_box;
   this->name = name;
   if (model.skeleton.boneCount > 0) {
-    model.currentPose = new Transform[model_.skeleton.boneCount];
-    model.boneMatrices = new Matrix[model_.skeleton.boneCount];
-    memcpy(model.currentPose, model_.currentPose, sizeof(Transform) * model_.skeleton.boneCount);
-    memcpy(model.boneMatrices, model_.boneMatrices, sizeof(Matrix) * model_.skeleton.boneCount);
+    model.currentPose = new Transform[model_.model.skeleton.boneCount];
+    model.boneMatrices = new Matrix[model_.model.skeleton.boneCount];
+    memcpy(model.currentPose, model_.model.currentPose, sizeof(Transform) * model_.model.skeleton.boneCount);
+    memcpy(model.boneMatrices, model_.model.boneMatrices, sizeof(Matrix) * model_.model.skeleton.boneCount);
   }
 }
 
 ModelRef::ModelRef(const ModelRef &other) {
   model = other.model;
+  texture_id = other.texture_id;
+  animations_count = other.animations_count;
+  bounding_box = other.bounding_box;
   animations = other.animations;
   name = other.name;
   if (other.model.skeleton.boneCount > 0) {
@@ -41,6 +47,9 @@ ModelRef::ModelRef(const ModelRef &other) {
 ModelRef &ModelRef::operator=(const ModelRef &other) {
   if (this != &other) {
     model = other.model;
+    texture_id = other.texture_id;
+    animations_count = other.animations_count;
+    bounding_box = other.bounding_box;
     animations = other.animations;
     name = other.name;
     if (other.model.skeleton.boneCount > 0) {
@@ -55,6 +64,9 @@ ModelRef &ModelRef::operator=(const ModelRef &other) {
 
 ModelRef::ModelRef(ModelRef &&other) noexcept {
   model = other.model;
+  texture_id = other.texture_id;
+  animations_count = other.animations_count;
+  bounding_box = other.bounding_box;
   animations = other.animations;
   name = other.name;
   model.currentPose = other.model.currentPose;
@@ -66,6 +78,9 @@ ModelRef::ModelRef(ModelRef &&other) noexcept {
 ModelRef &ModelRef::operator=(ModelRef &&other) noexcept {
   if (this != &other) {
     model = other.model;
+    texture_id = other.texture_id;
+    animations_count = other.animations_count;
+    bounding_box = other.bounding_box;
     animations = other.animations;
     name = other.name;
     model.currentPose = other.model.currentPose;
@@ -121,17 +136,22 @@ void ModelMgr::unload_model(const std::string &name) {
   }
 }
 
-void ModelMgr::util_get_model_preview(Model model, RenderTexture target) {
+void ModelMgr::util_get_model_preview(Model model, RenderTexture target, BoundingBox *bounding_box) {
   Camera model_preview_camera{};
 
-  Vector3 bb = GetModelBoundingBox(model).max;
+  BoundingBox bb = GetModelBoundingBox(model);
+  if (bounding_box)
+    *bounding_box = bb;
   // model_preview_camera.position = Vector3Scale(bb, 1.2);
-  float furtherest_axis = bb.x;
-  if (bb.y > bb.x)
-    furtherest_axis = bb.y;
-  if (bb.z > bb.y)
-    furtherest_axis = bb.z;
+  float furtherest_axis = (bb.max.x - bb.min.x) / 2.0f;
+  float len_y = (bb.max.y - bb.min.y) / 2.0f;
+  float len_z = (bb.max.z - bb.min.z) / 2.0f;
+  if (len_y > furtherest_axis)
+    furtherest_axis = len_y;
+  if (len_z > furtherest_axis)
+    furtherest_axis = len_z;
   model_preview_camera.position = Vector3{furtherest_axis + 0.1f, furtherest_axis + 0.1f, furtherest_axis + 0.1f};
+  model_preview_camera.position = Vector3Add(model_preview_camera.position, Vector3Scale(Vector3Add(bb.min, bb.max), 0.5));
   model_preview_camera.up = Vector3{0, 1, 0};
   model_preview_camera.target = Vector3{0, 0, 0};
   model_preview_camera.fovy = 90;
@@ -181,7 +201,7 @@ bool ModelMgr::load_model(const std::string &filepath) {
 
   model.target = LoadRenderTexture(100, 100);
   SetTextureFilter(model.target.texture, TEXTURE_FILTER_BILINEAR); // blurry instead of pixelated
-  util_get_model_preview(model.model, model.target);
+  util_get_model_preview(model.model, model.target, &model.bounding_box);
 
   models[name] = model;
   return true;
@@ -190,7 +210,7 @@ bool ModelMgr::load_model(const std::string &filepath) {
 ModelRef ModelMgr::take_model(const std::string &name, int obj_idx) {
   AnimatedModel &model = models[name];
   model.refs.insert(obj_idx);
-  ModelRef modelRef = ModelRef{model.model, model.animations, name};
+  ModelRef modelRef = ModelRef{model, name};
   return modelRef;
 }
 

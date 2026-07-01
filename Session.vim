@@ -59,17 +59,17 @@ badd +2 src2/embeded/cubemap.png.cpp
 badd +3 src2/embeded/cubemap.png.hpp
 badd +1 src2/embeded/icon.png.hpp
 badd +1 src2/embeded/icons.png.hpp
-badd +41 src2/App.hpp
-badd +392 src2/App.cpp
+badd +77 src2/App.hpp
+badd +400 src2/App.cpp
 badd +10 src2/StaticAssets.cpp
 badd +1 .gitmodules
 badd +243 ~/cacheCPM/raylib/c846/src/raylib.h
 badd +1 src2/embeded/cubemap.fs.hpp
-badd +7 src2/FPScontroler.cpp
+badd +4 src2/FPScontroler.cpp
 badd +2 src2/embeded/RobotoRegular.h
 badd +3 src2/embeded/RobotoRegular.cpp
-badd +9 src2/AssetMgr/ModelMgr.hpp
-badd +87 src2/AssetMgr/ModelMgr.cpp
+badd +45 src2/AssetMgr/ModelMgr.hpp
+badd +106 src2/AssetMgr/ModelMgr.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.fs.hpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.vs.hpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.vs.cpp
@@ -85,6 +85,10 @@ badd +131 ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
 badd +16 ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
 badd +8 ~/Documents/rendering-reaktor/src2/AssetMgr/TextureMgr.hpp
+badd +213 dap-src://35/1024/
+badd +3941 dap-src://35/1030/
+badd +213 dap-src://37/1026/
+badd +3941 dap-src://37/1032/
 argglobal
 %argdel
 tabnew +setlocal\ bufhidden=wipe
@@ -92,27 +96,8 @@ tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
-tabnew +setlocal\ bufhidden=wipe
 tabrewind
 edit src2/AssetMgr/ModelMgr.hpp
-let s:save_splitbelow = &splitbelow
-let s:save_splitright = &splitright
-set splitbelow splitright
-wincmd _ | wincmd |
-vsplit
-1wincmd h
-wincmd w
-let &splitbelow = s:save_splitbelow
-let &splitright = s:save_splitright
-wincmd t
-let s:save_winminheight = &winminheight
-let s:save_winminwidth = &winminwidth
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe 'vert 1resize ' . ((&columns * 119 + 120) / 240)
-exe 'vert 2resize ' . ((&columns * 120 + 120) / 240)
 argglobal
 balt ~/Documents/rendering-reaktor/src2/AssetMgr/TextureMgr.hpp
 setlocal foldmethod=manual
@@ -125,42 +110,16 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 15 - ((14 * winheight(0) + 29) / 59)
+let s:l = 36 - ((35 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 15
-normal! 031|
-wincmd w
-argglobal
-if bufexists(fnamemodify("src2/AssetMgr/ModelMgr.cpp", ":p")) | buffer src2/AssetMgr/ModelMgr.cpp | else | edit src2/AssetMgr/ModelMgr.cpp | endif
-if &buftype ==# 'terminal'
-  silent file src2/AssetMgr/ModelMgr.cpp
-endif
-balt src2/AssetMgr/ModelMgr.hpp
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 171 - ((52 * winheight(0) + 29) / 59)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 171
-normal! 010|
-wincmd w
-exe 'vert 1resize ' . ((&columns * 119 + 120) / 240)
-exe 'vert 2resize ' . ((&columns * 120 + 120) / 240)
+keepjumps 36
+normal! 0
 tabnext
 edit src2/AssetMgr/ModelMgr.cpp
 argglobal
-balt src2/AssetMgr/ModelMgr.hpp
+balt src2/App.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -171,11 +130,11 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 71 - ((42 * winheight(0) + 29) / 59)
+let s:l = 183 - ((47 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 71
+keepjumps 183
 normal! 0
 tabnext
 edit src2/App.hpp
@@ -191,12 +150,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 59 - ((37 * winheight(0) + 29) / 59)
+let s:l = 77 - ((51 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 59
-normal! 022|
+keepjumps 77
+normal! 028|
 tabnext
 edit src2/App.cpp
 wincmd t
@@ -207,7 +166,7 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-balt src2/App.hpp
+balt src2/FPScontroler.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -218,32 +177,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 392 - ((42 * winheight(0) + 29) / 59)
+let s:l = 400 - ((44 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 392
-normal! 029|
-tabnext
-edit src2/FPScontroler.cpp
-argglobal
-balt ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 4 - ((0 * winheight(0) + 29) / 59)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 4
-normal! 0
+keepjumps 400
+normal! 025|
 tabnext
 edit ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
 argglobal
