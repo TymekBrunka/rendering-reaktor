@@ -84,6 +84,7 @@ message(raylib)
 CPMAddPackage(
   NAME raylib
   GITHUB_REPOSITORY raysan5/raylib
+  # GIT_TAG c4d733e86482408cb6b6c3fa5d8770c769fd1c9d # 5.5 - raylib-gizmo
   GIT_TAG 970531d112fd535c13b45442468dded784b9779e
   # GIT_TAG 6.0
   OPTIONS

@@ -41,35 +41,33 @@ badd +8 ~/Documents/bettyergl/gex.ping.hpp
 badd +1 src/main.cpp
 badd +3 src/shaders/composite.vertex.glsl
 badd +4 src/shaders/composite.frag.glsl
-badd +42 CMakeLists.txt
+badd +44 CMakeLists.txt
 badd +6 src/input_handling.cpp
 badd +4 src/shaders/skybox.frag.glsl
 badd +21 src/rendering/FrameBuffer.cpp
 badd +1 .gitignore
-badd +5 src/rendering/CMakeLists.txt
+badd +1 src/rendering/CMakeLists.txt
 badd +135 deps/ext.cmake
 badd +182 ~/scoop/apps/mingw-winlibs-llvm-msvcrt/14.2.0-19.1.7-12.0.0-r3/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake
 badd +1 build/CMakeFiles/pkgRedirects/zlib-config.cmake
-badd +1 deps/raygizmo/raygizmo.c
 badd +1 deps/raygizmo/raygizmo.h
-badd +198 src2/raygizmo_test.cpp
 badd +145 src2/fps.cpp
 badd +9 src2/Texture2d.hpp
 badd +2 src2/embeded/cubemap.png.cpp
 badd +3 src2/embeded/cubemap.png.hpp
 badd +1 src2/embeded/icon.png.hpp
 badd +1 src2/embeded/icons.png.hpp
-badd +77 src2/App.hpp
-badd +400 src2/App.cpp
+badd +82 src2/App.hpp
+badd +499 src2/App.cpp
 badd +10 src2/StaticAssets.cpp
 badd +1 .gitmodules
 badd +243 ~/cacheCPM/raylib/c846/src/raylib.h
 badd +1 src2/embeded/cubemap.fs.hpp
-badd +4 src2/FPScontroler.cpp
+badd +64 src2/FPScontroler.cpp
 badd +2 src2/embeded/RobotoRegular.h
 badd +3 src2/embeded/RobotoRegular.cpp
-badd +45 src2/AssetMgr/ModelMgr.hpp
-badd +106 src2/AssetMgr/ModelMgr.cpp
+badd +9 src2/AssetMgr/ModelMgr.hpp
+badd +147 src2/AssetMgr/ModelMgr.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.fs.hpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.vs.hpp
 badd +1 ~/Documents/rendering-reaktor/src2/embeded/skinning.vs.cpp
@@ -80,7 +78,6 @@ badd +94 dap-src://1/1000/
 badd +1303 dap-src://2/1000/
 badd +24 dap-src://3/1000/
 badd +1 ~/Documents/rendering-reaktor/src2/main2.cpp
-badd +7 ~/Documents/rendering-reaktor/src2/main.cpp
 badd +131 ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
 badd +16 ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
 badd +1 ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
@@ -89,8 +86,12 @@ badd +213 dap-src://35/1024/
 badd +3941 dap-src://35/1030/
 badd +213 dap-src://37/1026/
 badd +3941 dap-src://37/1032/
+badd +195 ~/Documents/rendering-reaktor/src2/raygizmo_test.cpp
+badd +1 ~/Documents/rendering-reaktor/src2/main.cpp
+badd +1164 ~/Documents/rendering-reaktor/deps/raygizmo/raygizmo.c
 argglobal
 %argdel
+tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
@@ -110,12 +111,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 36 - ((35 * winheight(0) + 29) / 59)
+let s:l = 11 - ((10 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 36
-normal! 0
+keepjumps 11
+normal! 03|
 tabnext
 edit src2/AssetMgr/ModelMgr.cpp
 argglobal
@@ -130,16 +131,15 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 183 - ((47 * winheight(0) + 29) / 59)
+let s:l = 153 - ((19 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 183
-normal! 0
+keepjumps 153
+normal! 062|
 tabnext
 edit src2/App.hpp
 argglobal
-balt ~/Documents/rendering-reaktor/src2/main.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -150,12 +150,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 77 - ((51 * winheight(0) + 29) / 59)
+let s:l = 82 - ((48 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 77
-normal! 028|
+keepjumps 82
+normal! 033|
 tabnext
 edit src2/App.cpp
 wincmd t
@@ -177,16 +177,16 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 400 - ((44 * winheight(0) + 29) / 59)
+let s:l = 499 - ((44 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 400
-normal! 025|
+keepjumps 499
+normal! 019|
 tabnext
-edit ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
+edit ~/Documents/rendering-reaktor/src2/raygizmo_test.cpp
 argglobal
-balt src2/StaticAssets.cpp
+balt ~/Documents/rendering-reaktor/src2/main.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -197,16 +197,16 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 16 - ((15 * winheight(0) + 29) / 59)
+let s:l = 195 - ((14 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 16
+keepjumps 195
 normal! 0
 tabnext
 edit CMakeLists.txt
 argglobal
-balt deps/ext.cmake
+balt src/rendering/CMakeLists.txt
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -217,11 +217,31 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 42 - ((24 * winheight(0) + 29) / 59)
+let s:l = 43 - ((22 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 42
+keepjumps 43
+normal! 0
+tabnext
+edit ~/Documents/rendering-reaktor/deps/raygizmo/raygizmo.c
+argglobal
+balt deps/raygizmo/raygizmo.h
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 1164 - ((58 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 1164
 normal! 0
 tabnext 4
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'

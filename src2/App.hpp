@@ -34,10 +34,13 @@ struct Gif {
 #define AIR_DRAG 0.97f
 // Responsiveness for turning movement direction to looked direction
 #define CONTROL 10.0f
-#define VERTICAL_SPEED 30.0f
+#define VERTICAL_SPEED 15.0f
 
 class App {
 public:
+#ifndef NDEBUG
+  bool debug_mode = true;
+#endif
   int selected_object = -1;
   int location_id = 0;
   float headTimer = 0.0f;
@@ -56,6 +59,7 @@ public:
 
 private:
   RenderTexture color_target;
+  RenderTexture color_gizmo_target;
 
 public:
   struct {

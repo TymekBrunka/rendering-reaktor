@@ -104,7 +104,7 @@ void ModelMgr::setup() {
       .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
   };
 
-  AnimatedModel default_{.animations_count = 0, .animations = nullptr, .target = LoadRenderTexture(100, 100), .model = LoadModelFromMesh(GenMeshCube(1, 1, 1))};
+  AnimatedModel default_{.animations_count = 0, .animations = nullptr, .bounding_box = {Vector3{-0.5, -0.5, -0.5}, Vector3{0.5, 0.5, 0.5}}, .target = LoadRenderTexture(100, 100), .model = LoadModelFromMesh(GenMeshCube(1, 1, 1))};
   default_.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = placeholder_texture;
 
   models["default"] = default_;

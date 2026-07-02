@@ -56,6 +56,8 @@ void App::initialise() {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(800, 600, "reaktory");
 
+  SetGizmoLineWidth(3);
+
   Image icon_ = {
       .data = icon_data.data,
       .width = icon_data.width,
@@ -86,7 +88,9 @@ void App::initialise() {
   assets.icons = LoadTextureFromImage(icons_);
 
   color_target = LoadRenderTexture(800, 600);
+  color_gizmo_target = LoadRenderTexture(800, 600);
   SetTextureFilter(color_target.texture, TEXTURE_FILTER_POINT);
+  SetTextureFilter(color_gizmo_target.texture, TEXTURE_FILTER_POINT);
 
   Mesh cube = GenMeshCube(1, 1, 1);
   skybox = LoadModelFromMesh(cube);
@@ -171,7 +175,16 @@ void App::run() {
       UnloadRenderTexture(color_target);
       color_target = LoadRenderTexture(GetRenderWidth(), GetRenderHeight());
       SetTextureFilter(color_target.texture, TEXTURE_FILTER_POINT);
+
+      UnloadRenderTexture(color_gizmo_target);
+      color_gizmo_target = LoadRenderTexture(GetRenderWidth(), GetRenderHeight());
+      SetTextureFilter(color_gizmo_target.texture, TEXTURE_FILTER_POINT);
     }
+
+#ifndef NDEBUG
+    if (IsKeyPressed(KEY_F1))
+      debug_mode = !debug_mode;
+#endif
 
     // scene rendering and 3d character controler
     Vector2 mouseDelta;
@@ -251,20 +264,36 @@ void App::run() {
 }
 
 void App::handle_object_selection() {
+  if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
+    return;
+
   if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    std::cerr << "currently selected object #" << selected_object << "\n";
     render_color_scene();
     Image pixels = LoadImageFromTexture(color_target.texture);
     unsigned char *pixel = &((unsigned char *)pixels.data)[(((pixels.height - GetMouseY()) * pixels.width) + GetMouseX()) * 4];
-    std::cerr << "size: " << pixels.width * pixels.height * 4 << "\n";
-    std::cerr << "pixel (buffer pos): " << pixel - (unsigned char *)pixels.data << "\n";
+
+    Image gizmo_pixels = LoadImageFromTexture(color_gizmo_target.texture);
+    unsigned char *gizmo_pixel = &((unsigned char *)gizmo_pixels.data)[(((gizmo_pixels.height - GetMouseY()) * gizmo_pixels.width) + GetMouseX()) * 4];
+    // std::cerr << "size: " << pixels.width * pixels.height * 4 << "\n";
+    // std::cerr << "pixel (buffer pos): " << pixel - (unsigned char *)pixels.data << "\n";
+
+    // if pixel is blank (0x00000000) then id == -1
     // clang-format off
     int id =  pixel[2] + 
              (pixel[1] * 256) + 
              (pixel[0] * 256 * 256);
     // clang-format on
+
+    // change selected object if gizmo is not selected or no object is currently selected (so selecting ghost gizmo doesnt disallow selection)
+    if (selected_object == -1 || (gizmo_pixel[0] == 0 && gizmo_pixel[1] == 0 && gizmo_pixel[2] == 0))
+      selected_object = id - 1;
+    std::cerr << "currently selected object #" << selected_object << "\n";
     std::cerr << "selected object #" << id - 1 << "\n";
-    selected_object = id - 1;
+    std::cerr << "gizmo pixel is (" << (int)gizmo_pixel[0] << "," << (int)gizmo_pixel[1] << "," << (int)gizmo_pixel[2] << ")\n";
+    std::cerr << "\n";
     UnloadImage(pixels);
+    UnloadImage(gizmo_pixels);
   }
 }
 
@@ -442,6 +471,16 @@ void App::panel_ui() {
     ImGui::PopStyleColor(1);
   }
   ImGui::End();
+
+  if (ImGui::Begin("Właściwości")) {
+    if (selected_object != -1) {
+      WorldObject &object = objects[selected_object];
+      ImGui::DragFloat("x", &object.transform.translation.x, 0.1f);
+      ImGui::DragFloat("y", &object.transform.translation.y, 0.1f);
+      ImGui::DragFloat("z", &object.transform.translation.z, 0.1f);
+    }
+  }
+  ImGui::End();
 }
 
 void App::render_color_scene() {
@@ -471,6 +510,35 @@ void App::render_color_scene() {
   }
   EndMode3D();
   EndTextureMode();
+
+  if (selected_object != -1) {
+    std::cerr << "gizmo appears\n";
+    BeginTextureMode(color_gizmo_target);
+    BeginMode3D(camera);
+    ClearBackground(BLANK);
+
+    WorldObject &object = objects[selected_object];
+    DrawBoundingBox(object.model_ref.bounding_box, GREEN);
+    DrawGizmo3D(GIZMO_ALL, &object.transform);
+    Vector3 size = Vector3Subtract(object.model_ref.bounding_box.max, object.model_ref.bounding_box.min);
+    Vector3 scale = object.transform.scale;
+    float size_ = sqrt(Vector3Length(Vector3{size.x * scale.x, size.y * scale.y, size.z * scale.z}) / 2.0f) * 2;
+    if (size_ < 1.0f) {
+      size_ = 1.0f;
+    }
+    if (size_ > 4.0f) {
+      size_ = 4.0f;
+    }
+    SetGizmoSize(size_);
+    // object.model_ref.model.transform = GizmoToMatrix(object.transform);
+
+    EndMode3D();
+    EndTextureMode();
+  } else {
+    BeginTextureMode(color_gizmo_target);
+    ClearBackground(BLANK);
+    EndTextureMode();
+  }
 }
 
 void App::render_scene() {
@@ -505,15 +573,22 @@ void App::render_scene() {
     object.model_ref.model.transform = GizmoToMatrix(object.transform);
   }
 
-  // handle_object_selection();
+  handle_object_selection();
 
   EndMode3D();
-  // DrawTextureEx(color_target.texture, Vector2{20, 20}, 0, 0.5, WHITE);
+
+#ifndef NDEBUG
+  if (debug_mode) {
+    DrawTextureEx(color_target.texture, Vector2{20, 20}, 0, 0.5, WHITE);
+    DrawTextureEx(color_gizmo_target.texture, Vector2{20, 20}, 0, 0.5, WHITE);
+  }
+#endif
 }
 
 void App::cleanup() {
   rlImGuiShutdown();
   UnloadRenderTexture(color_target);
+  UnloadRenderTexture(color_gizmo_target);
   UnloadTexture(assets.icon);
   UnloadTexture(assets.icons);
   UnloadModel(skybox);
