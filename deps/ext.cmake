@@ -115,6 +115,13 @@ add_library(rlimgui STATIC ${rlimgui_SOURCE_DIR}/rlImGui.cpp)
 target_link_libraries(rlimgui PRIVATE imgui raylib)
 target_include_directories(rlimgui INTERFACE ${rlimgui_SOURCE_DIR})
 
+CPMAddPackage(
+  NAME imguizmo
+  GITHUB_REPOSITORY CedricGuillemet/ImGuizmo
+  GIT_TAG 1.9
+)
+target_link_libraries(imguizmo PUBLIC imgui)
+
 # add_library(yyjson src/yyjson/yyjson.c)
 # target_include_directories(yyjson PUBLIC src/yyjson/)
 

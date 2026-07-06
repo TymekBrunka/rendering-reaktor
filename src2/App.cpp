@@ -1,6 +1,7 @@
 #include "SDL3/SDL_dialog.h"
 #include "raylib.h"
 #include <App.hpp>
+#include <ImGuizmo.h>
 #include <SDL3/SDL.h>
 #include <cmath>
 #include <cstdio>
@@ -38,6 +39,10 @@ std::string imported_zip_file{};
 extern char *home_dir;
 
 static ImFont *font1;
+
+static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
+static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
+static bool useSnap(false);
 
 void App::initialise() {
 #ifdef _WIN32
@@ -473,6 +478,15 @@ void App::panel_ui() {
   ImGui::End();
 
   if (ImGui::Begin("Właściwości")) {
+    ImGui::Text("hello");
+    ImGui::Text(ImGuizmo::IsOver() ? "Over gizmo" : "");
+    ImGui::SameLine();
+    ImGui::Text(ImGuizmo::IsOver(ImGuizmo::TRANSLATE) ? "Over translate gizmo" : "");
+    ImGui::SameLine();
+    ImGui::Text(ImGuizmo::IsOver(ImGuizmo::ROTATE) ? "Over rotate gizmo" : "");
+    ImGui::SameLine();
+    ImGui::Text(ImGuizmo::IsOver(ImGuizmo::SCALE) ? "Over scale gizmo" : "");
+
     if (selected_object != -1) {
       WorldObject &object = objects[selected_object];
       ImGui::DragFloat("x", &object.transform.translation.x, 0.1f);

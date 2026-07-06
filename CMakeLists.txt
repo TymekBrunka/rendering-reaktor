@@ -78,6 +78,7 @@ target_link_libraries(main
   raygizmo
   rlimgui
   imgui
+  imguizmo
   SDL3::SDL3-static
   xlsxio_write_STATIC
   libzip::zip
