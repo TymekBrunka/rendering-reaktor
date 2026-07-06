@@ -1,5 +1,4 @@
 #include "SDL3/SDL_dialog.h"
-#include "raylib.h"
 #include <App.hpp>
 #include <ImGuizmo.h>
 #include <SDL3/SDL.h>
@@ -8,6 +7,8 @@
 #include <cstdlib>
 #include <imgui.h>
 #include <iostream>
+#include <raylib.h>
+#include <rcamera.h>
 #include <rlImGui.h>
 #include <rlgl.h>
 
@@ -240,9 +241,11 @@ void App::run() {
     BeginDrawing();
     ClearBackground(BLANK);
 
+    rlImGuiBegin();
+    ImGuizmo::BeginFrame();
+
     render_scene();
 
-    rlImGuiBegin();
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(0x5f151515)); // workaround to make docked windows transparent
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_DockingSeparatorSize, 0.0f);
@@ -480,11 +483,8 @@ void App::panel_ui() {
   if (ImGui::Begin("Właściwości")) {
     ImGui::Text("hello");
     ImGui::Text(ImGuizmo::IsOver() ? "Over gizmo" : "");
-    ImGui::SameLine();
     ImGui::Text(ImGuizmo::IsOver(ImGuizmo::TRANSLATE) ? "Over translate gizmo" : "");
-    ImGui::SameLine();
     ImGui::Text(ImGuizmo::IsOver(ImGuizmo::ROTATE) ? "Over rotate gizmo" : "");
-    ImGui::SameLine();
     ImGui::Text(ImGuizmo::IsOver(ImGuizmo::SCALE) ? "Over scale gizmo" : "");
 
     if (selected_object != -1) {
@@ -573,7 +573,7 @@ void App::render_scene() {
   if (selected_object != -1) {
     WorldObject &object = objects[selected_object];
     DrawBoundingBox(object.model_ref.bounding_box, GREEN);
-    DrawGizmo3D(GIZMO_ALL, &object.transform);
+    // DrawGizmo3D(GIZMO_ALL, &object.transform);
     Vector3 size = Vector3Subtract(object.model_ref.bounding_box.max, object.model_ref.bounding_box.min);
     Vector3 scale = object.transform.scale;
     float size_ = sqrt(Vector3Length(Vector3{size.x * scale.x, size.y * scale.y, size.z * scale.z}) / 2.0f) * 2;
@@ -584,10 +584,17 @@ void App::render_scene() {
       size_ = 4.0f;
     }
     SetGizmoSize(size_);
-    object.model_ref.model.transform = GizmoToMatrix(object.transform);
+    // object.model_ref.model.transform = GizmoToMatrix(object.transform);
+
+    ImGuizmo::SetRect(0, 0, GetRenderWidth(), GetRenderHeight());
+    Matrix view = GetCameraViewMatrix(&camera);
+    Matrix perspective = GetCameraProjectionMatrix(&camera, GetRenderWidth() / GetRenderHeight());
+    // ImGuizmo::DrawCubes((float*)&view, (float*)&perspective, (float *)&object.model_ref.model.transform, 1);
+    ImGuizmo::DrawAxes((float*)&view, (float*)&perspective, (float *)&object.model_ref.model.transform, 1);
+    ImGuizmo::Manipulate((float *)&view, (float *)&perspective, mCurrentGizmoOperation, mCurrentGizmoMode, (float *)&object.model_ref.model.transform);
   }
 
-  handle_object_selection();
+  // handle_object_selection();
 
   EndMode3D();
 
