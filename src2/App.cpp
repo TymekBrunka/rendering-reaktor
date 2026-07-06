@@ -5,12 +5,16 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/mat4x4.hpp>
 #include <imgui.h>
 #include <iostream>
 #include <raylib.h>
 #include <rcamera.h>
 #include <rlImGui.h>
 #include <rlgl.h>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <FPScontroler.cpp>
 
@@ -26,6 +30,8 @@
 #include <skybox.png.hpp>
 #include <skybox.vertex.glsl.hpp>
 
+#include "glm/geometric.hpp"
+#include "glm/trigonometric.hpp"
 #include "raygizmo.h"
 #include "raymath.h"
 #include <skinning.fs.hpp>
@@ -489,9 +495,8 @@ void App::panel_ui() {
 
     if (selected_object != -1) {
       WorldObject &object = objects[selected_object];
-      ImGui::DragFloat("x", &object.transform.translation.x, 0.1f);
-      ImGui::DragFloat("y", &object.transform.translation.y, 0.1f);
-      ImGui::DragFloat("z", &object.transform.translation.z, 0.1f);
+      ImGui::SetNextItemWidth(ImGui::GetWindowSize().x);
+      ImGui::DragFloat3("##pozycja", (float *)&object.transform.translation, 0.1f);
     }
   }
   ImGui::End();
@@ -587,11 +592,34 @@ void App::render_scene() {
     // object.model_ref.model.transform = GizmoToMatrix(object.transform);
 
     ImGuizmo::SetRect(0, 0, GetRenderWidth(), GetRenderHeight());
-    Matrix view = GetCameraViewMatrix(&camera);
-    Matrix perspective = GetCameraProjectionMatrix(&camera, GetRenderWidth() / GetRenderHeight());
+    glm::mat4x4 view = glm::perspective(glm::radians(camera.fovy), (float)GetRenderWidth() / (float)GetRenderHeight(), 0.1f, 1000.0f);
+    // clang-format off
+    glm::mat4x4 projection = glm::lookAt(
+        glm::vec3(
+          camera.position.x,
+          camera.position.y,
+          camera.position.z
+        ),
+
+        glm::normalize(glm::vec3(
+          camera.target.x,
+          camera.target.y,
+          camera.target.z
+        )),
+
+        glm::normalize(glm::vec3(
+          camera.up.x,
+          camera.up.y,
+          camera.up.z
+        ))
+    );
+    // clang-format on
+
     // ImGuizmo::DrawCubes((float*)&view, (float*)&perspective, (float *)&object.model_ref.model.transform, 1);
-    ImGuizmo::DrawAxes((float*)&view, (float*)&perspective, (float *)&object.model_ref.model.transform, 1);
-    ImGuizmo::Manipulate((float *)&view, (float *)&perspective, mCurrentGizmoOperation, mCurrentGizmoMode, (float *)&object.model_ref.model.transform);
+    // ImGuizmo::DrawGrid((float*)&view, (float*)&perspective, (float*)&identity, 100);
+    // ImGuizmo::DrawAxes((float*)&view, (float*)&perspective, (float *)&object.model_ref.model.transform, 1);
+    glm::mat4x4 identity = glm::mat4x4(1.0f);
+    ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(identity));
   }
 
   // handle_object_selection();

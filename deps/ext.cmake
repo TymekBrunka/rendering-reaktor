@@ -23,16 +23,16 @@ CPMAddPackage(
 add_library(gifdec OBJECT ${gifdec_SOURCE_DIR}/gifdec.c)
 target_include_directories(gifdec PUBLIC ${gifdec_SOURCE_DIR})
 
-# #math
-# message(glm)
-# CPMAddPackage(
-#   NAME glm
-#   VERSION 1.0.3
-#   GITHUB_REPOSITORY g-truc/glm
-#   GIT_TAG 1.0.3
-#   OPTIONS
-#     "GLM_ENABLE_CXX_20 ON"
-# )
+#math
+message(glm)
+CPMAddPackage(
+  NAME glm
+  VERSION 1.0.3
+  GITHUB_REPOSITORY g-truc/glm
+  GIT_TAG 1.0.3
+  OPTIONS
+    "GLM_ENABLE_CXX_20 ON"
+)
 
 set(CPM_USE_LOCAL_PACKAGES OFF)
 #
