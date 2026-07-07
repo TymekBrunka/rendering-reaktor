@@ -125,10 +125,6 @@ target_link_libraries(imguizmo PUBLIC imgui)
 # add_library(yyjson src/yyjson/yyjson.c)
 # target_include_directories(yyjson PUBLIC src/yyjson/)
 
-add_library(raygizmo deps/raygizmo/raygizmo.c)
-target_include_directories(raygizmo PUBLIC deps/raygizmo/)
-target_link_libraries(raygizmo PRIVATE raylib)
-
 CPMAddPackage(
   NAME zlib
   VERSION 1.3.1.2

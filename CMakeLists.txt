@@ -75,7 +75,6 @@ endif()
 
 target_link_libraries(main
   raylib
-  raygizmo
   rlimgui
   imgui
   imguizmo

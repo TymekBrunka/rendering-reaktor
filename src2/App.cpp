@@ -5,8 +5,10 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
 #include <imgui.h>
 #include <iostream>
@@ -14,7 +16,6 @@
 #include <rcamera.h>
 #include <rlImGui.h>
 #include <rlgl.h>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <FPScontroler.cpp>
 
@@ -30,9 +31,10 @@
 #include <skybox.png.hpp>
 #include <skybox.vertex.glsl.hpp>
 
+// #include "glm/ext/vector_float3.hpp"
 #include "glm/geometric.hpp"
+#include "glm/matrix.hpp"
 #include "glm/trigonometric.hpp"
-#include "raygizmo.h"
 #include "raymath.h"
 #include <skinning.fs.hpp>
 #include <skinning.vs.hpp>
@@ -47,9 +49,17 @@ extern char *home_dir;
 
 static ImFont *font1;
 
-static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
+static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::UNIVERSAL);
 static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
 static bool useSnap(false);
+
+void App::select(int idx) {
+  selected_object = idx;
+  if (idx <= -1)
+    return;
+  glm::mat4x4 rltransform = *(glm::mat4x4 *)&objects[selected_object].model_ref.model.transform;
+  selected_object_transform = glm::transpose(rltransform);
+}
 
 void App::initialise() {
 #ifdef _WIN32
@@ -67,8 +77,6 @@ void App::initialise() {
   SetConfigFlags(FLAG_MSAA_4X_HINT);
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(800, 600, "reaktory");
-
-  SetGizmoLineWidth(3);
 
   Image icon_ = {
       .data = icon_data.data,
@@ -100,11 +108,10 @@ void App::initialise() {
   assets.icons = LoadTextureFromImage(icons_);
 
   color_target = LoadRenderTexture(800, 600);
-  color_gizmo_target = LoadRenderTexture(800, 600);
   SetTextureFilter(color_target.texture, TEXTURE_FILTER_POINT);
-  SetTextureFilter(color_gizmo_target.texture, TEXTURE_FILTER_POINT);
 
   Mesh cube = GenMeshCube(1, 1, 1);
+  preview_box = LoadModelFromMesh(cube);
   skybox = LoadModelFromMesh(cube);
   skybox.materialCount = 1;
 
@@ -143,7 +150,7 @@ void App::initialise() {
   font1 = io.Fonts->AddFontFromMemoryCompressedTTF(RobotoRegular_compressed_data, RobotoRegular_compressed_size, 16.0f);
   io.Fonts->AddFontFromMemoryCompressedTTF(FA_compressed_data, FA_compressed_size, 16.0f, &fontcfg, icons_ranges);
 
-  rlSetBlendMode(BLEND_ALPHA);
+  // rlSetBlendMode(BLEND_ALPHA);
 
   camera.fovy = 90.0f;
   camera.projection = CAMERA_PERSPECTIVE;
@@ -187,10 +194,6 @@ void App::run() {
       UnloadRenderTexture(color_target);
       color_target = LoadRenderTexture(GetRenderWidth(), GetRenderHeight());
       SetTextureFilter(color_target.texture, TEXTURE_FILTER_POINT);
-
-      UnloadRenderTexture(color_gizmo_target);
-      color_gizmo_target = LoadRenderTexture(GetRenderWidth(), GetRenderHeight());
-      SetTextureFilter(color_gizmo_target.texture, TEXTURE_FILTER_POINT);
     }
 
 #ifndef NDEBUG
@@ -286,9 +289,6 @@ void App::handle_object_selection() {
     render_color_scene();
     Image pixels = LoadImageFromTexture(color_target.texture);
     unsigned char *pixel = &((unsigned char *)pixels.data)[(((pixels.height - GetMouseY()) * pixels.width) + GetMouseX()) * 4];
-
-    Image gizmo_pixels = LoadImageFromTexture(color_gizmo_target.texture);
-    unsigned char *gizmo_pixel = &((unsigned char *)gizmo_pixels.data)[(((gizmo_pixels.height - GetMouseY()) * gizmo_pixels.width) + GetMouseX()) * 4];
     // std::cerr << "size: " << pixels.width * pixels.height * 4 << "\n";
     // std::cerr << "pixel (buffer pos): " << pixel - (unsigned char *)pixels.data << "\n";
 
@@ -300,14 +300,12 @@ void App::handle_object_selection() {
     // clang-format on
 
     // change selected object if gizmo is not selected or no object is currently selected (so selecting ghost gizmo doesnt disallow selection)
-    if (selected_object == -1 || (gizmo_pixel[0] == 0 && gizmo_pixel[1] == 0 && gizmo_pixel[2] == 0))
-      selected_object = id - 1;
+    if (selected_object == -1 || (!ImGuizmo::IsOver() && selected_object != -1))
+      select(id - 1);
     std::cerr << "currently selected object #" << selected_object << "\n";
     std::cerr << "selected object #" << id - 1 << "\n";
-    std::cerr << "gizmo pixel is (" << (int)gizmo_pixel[0] << "," << (int)gizmo_pixel[1] << "," << (int)gizmo_pixel[2] << ")\n";
     std::cerr << "\n";
     UnloadImage(pixels);
-    UnloadImage(gizmo_pixels);
   }
 }
 
@@ -380,7 +378,7 @@ bool App::IconButton(const char *label, int idx, ImVec2 size) {
 }
 
 void App::panel_ui() {
-  if (ImGui::Begin("ThePanel")) {
+  if (ImGui::Begin("Narzędzia")) {
     rlImGuiImageSize(&assets.icon, 20, 20);
     ImGui::SameLine();
     ImGui::Text("reaktory");
@@ -402,6 +400,19 @@ void App::panel_ui() {
       }
       i++;
     }
+    ImGui::Dummy(ImVec2(0, 10));
+
+    ImGui::Checkbox("manipulacja objektem\nw przestrzeni\nlokalnej", &is_local_space);
+    if (is_local_space)
+      mCurrentGizmoMode = ImGuizmo::LOCAL;
+    else
+      mCurrentGizmoMode = ImGuizmo::WORLD;
+    ImGui::Checkbox("użyj kroku", &use_snaping);
+
+    ImGui::BeginDisabled(!use_snaping);
+    ImGui::DragFloat("krok", &snap);
+    snapping = Vector3{snap, snap, snap};
+    ImGui::EndDisabled();
   }
   ImGui::End();
 
@@ -419,16 +430,16 @@ void App::panel_ui() {
       ImGui::PushID(i);
       if (ImGui::ImageButton("##preview", (ImTextureID)model.target.texture.id, ImVec2(75, 75), ImVec2(0, 1), ImVec2(1, 0))) {
         ModelRef modelRef = model_mgr.take_model(name, objects.size());
-        objects.push_back({GizmoIdentity(), std::move(modelRef)});
+        objects.push_back({Transform{Vector3{0, 0, 0}, Quaternion{0, 0, 0, 0}, Vector3{1, 1, 1}}, std::move(modelRef)});
       }
 
       ImGui::SetNextItemWidth(80);
-      ImGui::LabelText("##", name.c_str());
+      ImGui::LabelText("##name", name.c_str());
 
       if (ImGui::Button("usuń")) {
         std::unordered_set<int> &objects_using_deleted_model = model_mgr.models[name].refs;
         for (int idx : objects_using_deleted_model) {
-          objects[idx] = {GizmoIdentity(), model_mgr.take_model("default", idx)};
+          objects[idx] = {Transform{Vector3{0, 0, 0}, Quaternion{0, 0, 0, 0}, Vector3{1, 1, 1}}, model_mgr.take_model("default", idx)};
         }
         model_mgr.unload_model(name);
 
@@ -470,7 +481,7 @@ void App::panel_ui() {
       ImGui::PushID(i);
       snprintf(formatted_text, 15, "Objekt #%d", i);
       if (ImGui::Button("##object", ImVec2(ImGui::GetWindowSize().x - (window_padding.x * 2), 30))) {
-        selected_object = i;
+        select(i);
       }
       ImVec2 pos = ImGui::GetItemRectMin();
       drawlist->AddImage((ImTextureRef)object.model_ref.texture_id, ImVec2(pos.x + 1, pos.y + 1), ImVec2(pos.x + 29, pos.y + 29), ImVec2(0, 1), ImVec2(1, 0));
@@ -487,16 +498,22 @@ void App::panel_ui() {
   ImGui::End();
 
   if (ImGui::Begin("Właściwości")) {
-    ImGui::Text("hello");
-    ImGui::Text(ImGuizmo::IsOver() ? "Over gizmo" : "");
-    ImGui::Text(ImGuizmo::IsOver(ImGuizmo::TRANSLATE) ? "Over translate gizmo" : "");
-    ImGui::Text(ImGuizmo::IsOver(ImGuizmo::ROTATE) ? "Over rotate gizmo" : "");
-    ImGui::Text(ImGuizmo::IsOver(ImGuizmo::SCALE) ? "Over scale gizmo" : "");
-
     if (selected_object != -1) {
       WorldObject &object = objects[selected_object];
-      ImGui::SetNextItemWidth(ImGui::GetWindowSize().x);
-      ImGui::DragFloat3("##pozycja", (float *)&object.transform.translation, 0.1f);
+      ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(selected_object_transform), (float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale);
+
+      float width = ImGui::GetWindowSize().x - (2 * ImGui::GetStyle().WindowPadding.x);
+      ImGui::TextUnformatted("pozycja");
+      ImGui::SetNextItemWidth(width);
+      ImGui::DragFloat3("##position", (float *)&object.transform.translation, snap);
+      ImGui::TextUnformatted("obrót");
+      ImGui::SetNextItemWidth(width);
+      ImGui::DragFloat3("##rotation", (float *)&object.transform.rotation, 0.15f);
+      ImGui::TextUnformatted("skala");
+      ImGui::SetNextItemWidth(width);
+      ImGui::DragFloat3("##scale", (float *)&object.transform.scale, snap);
+
+      ImGuizmo::RecomposeMatrixFromComponents((float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale, glm::value_ptr(selected_object_transform));
     }
   }
   ImGui::End();
@@ -518,49 +535,21 @@ void App::render_color_scene() {
     };
     // clang-format on
     SetShaderValue(assets.colorpicker_shader, location_id, &id, SHADER_UNIFORM_VEC4);
-    for (int i = 0; i < object.model_ref.model.materialCount; i++) {
-      object.model_ref.model.materials[i].shader = assets.colorpicker_shader;
+    for (int j = 0; j < object.model_ref.model.materialCount; j++) {
+      object.model_ref.model.materials[j].shader = assets.colorpicker_shader;
     }
     DrawModel(object.model_ref.model, Vector3{0, 0, 0}, 1, WHITE);
-    for (int i = 0; i < object.model_ref.model.materialCount; i++) {
-      object.model_ref.model.materials[i].shader = assets.skinning_shader;
+    for (int j = 0; j < object.model_ref.model.materialCount; j++) {
+      object.model_ref.model.materials[j].shader = assets.skinning_shader;
     }
     i++;
   }
   EndMode3D();
   EndTextureMode();
-
-  if (selected_object != -1) {
-    std::cerr << "gizmo appears\n";
-    BeginTextureMode(color_gizmo_target);
-    BeginMode3D(camera);
-    ClearBackground(BLANK);
-
-    WorldObject &object = objects[selected_object];
-    DrawBoundingBox(object.model_ref.bounding_box, GREEN);
-    DrawGizmo3D(GIZMO_ALL, &object.transform);
-    Vector3 size = Vector3Subtract(object.model_ref.bounding_box.max, object.model_ref.bounding_box.min);
-    Vector3 scale = object.transform.scale;
-    float size_ = sqrt(Vector3Length(Vector3{size.x * scale.x, size.y * scale.y, size.z * scale.z}) / 2.0f) * 2;
-    if (size_ < 1.0f) {
-      size_ = 1.0f;
-    }
-    if (size_ > 4.0f) {
-      size_ = 4.0f;
-    }
-    SetGizmoSize(size_);
-    // object.model_ref.model.transform = GizmoToMatrix(object.transform);
-
-    EndMode3D();
-    EndTextureMode();
-  } else {
-    BeginTextureMode(color_gizmo_target);
-    ClearBackground(BLANK);
-    EndTextureMode();
-  }
 }
 
 void App::render_scene() {
+  rlSetBlendMode(BLEND_ALPHA);
   BeginMode3D(camera);
   rlDisableBackfaceCulling();
   rlDisableDepthMask();
@@ -577,35 +566,41 @@ void App::render_scene() {
 
   if (selected_object != -1) {
     WorldObject &object = objects[selected_object];
-    DrawBoundingBox(object.model_ref.bounding_box, GREEN);
-    // DrawGizmo3D(GIZMO_ALL, &object.transform);
-    Vector3 size = Vector3Subtract(object.model_ref.bounding_box.max, object.model_ref.bounding_box.min);
-    Vector3 scale = object.transform.scale;
-    float size_ = sqrt(Vector3Length(Vector3{size.x * scale.x, size.y * scale.y, size.z * scale.z}) / 2.0f) * 2;
-    if (size_ < 1.0f) {
-      size_ = 1.0f;
-    }
-    if (size_ > 4.0f) {
-      size_ = 4.0f;
-    }
-    SetGizmoSize(size_);
-    // object.model_ref.model.transform = GizmoToMatrix(object.transform);
+    BoundingBox bb = object.model_ref.bounding_box;
+    // preview_box.transform = MatrixMultiply(object.model_ref.model.transform, MatrixScale(bb.min.x + bb.max.x, bb.min.y + bb.max.y, bb.min.z + bb.max.z));
+    // preview_box.transform = object.model_ref.model.transform;
+    // clang-format off
+    preview_box.transform = MatrixMultiply(
+        MatrixMultiply(
+          MatrixTranslate((bb.min.x + bb.max.x)/-2.0f, (bb.min.y + bb.max.y)/-2.0f, (bb.min.z + bb.max.z)/-2.0f),
+          MatrixScale(bb.min.x - bb.max.x, bb.min.y - bb.max.y, bb.min.z - bb.max.z)
+        ),
+        object.model_ref.model.transform
+    );
+    // clang-format on
+    // preview_box.transform = MatrixScale(bb.max.x + bb.min.x, bb.max.y, bb.max.z);
+
+    rlDisableDepthMask();
+    DrawModel(preview_box, Vector3{0, 0, 0}, 1, Color{0x00, 0xff, 0x00, 0x80});
+    rlEnableDepthMask();
 
     ImGuizmo::SetRect(0, 0, GetRenderWidth(), GetRenderHeight());
-    glm::mat4x4 view = glm::perspective(glm::radians(camera.fovy), (float)GetRenderWidth() / (float)GetRenderHeight(), 0.1f, 1000.0f);
+    // i had to make matrices myself instead of suing raylib's built-in functions because the output was wrong
+    // this migh be to imguizmo using different matrix spec (unlike raylib it is either row major or left-hand-sided)
+    glm::mat4x4 projection = glm::perspective(glm::radians(camera.fovy), (float)GetRenderWidth() / (float)GetRenderHeight(), 0.1f, 1000.0f);
     // clang-format off
-    glm::mat4x4 projection = glm::lookAt(
+    glm::mat4x4 view = glm::lookAt(
         glm::vec3(
           camera.position.x,
           camera.position.y,
           camera.position.z
         ),
 
-        glm::normalize(glm::vec3(
+        glm::vec3(
           camera.target.x,
           camera.target.y,
           camera.target.z
-        )),
+        ),
 
         glm::normalize(glm::vec3(
           camera.up.x,
@@ -615,21 +610,19 @@ void App::render_scene() {
     );
     // clang-format on
 
-    // ImGuizmo::DrawCubes((float*)&view, (float*)&perspective, (float *)&object.model_ref.model.transform, 1);
-    // ImGuizmo::DrawGrid((float*)&view, (float*)&perspective, (float*)&identity, 100);
-    // ImGuizmo::DrawAxes((float*)&view, (float*)&perspective, (float *)&object.model_ref.model.transform, 1);
-    glm::mat4x4 identity = glm::mat4x4(1.0f);
-    ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(identity));
+    // because of different matrix spec i transpose matrix back and forth (otherwise it skews instead of moving object)
+    ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(selected_object_transform), NULL, use_snaping ? (float *)&snapping : NULL);
+    glm::mat4x4 rltransform = glm::transpose(selected_object_transform);
+    object.model_ref.model.transform = *(Matrix *)&rltransform;
   }
 
-  // handle_object_selection();
+  handle_object_selection();
 
   EndMode3D();
 
 #ifndef NDEBUG
   if (debug_mode) {
     DrawTextureEx(color_target.texture, Vector2{20, 20}, 0, 0.5, WHITE);
-    DrawTextureEx(color_gizmo_target.texture, Vector2{20, 20}, 0, 0.5, WHITE);
   }
 #endif
 }
@@ -637,10 +630,10 @@ void App::render_scene() {
 void App::cleanup() {
   rlImGuiShutdown();
   UnloadRenderTexture(color_target);
-  UnloadRenderTexture(color_gizmo_target);
   UnloadTexture(assets.icon);
   UnloadTexture(assets.icons);
   UnloadModel(skybox);
+  // UnloadModel(preview_box);
   CloseWindow();
   UnloadRenderDoc();
 }

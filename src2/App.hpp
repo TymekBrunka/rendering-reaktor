@@ -6,6 +6,7 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <glm/mat4x4.hpp>
 
 #include <AssetMgr/ModelMgr.hpp>
 
@@ -41,13 +42,19 @@ public:
 #ifndef NDEBUG
   bool debug_mode = true;
 #endif
+  bool use_snaping = false;
+  bool is_local_space = true;
   int selected_object = -1;
   int location_id = 0;
+  float snap = 0.5;
+
   float headTimer = 0.0f;
   float walkLerp = 0.0f;
   Vector2 sensitivity = {0.003f, 0.003f};
   Vector2 orientation = {0};
   Vector2 lean = {0};
+
+  Vector3 snapping = {0}; 
   Camera camera = {0};
   struct {
     Texture2D icon;
@@ -59,9 +66,9 @@ public:
 
 private:
   RenderTexture color_target;
-  RenderTexture color_gizmo_target;
 
 public:
+  glm::mat4x4 selected_object_transform;
   struct {
     Vector3 position = {0};
     Vector3 velocity = {0};
@@ -70,12 +77,13 @@ public:
   // std::vector<uint16_t> sparse_texture_list;
   std::vector<Texture2D> static_textures;
   std::vector<Gif> dynamic_textures;
-  ModelMgr model_mgr;
   std::vector<WorldObject> objects;
+  ModelMgr model_mgr;
   // std::vector<Model> objects;
   int new_obj_id = 0;
 
   Model skybox;
+  Model preview_box;
   std::vector<std::string> models_to_load;
 
   App() = default;
@@ -94,4 +102,5 @@ public:
   bool IconButton(const char *label, int idx = 1, ImVec2 size = ImVec2(30, 30));
 
   bool import_scene_zip(const char *fielpath);
+  void select(int idx);
 };
