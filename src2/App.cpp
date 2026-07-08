@@ -61,12 +61,15 @@ void App::select(int idx) {
   selected_object_transform = glm::transpose(rltransform);
 }
 
-void App::initialise() {
+bool App::initialise() {
 #ifdef _WIN32
   home_dir = getenv("USERPROFILE");
 #else
   home_dir = getenv("HOME");
 #endif
+
+  if (!prepare_files_if_empty())
+    return false;
 
   if (!home_dir)
     throw "Cannot find home";
@@ -108,7 +111,9 @@ void App::initialise() {
   assets.icons = LoadTextureFromImage(icons_);
 
   color_target = LoadRenderTexture(800, 600);
+  object_selection_target = LoadRenderTexture(800, 600);
   SetTextureFilter(color_target.texture, TEXTURE_FILTER_POINT);
+  SetTextureFilter(object_selection_target.texture, TEXTURE_FILTER_POINT);
 
   Mesh cube = GenMeshCube(1, 1, 1);
   preview_box = LoadModelFromMesh(cube);
@@ -165,6 +170,8 @@ void App::initialise() {
   model_mgr.setup();
 
   SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+  
+  return true;
 }
 
 void App::run() {
@@ -194,6 +201,10 @@ void App::run() {
       UnloadRenderTexture(color_target);
       color_target = LoadRenderTexture(GetRenderWidth(), GetRenderHeight());
       SetTextureFilter(color_target.texture, TEXTURE_FILTER_POINT);
+
+      UnloadRenderTexture(object_selection_target);
+      object_selection_target = LoadRenderTexture(GetRenderWidth(), GetRenderHeight());
+      SetTextureFilter(object_selection_target.texture, TEXTURE_FILTER_POINT);
     }
 
 #ifndef NDEBUG
@@ -344,6 +355,14 @@ struct PanelIcon {
 };
 
 PanelIcon panel_icons[] = {
+    {9, "załaduj",
+     [](App *app) {
+       static const SDL_DialogFileFilter ofd_filters[] = {{"Archiwum zip (.zip)", "zip"}, {"Wszystkie pliki", "*"}};
+       SDL_ShowOpenFileDialog(load_zip_callback, NULL, nullptr, ofd_filters, 2, NULL, false);
+     }},
+
+    {3, "zapisz", [](App *app) {}},
+
     {5, "model",
      [](App *app) {
        static const SDL_DialogFileFilter ofd_filters[] = {{"Modele obj (.obj)", "obj"}, {"Wszystkie pliki", "*"}};
@@ -351,12 +370,6 @@ PanelIcon panel_icons[] = {
      }},
 
     {7, "arkusz", [](App *app) {}},
-
-    {9, "załaduj",
-     [](App *app) {
-       static const SDL_DialogFileFilter ofd_filters[] = {{"Archiwum zip (.zip)", "zip"}, {"Wszystkie pliki", "*"}};
-       SDL_ShowOpenFileDialog(load_zip_callback, NULL, nullptr, ofd_filters, 2, NULL, false);
-     }},
 };
 
 #define ICONS_MODULO 4
@@ -383,6 +396,8 @@ void App::panel_ui() {
     ImGui::SameLine();
     ImGui::Text("reaktory");
 
+    font1->Scale = 0.9;
+    ImGui::PushFont(font1);
     int i = 0;
     float width_sum = 0;
     for (const auto &icon : panel_icons) {
@@ -400,7 +415,9 @@ void App::panel_ui() {
       }
       i++;
     }
-    ImGui::Dummy(ImVec2(0, 10));
+    font1->Scale = 1;
+    ImGui::PopFont();
+    ImGui::Dummy(ImVec2(0, 20));
 
     ImGui::Checkbox("manipulacja objektem\nw przestrzeni\nlokalnej", &is_local_space);
     if (is_local_space)
@@ -505,13 +522,13 @@ void App::panel_ui() {
       float width = ImGui::GetWindowSize().x - (2 * ImGui::GetStyle().WindowPadding.x);
       ImGui::TextUnformatted("pozycja");
       ImGui::SetNextItemWidth(width);
-      ImGui::DragFloat3("##position", (float *)&object.transform.translation, snap);
+      ImGui::DragFloat3("##position", (float *)&object.transform.translation, snap, 0, 0, "%.2f");
       ImGui::TextUnformatted("obrót");
       ImGui::SetNextItemWidth(width);
-      ImGui::DragFloat3("##rotation", (float *)&object.transform.rotation, 0.15f);
+      ImGui::DragFloat3("##rotation", (float *)&object.transform.rotation, 15, 0, 0, "%.1f");
       ImGui::TextUnformatted("skala");
       ImGui::SetNextItemWidth(width);
-      ImGui::DragFloat3("##scale", (float *)&object.transform.scale, snap);
+      ImGui::DragFloat3("##scale", (float *)&object.transform.scale, snap, 0, 0, "%.2f");
 
       ImGuizmo::RecomposeMatrixFromComponents((float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale, glm::value_ptr(selected_object_transform));
     }
@@ -556,57 +573,72 @@ void App::render_scene() {
   DrawModel(skybox, camera.position, 1.0f, WHITE);
   rlEnableBackfaceCulling();
   rlEnableDepthMask();
-  EndMode3D();
 
-  BeginMode3D(camera);
-  DrawCube({-10, -15, -20}, 20, 30, 40, RED);
+  // DrawCube({-10, -15, -20}, 20, 30, 40, RED);
   for (const auto &object : objects) {
     DrawModel(object.model_ref.model, Vector3{0, 0, 0}, 1, WHITE);
   }
+  EndMode3D();
 
   if (selected_object != -1) {
     WorldObject &object = objects[selected_object];
     BoundingBox bb = object.model_ref.bounding_box;
-    // preview_box.transform = MatrixMultiply(object.model_ref.model.transform, MatrixScale(bb.min.x + bb.max.x, bb.min.y + bb.max.y, bb.min.z + bb.max.z));
-    // preview_box.transform = object.model_ref.model.transform;
+    Vector3 size = Vector3{fabsf(bb.max.x - bb.min.x), fabsf(bb.max.y - bb.min.y), fabsf(bb.max.z - bb.min.z)};
     // clang-format off
     preview_box.transform = MatrixMultiply(
-        MatrixMultiply(
-          MatrixTranslate((bb.min.x + bb.max.x)/-2.0f, (bb.min.y + bb.max.y)/-2.0f, (bb.min.z + bb.max.z)/-2.0f),
-          MatrixScale(bb.min.x - bb.max.x, bb.min.y - bb.max.y, bb.min.z - bb.max.z)
-        ),
-        object.model_ref.model.transform
+      MatrixMultiply(
+        MatrixScale(size.x, size.y, size.z),
+        MatrixTranslate(bb.min.x + size.x/2.0f, bb.min.y + size.y/2.0f, bb.min.z + size.z/2.0f)
+      ),
+      object.model_ref.model.transform
     );
     // clang-format on
     // preview_box.transform = MatrixScale(bb.max.x + bb.min.x, bb.max.y, bb.max.z);
 
+    // since i cant just clear depth buffer with raylib then ill render that single box to another rendertexture and DrawTexture it
+    BeginTextureMode(object_selection_target);
+    ClearBackground(BLANK);
+    BeginMode3D(camera);
     rlDisableDepthMask();
-    DrawModel(preview_box, Vector3{0, 0, 0}, 1, Color{0x00, 0xff, 0x00, 0x80});
+    DrawModel(preview_box, Vector3{0, 0, 0}, 1, Color{0x00, 0xff, 0x00, 0x90});
     rlEnableDepthMask();
+    EndMode3D();
+    EndTextureMode();
+
+    // clang-format off
+    DrawTexturePro(
+      object_selection_target.texture,
+      Rectangle{0, 0, (float)object_selection_target.texture.width, (float)-object_selection_target.texture.height},
+      Rectangle{0, 0, (float)object_selection_target.texture.width, (float)object_selection_target.texture.height},
+      Vector2{0,0},
+      0,
+      WHITE
+    );
+    // clang-format on
 
     ImGuizmo::SetRect(0, 0, GetRenderWidth(), GetRenderHeight());
-    // i had to make matrices myself instead of suing raylib's built-in functions because the output was wrong
+    // i had to make matrices myself instead of using raylib's built-in functions because the output was wrong
     // this migh be to imguizmo using different matrix spec (unlike raylib it is either row major or left-hand-sided)
     glm::mat4x4 projection = glm::perspective(glm::radians(camera.fovy), (float)GetRenderWidth() / (float)GetRenderHeight(), 0.1f, 1000.0f);
     // clang-format off
     glm::mat4x4 view = glm::lookAt(
-        glm::vec3(
-          camera.position.x,
-          camera.position.y,
-          camera.position.z
-        ),
+      glm::vec3(
+        camera.position.x,
+        camera.position.y,
+        camera.position.z
+      ),
 
-        glm::vec3(
-          camera.target.x,
-          camera.target.y,
-          camera.target.z
-        ),
+      glm::vec3(
+        camera.target.x,
+        camera.target.y,
+        camera.target.z
+      ),
 
-        glm::normalize(glm::vec3(
-          camera.up.x,
-          camera.up.y,
-          camera.up.z
-        ))
+      glm::normalize(glm::vec3(
+        camera.up.x,
+        camera.up.y,
+        camera.up.z
+      ))
     );
     // clang-format on
 
@@ -617,8 +649,6 @@ void App::render_scene() {
   }
 
   handle_object_selection();
-
-  EndMode3D();
 
 #ifndef NDEBUG
   if (debug_mode) {

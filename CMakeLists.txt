@@ -82,6 +82,7 @@ target_link_libraries(main
   xlsxio_write_STATIC
   libzip::zip
   glm::glm
+  yyjson
 
   static_assets
   ModelMgr
@@ -89,8 +90,8 @@ target_link_libraries(main
 
 target_include_directories(main PRIVATE src2)
 
-message(${CMAKE_CURRENT_SOURCE_DIR})
-message(${CMAKE_SOURCE_DIR})
+add_executable(bytepack src2/BuildTools/bytepack.c)
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_options(main PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
   target_link_options(main PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)

@@ -122,8 +122,8 @@ CPMAddPackage(
 )
 target_link_libraries(imguizmo PUBLIC imgui)
 
-# add_library(yyjson src/yyjson/yyjson.c)
-# target_include_directories(yyjson PUBLIC src/yyjson/)
+add_library(yyjson deps/yyjson/yyjson.c)
+target_include_directories(yyjson PUBLIC deps/yyjson/)
 
 CPMAddPackage(
   NAME zlib

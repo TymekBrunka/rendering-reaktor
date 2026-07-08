@@ -27,12 +27,12 @@ struct Gif {
 };
 
 #define MAX_SPEED 75.0f
-#define MAX_ACCEL 125.0f
+#define MAX_ACCEL 90.0f
 // Grounded drag
 #define FRICTION 0.86f
 // Increasing air drag, increases strafing speed
 // #define AIR_DRAG 0.98f
-#define AIR_DRAG 0.97f
+#define AIR_DRAG 0.95f
 // Responsiveness for turning movement direction to looked direction
 #define CONTROL 10.0f
 #define VERTICAL_SPEED 15.0f
@@ -66,6 +66,7 @@ public:
 
 private:
   RenderTexture color_target;
+  RenderTexture object_selection_target;
 
 public:
   glm::mat4x4 selected_object_transform;
@@ -87,10 +88,11 @@ public:
   std::vector<std::string> models_to_load;
 
   App() = default;
-  void initialise();
+  bool initialise();
   void run();
   void cleanup();
 
+  void select(int idx);
   void handle_object_selection();
   void panel_ui();
   void render_scene();
@@ -101,6 +103,7 @@ public:
 
   bool IconButton(const char *label, int idx = 1, ImVec2 size = ImVec2(30, 30));
 
+  bool prepare_files_if_empty();
   bool import_scene_zip(const char *fielpath);
-  void select(int idx);
+  bool save();
 };

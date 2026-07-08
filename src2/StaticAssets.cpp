@@ -12,3 +12,7 @@
 
 #include "embeded/fa.h"
 #include "embeded/RobotoRegular.cpp"
+
+#include "embeded/scene.json.cpp"
+#include "embeded/data.txt.cpp"
+#include "embeded/data.xlsx.cpp"

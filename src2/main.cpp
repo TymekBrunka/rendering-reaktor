@@ -5,16 +5,17 @@
 
 int main(int argc, const char *argv[]) {
   App app;
-  app.initialise();
+  if (!app.initialise())
+    return 1;
 
   if (argc == 2)
     if (!strcmp(".m3d", &argv[1][strlen(argv[1]) - 4])) {
       app.model_mgr.load_model(argv[1]);
     }
 
-  if (!app.import_scene_zip("assets/example_scene.zip")) {
-    std::cerr << "Failed to load the scene\n";
-  }
+  // if (!app.import_scene_zip("assets/example_scene.zip")) {
+  //   std::cerr << "Failed to load the scene\n";
+  // }
 
   app.run();
   app.cleanup();

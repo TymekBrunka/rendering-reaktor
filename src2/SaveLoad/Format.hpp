@@ -11,6 +11,6 @@ bool alloc_read_file_from_zip(zip_t *za, zip_int64_t idx, char **data, zip_sourc
 #define SEP "/"
 #endif
 
-#define ROOTDIR SEP "reaktory" SEP
+#define ROOTDIR SEP ".reaktory" SEP
 #define TMPDIR ROOTDIR "tmp" SEP
 #define MODELS_TMPDIR TMPDIR "models" SEP

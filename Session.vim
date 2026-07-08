@@ -41,13 +41,13 @@ badd +8 ~/Documents/bettyergl/gex.ping.hpp
 badd +1 src/main.cpp
 badd +3 src/shaders/composite.vertex.glsl
 badd +4 src/shaders/composite.frag.glsl
-badd +43 CMakeLists.txt
+badd +85 CMakeLists.txt
 badd +6 src/input_handling.cpp
 badd +4 src/shaders/skybox.frag.glsl
 badd +21 src/rendering/FrameBuffer.cpp
 badd +1 .gitignore
 badd +1 src/rendering/CMakeLists.txt
-badd +88 deps/ext.cmake
+badd +26 deps/ext.cmake
 badd +182 ~/scoop/apps/mingw-winlibs-llvm-msvcrt/14.2.0-19.1.7-12.0.0-r3/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake
 badd +1 build/CMakeFiles/pkgRedirects/zlib-config.cmake
 badd +145 src2/fps.cpp
@@ -56,8 +56,8 @@ badd +2 src2/embeded/cubemap.png.cpp
 badd +3 src2/embeded/cubemap.png.hpp
 badd +1 src2/embeded/icon.png.hpp
 badd +1 src2/embeded/icons.png.hpp
-badd +42 src2/App.hpp
-badd +237 src2/App.cpp
+badd +14 src2/App.hpp
+badd +605 src2/App.cpp
 badd +10 src2/StaticAssets.cpp
 badd +1 .gitmodules
 badd +243 ~/cacheCPM/raylib/c846/src/raylib.h
@@ -90,9 +90,10 @@ badd +1 ~/Documents/rendering-reaktor/src2/main.cpp
 badd +1 ~/Documents/rendering-reaktor/deps/raygizmo2/raygizmo.h
 badd +1 ~/Documents/rendering-reaktor/deps/raygizmo2/raygizmo.c
 badd +1 ~/Documents/rendering-reaktor/deps/raygizmo/raygizmo.c
-badd +0 ~/Documents/rendering-reaktor/deps/raygizmo/raygizmo.h
+badd +1 ~/Documents/rendering-reaktor/deps/raygizmo/raygizmo.h
 argglobal
 %argdel
+tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
@@ -111,23 +112,16 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 10 - ((9 * winheight(0) + 29) / 59)
+let s:l = 13 - ((12 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 10
-normal! 03|
+keepjumps 13
+normal! 0
 tabnext
-edit src2/AssetMgr/ModelMgr.cpp
-wincmd t
-let s:save_winminheight = &winminheight
-let s:save_winminwidth = &winminwidth
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
+edit src2/FPScontroler.cpp
 argglobal
-balt src2/App.cpp
+balt src2/AssetMgr/ModelMgr.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -138,12 +132,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 107 - ((29 * winheight(0) + 29) / 59)
+let s:l = 49 - ((46 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 107
-normal! 0139|
+keepjumps 49
+normal! 0
 tabnext
 edit src2/App.hpp
 argglobal
@@ -157,14 +151,21 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 42 - ((8 * winheight(0) + 29) / 59)
+let s:l = 16 - ((15 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 42
-normal! 025|
+keepjumps 16
+normal! 022|
 tabnext
 edit src2/App.cpp
+wincmd t
+let s:save_winminheight = &winminheight
+let s:save_winminwidth = &winminwidth
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 argglobal
 balt ~/Documents/rendering-reaktor/src2/raygizmo_test.cpp
 setlocal foldmethod=manual
@@ -177,12 +178,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 417 - ((39 * winheight(0) + 29) / 59)
+let s:l = 605 - ((17 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 417
-normal! 038|
+keepjumps 605
+normal! 010|
 tabnext
 edit deps/ext.cmake
 argglobal
@@ -197,13 +198,32 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 88 - ((10 * winheight(0) + 29) / 59)
+let s:l = 26 - ((6 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 88
-normal! 050|
-tabnext 2
+keepjumps 26
+normal! 05|
+tabnext
+edit CMakeLists.txt
+argglobal
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 85 - ((46 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 85
+normal! 010|
+tabnext 4
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif
