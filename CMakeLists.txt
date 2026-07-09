@@ -92,6 +92,10 @@ target_include_directories(main PRIVATE src2)
 
 add_executable(bytepack src2/BuildTools/bytepack.c)
 
+add_executable(imgpack src2/BuildTools/imgpack.c)
+target_include_directories(imgpack PRIVATE src2/BuildTools)
+target_link_libraries(imgpack PRIVATE m)
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_options(main PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
   target_link_options(main PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
