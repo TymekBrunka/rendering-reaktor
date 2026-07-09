@@ -26,6 +26,12 @@ struct Gif {
   Image data;
 };
 
+struct AppMetadata {
+  bool possibly_had_lost_its_files = false;
+  int app_major, app_minor, app_patch;
+  int format_major, format_minor, format_patch;
+};
+
 #define MAX_SPEED 75.0f
 #define MAX_ACCEL 90.0f
 // Grounded drag
@@ -87,23 +93,29 @@ public:
   Model preview_box;
   std::vector<std::string> models_to_load;
 
+  AppMetadata metadata;
+
   App() = default;
   bool initialise();
   void run();
   void cleanup();
 
   void select(int idx);
-  void handle_object_selection();
   void panel_ui();
   void render_scene();
-  void render_color_scene();
 
   void updateCamera();
   void updateBody();
 
   bool IconButton(const char *label, int idx = 1, ImVec2 size = ImVec2(30, 30));
 
-  bool prepare_files_if_empty();
+private:
+  void handle_object_selection();
+  void render_color_scene();
+  bool load_app();
+  bool read_data_txt(char* data_txt, size_t data_txt_len, AppMetadata* meta);
+
+public:
   bool import_scene_zip(const char *fielpath);
   bool save();
 };

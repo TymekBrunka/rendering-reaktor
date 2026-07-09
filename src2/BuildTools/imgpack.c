@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -12,7 +13,7 @@ char c_file_path[200] = {0};
 char h_file_path[200] = {0};
 char header_guard_text[200] = {0};
 
-void get_file_name(const char *filepath, char *out) {
+void get_file_name(const char *filepath, char *out, size_t out_buf_len) {
   size_t start = 0;
   size_t length = strlen(filepath);
   for (intptr_t i = length - 1; i >= 0; i--) {
@@ -26,9 +27,9 @@ void get_file_name(const char *filepath, char *out) {
     }
   }
 
-  // char *name = calloc(1, length - start + 1);
-  memcpy(out, &filepath[start], length - start);
-  out[length] = '\0';
+  // memcpy(out, &filepath[start], length - start);
+  // out[length] = '\0';
+  snprintf(out, out_buf_len, "%s", &filepath[start]);
 }
 
 void name2cident(char *name, char *out) {
@@ -43,7 +44,7 @@ void name2cident(char *name, char *out) {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 4) {
+  if (argc < 5) {
     fprintf(stderr, "imgpack: Not enough arguments\n");
     return 1;
   }
@@ -63,7 +64,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  get_file_name(h_file_path, formated_string);
+  get_file_name(h_file_path, formated_string, 1024);
   fprintf(cfile, "#include \"%s\"\n\n", formated_string);
   name2cident(formated_string, formated_string);
   fprintf(hfile,
@@ -72,7 +73,11 @@ int main(int argc, char **argv) {
           "#include <stdlib.h>\n\n",
           formated_string, formated_string);
 
-  for (int i = 3; i < argc; i++) {
+  if (argv[3][0] == 'y')
+    stbi_set_flip_vertically_on_load(true);
+
+  for (int i = 4; i < argc; i++) {
+    fprintf(stderr, "imgpack: reading file %s\n", argv[i]);
     int width, height, channels;
     unsigned char *pixels = stbi_load(argv[i], &width, &height, &channels, atoi(argv[2]));
     if (pixels == NULL) {
@@ -80,20 +85,20 @@ int main(int argc, char **argv) {
       continue;
     }
     size_t pixels_amount = width * height * channels;
-    get_file_name(argv[i], formated_string);
+    get_file_name(argv[i], formated_string, 1024);
     name2cident(formated_string, formated_string);
     fprintf(hfile,
-            "extern int %s_width;\n"
-            "extern int %s_height;\n"
-            "extern int %s_channels;\n"
-            "extern unsigned char %s_pixels[%ld];\n\n",
+            "extern const int %s_width;\n"
+            "extern const int %s_height;\n"
+            "extern const int %s_channels;\n"
+            "extern const unsigned char %s_pixels[%ld];\n\n",
             formated_string, formated_string, formated_string, formated_string, pixels_amount);
 
     fprintf(cfile,
-            "int %s_width = %d;\n"
-            "int %s_height = %d;\n"
-            "int %s_channels = %d;\n"
-            "unsigned char %s_pixels[%ld] = {",
+            "const int %s_width = %d;\n"
+            "const int %s_height = %d;\n"
+            "const int %s_channels = %d;\n"
+            "const unsigned char %s_pixels[%ld] = {",
             formated_string, width, formated_string, height, formated_string, channels, formated_string, pixels_amount);
 
     unsigned char *end = &pixels[pixels_amount - 1];

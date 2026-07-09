@@ -30,16 +30,55 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 include(deps/ext.cmake)
+include(BuildTools.cmake)
 
-add_library(static_assets src2/StaticAssets.cpp)
-target_include_directories(static_assets PRIVATE src2 PUBLIC src2/embeded)
+bytepack_(
+  OUTPUT shaders
+  SOURCES
+    assets/shaders/cubemap.vs
+    assets/shaders/cubemap.fs
+    assets/shaders/skinning.vs
+    assets/shaders/skinning.fs
+    assets/shaders/skinning_colorpicker.fs
+    assets/shaders/skybox.vertex.glsl
+    assets/shaders/skybox.frag.glsl
+)
+
+bytepack_(
+  OUTPUT first_launch_data
+  SOURCES
+    assets/data.txt
+    assets/data.xlsx
+    assets/scene.json
+)
+
+imgpack_(
+  OUTPUT images
+  CHANNELS 4
+  FLIP y
+  SOURCES
+    assets/images/icons.png
+    assets/images/placeholder.png
+    assets/images/skybox.png
+)
+
+imgpack_(
+  OUTPUT icon_img
+  CHANNELS 4
+  FLIP n
+  SOURCES
+    assets/images/icon.png
+)
+
+add_library(imgui_assets src2/embeded/imgui_assets.cpp)
+target_include_directories(imgui_assets PRIVATE src2 PUBLIC src2/embeded)
 
 add_library(ModelMgr
   src2/AssetMgr/ModelMgr.cpp
   src2/AssetMgr/ModelMgr.hpp
 )
 target_include_directories(ModelMgr PRIVATE src2/AssetMgr)
-target_link_libraries(ModelMgr PUBLIC raylib PRIVATE static_assets)
+target_link_libraries(ModelMgr PUBLIC raylib PRIVATE images)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
   add_executable(main WIN32 src2/main.cpp src2/App.cpp src2/App.hpp src2/SaveLoad/SaveMod.cpp)
@@ -65,6 +104,8 @@ target_compile_options(main PRIVATE
 
 if (SANS)
   target_link_options(main PRIVATE -fsanitize=undefined,address)
+  target_link_options(bytepack PRIVATE -fsanitize=undefined,address)
+  target_link_options(imgpack PRIVATE -fsanitize=undefined,address)
 endif()
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows" OR CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -84,72 +125,24 @@ target_link_libraries(main
   glm::glm
   yyjson
 
-  static_assets
+  imgui_assets
+  shaders
+  images
+  icon_img
+  first_launch_data
+
   ModelMgr
 )
 
 target_include_directories(main PRIVATE src2)
 
-add_executable(bytepack src2/BuildTools/bytepack.c)
-
-add_executable(imgpack src2/BuildTools/imgpack.c)
-target_include_directories(imgpack PRIVATE src2/BuildTools)
-target_link_libraries(imgpack PRIVATE m)
-
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_options(main PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
   target_link_options(main PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
+
+  target_compile_options(bytepack PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
+  target_link_options(bytepack PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
+
+  target_compile_options(imgpack PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
+  target_link_options(imgpack PRIVATE -fsanitize=undefined -fsanitize-undefined-trap-on-error)
 endif()
-
-# add_executable(ziptest src2/Zip/zip.cpp)
-# target_link_libraries(ziptest PRIVATE libzip::zip)
-
-# add_subdirectory(src/rendering)
-#
-# imgpack(cubemap2Img src/cubemap2.png cubemap2.png y 4)
-# imgpack(icon_data src/icon.png icon.png n 4)
-# imgpack(iconsImg src/icons.png icons.png y 4)
-# bytepack(skybox_vertex_text src/shaders/skybox.vertex.glsl skybox.vertex.glsl)
-# bytepack(skybox_fragment_text src/shaders/skybox.frag.glsl skybox.frag.glsl)
-# bytepack(model_vertex_text src/shaders/model.vertex.glsl model.vertex.glsl)
-# bytepack(model_fragment_text src/shaders/model.frag.glsl model.frag.glsl)
-# bytepack(composite_vertex_text src/shaders/composite.vertex.glsl composite.vertex.glsl)
-# bytepack(composite_fragment_text src/shaders/composite.frag.glsl composite.frag.glsl)
-#
-# # add_library(tinyobjloader OBJECT src/tinyobjloader/tiny_obj_loader.cc)
-# # target_include_directories(tinyobjloader PUBLIC src/tinyobjloader/)
-#
-# add_library(pfd STATIC src/pfd/pfd.cpp)
-# # target_include_directories(pfd PUBLIC src/pfd/)
-# target_precompile_headers(pfd PUBLIC src/pfd/portable-file-dialogs.h)
-#
-# add_executable(main
-#   src/main.cpp
-#   src/EditorClasses/Camera.cpp
-#   src/EditorClasses/EditorActionsPanel.cpp
-#   src/EditorClasses/MeshManager.cpp
-#   src/utils/Logger.hpp
-# )
-#
-# target_include_directories(main PUBLIC src/EditorClasses/ src)
-# target_link_libraries(main PUBLIC
-#   rr
-#   glm::glm-header-only
-#   # tinyobjloader
-#   assimp::assimp
-#
-# #prebuilt assets
-#   cubemap2Img
-#   icon_data
-#   iconsImg
-#   skybox_vertex_text
-#   skybox_fragment_text
-#   model_vertex_text
-#   model_fragment_text
-#   composite_vertex_text
-#   composite_fragment_text
-#   INTERFACE
-#   pfd
-# )
-# target_precompile_headers(main REUSE_FROM pfd)
-# target_link_libraries(main PUBLIC imgui imguizmo)

@@ -5,7 +5,7 @@
 #include <cstring>
 #include <iostream>
 
-#include <placeholder.png.hpp>
+#include <images.h>
 
 ModelRef::~ModelRef() {
   if (model.currentPose != nullptr)
@@ -97,9 +97,9 @@ ModelRef &ModelRef::operator=(ModelRef &&other) noexcept {
 
 void ModelMgr::setup() {
   Image placeholder_ = {
-      .data = placeholder_img_data.data,
-      .width = placeholder_img_data.width,
-      .height = placeholder_img_data.height,
+      .data = (void*)placeholder_png_pixels,
+      .width = placeholder_png_width,
+      .height = placeholder_png_height,
       .mipmaps = 1,
       .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
   };

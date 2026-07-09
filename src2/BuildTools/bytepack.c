@@ -9,7 +9,7 @@ char c_file_path[200] = {0};
 char h_file_path[200] = {0};
 char header_guard_text[200] = {0};
 
-void get_file_name(const char *filepath, char *out) {
+void get_file_name(const char *filepath, char *out, size_t out_buf_len) {
   size_t start = 0;
   size_t length = strlen(filepath);
   for (intptr_t i = length - 1; i >= 0; i--) {
@@ -23,9 +23,9 @@ void get_file_name(const char *filepath, char *out) {
     }
   }
 
-  // char *name = calloc(1, length - start + 1);
-  memcpy(out, &filepath[start], length - start);
-  out[length] = '\0';
+  // memcpy(out, &filepath[start], length - start);
+  // out[length] = '\0';
+  snprintf(out, out_buf_len, "%s", &filepath[start]);
 }
 
 void name2cident(char *name, char *out) {
@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  get_file_name(h_file_path, formated_string);
+  get_file_name(h_file_path, formated_string, 1024);
   fprintf(cfile, "#include \"%s\"\n\n", formated_string);
   name2cident(formated_string, formated_string);
   fprintf(hfile,
@@ -102,19 +102,19 @@ int main(int argc, char **argv) {
       continue;
     }
 
-    get_file_name(argv[i], formated_string);
+    get_file_name(argv[i], formated_string, 1024);
     name2cident(formated_string, formated_string);
     fprintf(hfile,
-            "extern size_t %s_size;\n"
-            "extern unsigned char %s_data[%ld];\n\n",
-            formated_string, formated_string, bytes_read);
+            "extern const size_t %s_size;\n"
+            "extern const unsigned char %s_data[%ld];\n\n",
+            formated_string, formated_string, bytes_read + 1);
 
     fprintf(cfile,
-            "size_t %s_size = %ld;\n"
-            "unsigned char %s_data[%ld] = {",
-            formated_string, bytes_read, formated_string, bytes_read);
+            "const size_t %s_size = %ld;\n"
+            "const unsigned char %s_data[%ld] = {",
+            formated_string, bytes_read, formated_string, bytes_read + 1);
 
-    unsigned char *end = &blob[bytes_read-1];
+    unsigned char *end = &blob[bytes_read]; //since last byte is null terminator (in case its c style string)
     for (unsigned char *uc = blob; uc <= end; uc++) {
       fprintf(cfile, "0x%0.2x, ", *uc);
     }

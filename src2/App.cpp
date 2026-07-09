@@ -22,25 +22,18 @@
 // #include <GLFW/glfw3.h>
 #include <IconsFontAwesome6.h>
 #include <RobotoRegular.h>
-#include <cubemap.fs.hpp>
-#include <cubemap.vs.hpp>
-#include <icon.png.hpp>
-#include <icons.png.hpp>
-#include <placeholder.png.hpp>
-#include <skybox.frag.glsl.hpp>
-#include <skybox.png.hpp>
-#include <skybox.vertex.glsl.hpp>
 
 // #include "glm/ext/vector_float3.hpp"
 #include "glm/geometric.hpp"
 #include "glm/matrix.hpp"
 #include "glm/trigonometric.hpp"
 #include "raymath.h"
-#include <skinning.fs.hpp>
-#include <skinning.vs.hpp>
-#include <skinning_colorpicker.fs.hpp>
 
 #include <Renderdoc.cpp>
+
+#include <icon_img.h>
+#include <images.h>
+#include <shaders.h>
 
 std::mutex global_lock{};
 std::string imported_zip_file{};
@@ -68,9 +61,6 @@ bool App::initialise() {
   home_dir = getenv("HOME");
 #endif
 
-  if (!prepare_files_if_empty())
-    return false;
-
   if (!home_dir)
     throw "Cannot find home";
 
@@ -81,26 +71,31 @@ bool App::initialise() {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(800, 600, "reaktory");
 
+  model_mgr.setup();
+
+  if (!load_app())
+    return false;
+
   Image icon_ = {
-      .data = icon_data.data,
-      .width = icon_data.width,
-      .height = icon_data.height,
+      .data = (void *)icon_png_pixels,
+      .width = icon_png_width,
+      .height = icon_png_height,
       .mipmaps = 1,
       .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
   };
 
   Image icons_ = {
-      .data = iconsImg.data,
-      .width = iconsImg.width,
-      .height = iconsImg.height,
+      .data = (void *)icons_png_pixels,
+      .width = icons_png_width,
+      .height = icons_png_height,
       .mipmaps = 1,
       .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
   };
 
   Image skybox_ = {
-      .data = skyboxImg.data,
-      .width = skyboxImg.width,
-      .height = skyboxImg.height,
+      .data = (void *)skybox_png_pixels,
+      .width = skybox_png_width,
+      .height = skybox_png_height,
       .mipmaps = 1,
       .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
   };
@@ -121,7 +116,7 @@ bool App::initialise() {
   skybox.materialCount = 1;
 
   std::cerr << "Loading skybox shader\n";
-  Shader skybox_shader = LoadShaderFromMemory(skybox_vertex_text, skybox_fragment_text);
+  Shader skybox_shader = LoadShaderFromMemory((const char *)skybox_vertex_glsl_data, (const char *)skybox_frag_glsl_data);
   skybox.materials[0].shader = skybox_shader;
 
   int envmap_map[1] = {MATERIAL_MAP_CUBEMAP};
@@ -131,12 +126,12 @@ bool App::initialise() {
   SetTextureFilter(skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture, TEXTURE_FILTER_POINT); // pixelated instead of blurry
                                                                                                   //
   std::cerr << "Loading model(skinning) shader\n";
-  assets.skinning_shader = LoadShaderFromMemory(skinning_vs_text, skinning_fs_text);
+  assets.skinning_shader = LoadShaderFromMemory((const char *)skinning_vs_data, (const char *)skinning_fs_data);
   if (!IsShaderValid(assets.skinning_shader))
     std::cerr << "failed to load model(skinning) shader\n";
 
   std::cerr << "Loading model(skinning+colorpicker) shader\n";
-  assets.colorpicker_shader = LoadShaderFromMemory(skinning_vs_text, skinning_fs_colorpicker_text);
+  assets.colorpicker_shader = LoadShaderFromMemory((const char *)skinning_vs_data, (const char *)skinning_colorpicker_fs_data);
   if (!IsShaderValid(assets.colorpicker_shader))
     std::cerr << "failed to load model(skinning+colorpicker) shader\n";
   location_id = GetShaderLocation(assets.colorpicker_shader, "ID");
@@ -167,10 +162,8 @@ bool App::initialise() {
 
   updateCamera();
 
-  model_mgr.setup();
-
   SetTargetFPS(60); // Set our game to run at 60 frames-per-second
-  
+
   return true;
 }
 

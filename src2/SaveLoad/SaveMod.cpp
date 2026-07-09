@@ -6,14 +6,14 @@
 #include <stdio.h>
 #include <zip.h>
 
-#include <data.txt.hpp>
-#include <data.xlsx.hpp>
 #include <dirent.h>
 #include <errno.h>
 #include <filesystem>
-#include <scene.json.hpp>
+
+#include <first_launch_data.h>
 
 char *home_dir = NULL;
+char cwd_path[1024] = {0};
 char formated_path[1024] = {0};
 
 #include "Format_0_0_1.cpp"
@@ -31,7 +31,7 @@ char formated_path[1024] = {0};
     if (!strncmp(reader, (x), sizeof((x)) - 1))
 
 bool mkdirIfNotExists(const char *x) {
-  snprintf(formated_path, 1024, "%s/%s", home_dir, (x));
+  snprintf(formated_path, 1024, "%s/%s", cwd_path, (x));
   DIR *dir = opendir(formated_path);
   if (dir)
     closedir(dir);
@@ -106,6 +106,61 @@ static bool parse_version(const char *reader, size_t line_length, int *major, in
   return true;
 }
 
+bool App::read_data_txt(char* data_txt, size_t data_txt_len, AppMetadata* meta) {
+  bool possibly_had_lost_its_files = false;
+
+  fprintf(stderr, "Contents of 'data.txt':\n>>>>\n%s\n<<<<\n", data_txt);
+
+  // size_t linenr = 1;
+  // size_t column = 0;
+
+  char *reader_end = &data_txt[data_txt_len - 1];
+  for (char *reader = data_txt; reader <= reader_end;) {
+    // fprintf(stderr, "reader: %s\n", reader);
+
+    if (*reader != '#') {
+      size_t line_length = 0;
+      for (char *c = reader; c <= reader_end && *c != '\n'; c++)
+        line_length++;
+
+      if_field_is("app version: ") {
+        reader += sizeof("app version: ") - 1;
+        if (!parse_version(reader, line_length - sizeof("app version: ") + 1, &meta->app_major, &meta->app_minor, &meta->app_patch))
+          return false;
+        fprintf(stderr, "App Version is: %d.%d.%d\n", meta->app_major, meta->app_minor, meta->app_patch);
+      }
+
+      if_field_is("format version: ") {
+        reader += sizeof("format version: ") - 1;
+        if (!parse_version(reader, line_length - sizeof("format version: ") + 1, &meta->format_major, &meta->format_minor, &meta->format_patch))
+          return false;
+        fprintf(stderr, "Format Version is: %d.%d.%d\n", meta->format_major, meta->format_minor, meta->format_patch);
+      }
+
+      if_field_is("possibly had lost its files: ") {
+        if (line_length >= sizeof("possibly had lost its files: ")) {
+          reader += sizeof("possibly had lost its files: ") - 1;
+          if (*reader == 'y')
+            meta->possibly_had_lost_its_files = true;
+          else if (*reader != 'n') {
+            fprintf(stderr, "Wrong format: field 'possibly had lost its files must start with either y or n\n");
+            return false;
+          }
+          fprintf(stderr, "Had possibly lost its files: %d\n", meta->possibly_had_lost_its_files);
+        }
+      }
+    }
+
+    while (*reader != '\n' && reader <= reader_end)
+      reader++;
+    if (*reader == '\n') // so it doesnt trap on newline
+      reader++;
+    // linenr++;
+  }
+
+  return true;
+}
+
 bool App::import_scene_zip(const char *filepath) {
   FILE *input;
   size_t filesize;
@@ -165,9 +220,7 @@ bool App::import_scene_zip(const char *filepath) {
   zip_stat_t stat;
   zip_stat_init(&stat);
 
-  int app_major, app_minor, app_patch;
-  int format_major, format_minor, format_patch;
-  bool possibly_had_lost_its_files = false;
+  AppMetadata meta;
   SCOPE("reading contents of data.txt") {
 
     zip_int64_t data_txt_idx = zip_name_locate(za, "data.txt", 0);
@@ -181,62 +234,12 @@ bool App::import_scene_zip(const char *filepath) {
     if (!alloc_read_file_from_zip(za, data_txt_idx, &data_txt, data_txt_src, &stat)) {
       endzip();
     }
-
-    fprintf(stderr, "Contents of 'data.txt':\n>>>>\n%s\n<<<<\n", data_txt);
-
-    // size_t linenr = 1;
-    // size_t column = 0;
-
-    char *reader_end = &data_txt[stat.size - 1];
-    for (char *reader = data_txt; reader <= reader_end;) {
-      // fprintf(stderr, "reader: %s\n", reader);
-
-      if (*reader != '#') {
-        size_t line_length = 0;
-        for (char *c = reader; c <= reader_end && *c != '\n'; c++)
-          line_length++;
-
-        if_field_is("app version: ") {
-          reader += sizeof("app version: ") - 1;
-          if (!parse_version(reader, line_length - sizeof("app version: ") + 1, &app_major, &app_minor, &app_patch)) {
-            zip_source_free(data_txt_src);
-            delete[] data_txt;
-            endzip();
-          }
-          fprintf(stderr, "App Version is: %d.%d.%d\n", app_major, app_minor, app_patch);
-        }
-
-        if_field_is("format version: ") {
-          reader += sizeof("format version: ") - 1;
-          if (!parse_version(reader, line_length - sizeof("format version: ") + 1, &format_major, &format_minor, &format_patch)) {
-            zip_source_free(data_txt_src);
-            delete[] data_txt;
-            endzip();
-          }
-          fprintf(stderr, "Format Version is: %d.%d.%d\n", format_major, format_minor, format_patch);
-        }
-
-        if_field_is("possibly had lost its files: ") {
-          if (line_length >= sizeof("possibly had lost its files: ")) {
-            reader += sizeof("possibly had lost its files: ") - 1;
-            if (*reader == 'y')
-              possibly_had_lost_its_files = true;
-            else if (*reader != 'n') {
-              fprintf(stderr, "Wrong format: field 'possibly had lost its files must start with either y or n\n");
-              zip_source_free(data_txt_src);
-              delete[] data_txt;
-              endzip();
-            }
-            fprintf(stderr, "Had possibly lost its files: %d\n", possibly_had_lost_its_files);
-          }
-        }
-      }
-
-      while (*reader != '\n' && reader <= reader_end)
-        reader++;
-      if (*reader == '\n') // so it doesnt trap on newline
-        reader++;
-      // linenr++;
+    
+    if (!read_data_txt(data_txt, stat.size, &meta)) {
+      fprintf(stderr, "i need free\n");
+      zip_source_free(data_txt_src);
+      delete[] data_txt;
+      endzip();
     }
 
     zip_source_free(data_txt_src);
@@ -247,20 +250,21 @@ bool App::import_scene_zip(const char *filepath) {
 
   SCOPE("selecting proper loader") {
 
-    if (format_major == 0) {
-      if (format_minor == 0 && format_patch == 1) {
+    if (meta.format_major == 0) {
+      if (meta.format_minor == 0 && meta.format_patch == 1) {
         loader = zip_loader_0_0_1;
       }
     }
 
     if (loader == NULL) {
-      fprintf(stderr, "Couldnt find loader for format version %d.%d.%d\n", format_major, format_minor, format_patch);
+      fprintf(stderr, "Couldnt find loader for format version %d.%d.%d\n", meta.format_major, meta.format_minor, meta.format_patch);
       endzip();
     }
   }
 
   SCOPE("reading from zip archive") {
 
+    snprintf(cwd_path, 1024, "%s" ROOTDIR TMPDIR, home_dir);
     num_of_entries = zip_get_num_entries(za, 0);
     fprintf(stderr, "-- NUMBER OF ENTRIES: %llu\n", num_of_entries);
     for (size_t i = 0; i < num_of_entries; i++) {
@@ -268,6 +272,9 @@ bool App::import_scene_zip(const char *filepath) {
         fprintf(stderr, "Can't stat file %llu in zip archive : %s\n", i, zip_strerror(za));
         continue;
       }
+
+      if (!strcmp(stat.name, "data.txt"))
+        continue;
 
       fprintf(stderr, "file: %s\n", stat.name);
 
@@ -277,18 +284,19 @@ bool App::import_scene_zip(const char *filepath) {
     }
   }
 
+  metadata = meta;
+
   zip_source_free(src);
   delete[] blob;
   zip_error_fini(&error);
   return true;
 }
 
-#define makeFileIfNotExists(x, contents)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              \
-  snprintf(formated_path, 1024, "%s" SEP x, home_dir);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                \
+#define makeFileIfNotExists(x, contents, size)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        \
+  snprintf(formated_path, 1024, "%s" SEP x, cwd_path);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                \
   if ((tmpf = fopen(formated_path, "rb")) == NULL) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  \
     if ((tmpf = fopen(formated_path, "wb")) != NULL) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                \
-      fprintf(stderr, "new contents size is: %d\n", strlen((contents)));                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              \
-      fprintf(tmpf, "%s", (contents));                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                \
+      fwrite((contents), 1, (size), tmpf);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            \
       fclose(tmpf);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   \
     } else {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          \
       fprintf(stderr, "Failed to open %s for write.\n", formated_path);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               \
@@ -298,22 +306,21 @@ bool App::import_scene_zip(const char *filepath) {
     fclose(tmpf);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     \
   }
 
-bool App::prepare_files_if_empty() {
-  bool is_first_time = false;
-  SCOPE("creating necesary directories") {
+bool App::load_app() {
+  SCOPE("handle first launch / missing files") {
 
-    is_first_time = mkdirIfNotExists("/.reaktory/");
-    mkdirIfNotExists("/.reaktory/tmp/");
-    mkdirIfNotExists("/.reaktory/models/");
-    mkdirIfNotExists("/.reaktory/tmp/models/");
-  }
+    snprintf(cwd_path, 1024, "%s" SEP "%s", home_dir, ".reaktory");
+    bool is_first_time = false;
 
-  // fprintf(stderr, "\n");
-  SCOPE("create necesary files") {
+    is_first_time = mkdirIfNotExists("");
+    mkdirIfNotExists("/models/");
+    mkdirIfNotExists("/tmp/");
+    mkdirIfNotExists("/tmp/models/");
+
     FILE *tmpf;
-    makeFileIfNotExists(ROOTDIR SEP "scene.json", scene_json_text);
-    makeFileIfNotExists(ROOTDIR SEP "data.txt", data_txt_text);
-    makeFileIfNotExists(ROOTDIR SEP "data.xlsx", data_xlsx_text);
+    makeFileIfNotExists("scene.json", scene_json_data, scene_json_size);
+    makeFileIfNotExists("data.txt", data_txt_data, data_txt_size);
+    makeFileIfNotExists("data.xlsx", data_xlsx_data, data_xlsx_size);
   }
 
   return true;
