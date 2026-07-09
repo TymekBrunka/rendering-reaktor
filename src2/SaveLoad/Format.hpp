@@ -6,7 +6,7 @@ struct abstract_file {
   union {
     zip_stat_t stat;
     FILE* file;
-  }
+  } u;
 };
 
 extern char *home_dir;

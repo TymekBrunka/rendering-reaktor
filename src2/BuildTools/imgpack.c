@@ -106,6 +106,8 @@ int main(int argc, char **argv) {
       fprintf(cfile, "0x%0.2x, ", *uc);
     }
     fprintf(cfile, "};\n\n");
+
+    free(pixels);
   }
 
   fprintf(hfile, "#endif");

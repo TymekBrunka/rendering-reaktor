@@ -653,6 +653,7 @@ void App::render_scene() {
 void App::cleanup() {
   rlImGuiShutdown();
   UnloadRenderTexture(color_target);
+  UnloadRenderTexture(object_selection_target);
   UnloadTexture(assets.icon);
   UnloadTexture(assets.icons);
   UnloadModel(skybox);

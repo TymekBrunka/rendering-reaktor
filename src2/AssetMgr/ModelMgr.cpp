@@ -119,6 +119,7 @@ ModelMgr::~ModelMgr() {
     UnloadModel(model.model);
   }
   // UnloadShader(shader);
+  UnloadTexture(placeholder_texture);
 }
 
 void ModelMgr::unload_model(const std::string &name) {
