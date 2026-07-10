@@ -1,20 +1,29 @@
 #pragma once
+#include <cstddef>
 #include <zip.h>
 
 struct abstract_file {
   bool is_file;
+  char *path;
   union {
     zip_stat_t stat;
-    FILE* file;
+    FILE *file;
   } u;
+};
+
+struct abstract_memory {
+  void *data;
+  zip_source_t *source;
 };
 
 extern char *home_dir;
 extern char cwd_path[1024];
 extern char formated_path[1024];
 
-bool alloc_read_file_from_zip(zip_t *za, zip_int64_t idx, char **data, zip_source_t *src, zip_stat_t *stat);
-bool make_file_real(abstract_file *afile);
+bool abstract_file_open_and_read(const char *path, abstract_file *afile, size_t *size);
+abstract_memory abstract_file_read(abstract_file *afile, size_t *size);
+bool abstract_file_write(abstract_file *afile, size_t size, void *data);
+bool abstract_file_make_real(abstract_file *afile);
 
 #ifdef _WIN32
 #define SEP "\\"

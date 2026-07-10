@@ -10,22 +10,17 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 let s:shortmess_save = &shortmess
 set shortmess+=aoO
-badd +78 ~/Documents/kody/rendering-reaktor/src2/BuildTools/bytepack.c
-badd +5 ~/Documents/kody/rendering-reaktor/build/bytepack.c
-badd +5 ~/Documents/kody/rendering-reaktor/build/bytepack.h
-badd +4 ~/Documents/kody/rendering-reaktor/assets/data.txt
-badd +82 ~/Documents/kody/rendering-reaktor/src2/BuildTools/imgpack.c
-badd +7988 ~/Documents/kody/rendering-reaktor/src2/BuildTools/stb_image.h
-badd +97 ~/Documents/kody/rendering-reaktor/CMakeLists.txt
-badd +1 ~/Documents/kody/rendering-reaktor/build/imagine.h
-badd +1 ~/Documents/kody/rendering-reaktor/build/imagine.c
+badd +123 ~/Documents/kody/rendering-reaktor/src2/BuildTools/bytepack.c
+badd +110 ~/Documents/kody/rendering-reaktor/src2/BuildTools/imgpack.c
+badd +9 ~/Documents/kody/rendering-reaktor/src2/SaveLoad/Format.hpp
+badd +122 ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
+badd +656 ~/Documents/kody/rendering-reaktor/src2/App.cpp
 argglobal
 %argdel
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
-tabnew +setlocal\ bufhidden=wipe
 tabrewind
-edit ~/Documents/kody/rendering-reaktor/src2/BuildTools/bytepack.c
+edit ~/Documents/kody/rendering-reaktor/src2/SaveLoad/Format.hpp
 argglobal
 balt ~/Documents/kody/rendering-reaktor/src2/BuildTools/imgpack.c
 setlocal foldmethod=manual
@@ -38,47 +33,16 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 101 - ((24 * winheight(0) + 27) / 55)
+let s:l = 9 - ((8 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 101
-normal! 0
+keepjumps 9
+normal! 06|
 tabnext
-edit ~/Documents/kody/rendering-reaktor/src2/BuildTools/imgpack.c
-let s:save_splitbelow = &splitbelow
-let s:save_splitright = &splitright
-set splitbelow splitright
-wincmd _ | wincmd |
-vsplit
-1wincmd h
-wincmd w
-let &splitbelow = s:save_splitbelow
-let &splitright = s:save_splitright
-wincmd t
-let s:save_winminheight = &winminheight
-let s:save_winminwidth = &winminwidth
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe 'vert 1resize ' . ((&columns * 40 + 106) / 212)
-exe 'vert 2resize ' . ((&columns * 171 + 106) / 212)
+edit ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
 argglobal
-enew
-file neo-tree\ filesystem\ \[2]
-balt ~/Documents/kody/rendering-reaktor/src2/BuildTools/imgpack.c
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-wincmd w
-argglobal
-balt ~/Documents/kody/rendering-reaktor/src2/BuildTools/bytepack.c
+balt ~/Documents/kody/rendering-reaktor/src2/SaveLoad/Format.hpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -89,19 +53,16 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 82 - ((22 * winheight(0) + 27) / 55)
+let s:l = 122 - ((7 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 82
-normal! 010|
-wincmd w
-exe 'vert 1resize ' . ((&columns * 40 + 106) / 212)
-exe 'vert 2resize ' . ((&columns * 171 + 106) / 212)
+keepjumps 122
+normal! 037|
 tabnext
-edit ~/Documents/kody/rendering-reaktor/CMakeLists.txt
+edit ~/Documents/kody/rendering-reaktor/src2/App.cpp
 argglobal
-balt ~/Documents/kody/rendering-reaktor/build/imagine.c
+balt ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -112,39 +73,26 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 97 - ((31 * winheight(0) + 27) / 55)
+let s:l = 656 - ((48 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 97
-normal! 039|
-tabnext
-argglobal
-enew
-balt ~/Documents/kody/rendering-reaktor/CMakeLists.txt
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal nofoldenable
-tabnext 2
+keepjumps 656
+normal! 045|
+tabnext 3
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
 set winheight=1 winwidth=20
 let &shortmess = s:shortmess_save
-let &winminheight = s:save_winminheight
-let &winminwidth = s:save_winminwidth
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
 set hlsearch
+nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :
