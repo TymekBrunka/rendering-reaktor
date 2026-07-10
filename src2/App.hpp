@@ -112,10 +112,10 @@ public:
 private:
   void handle_object_selection();
   void render_color_scene();
-  bool load_app();
   bool read_data_txt(char* data_txt, size_t data_txt_len, AppMetadata* meta);
 
 public:
+  bool load_app(bool from_zip, const char* root);
   bool import_scene_zip(const char *fielpath);
   bool save();
 };

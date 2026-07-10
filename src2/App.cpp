@@ -73,7 +73,17 @@ bool App::initialise() {
 
   model_mgr.setup();
 
-  if (!load_app())
+  char rootdir[1024] = {0};
+  snprintf(rootdir, 1024,
+           "%s"
+#ifdef _WIN32
+           "\\"
+#else
+           "/"
+#endif
+           "%s",
+           home_dir, ".reaktory");
+  if (!load_app(false, rootdir))
     return false;
 
   Image icon_ = {

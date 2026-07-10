@@ -3,18 +3,21 @@
 #include <stdio.h>
 #include <zip.h>
 
-bool zip_loader_0_0_1(App *app, zip_t *za, zip_stat_t *stat, zip_error_t *error) {
+bool zip_loader_0_0_1(App *app, abstract_file *afile) {
   char *data = NULL;
   zip_source_t *data_src = NULL;
 
-  if (!strncmp(stat->name, "models/", sizeof("models/") - 1)) {
-    fprintf(stderr, "model -> %s\n", stat->name);
-    if (!alloc_read_file_from_zip(za, stat->index, &data, data_src, stat)) {
-      return false;
-    }
+  if (!strncmp(afile->path, "models/", sizeof("models/") - 1)) {
+    fprintf(stderr, "model -> %s\n", afile->path);
+    // if (!alloc_read_file_from_zip(za, stat->index, &data, data_src, stat)) {
+    //   return false;
+    // }
+
+    abstract_memory memory = abstract_file_read(afile);
+    abstract_memory_read_data(&memory);
 
     // size_t name_length = strlen(stat->name);
-    snprintf(formated_path, 1024, "%s%s%s", cwd_path, MODELS_DIR, &stat->name[sizeof("models/")-1]);
+    snprintf(formated_path, 1024, "%s%s%s", cwd_path, MODELS_DIR, &afile->path[sizeof("models/") - 1]);
 
     fprintf(stderr, "Saving to file %s\n", formated_path);
 
@@ -24,13 +27,12 @@ bool zip_loader_0_0_1(App *app, zip_t *za, zip_stat_t *stat, zip_error_t *error)
       return false;
     }
 
-    fwrite(data, 1, stat->size, file);
+    fwrite(memory.data, 1, memory.size, file);
     fclose(file);
 
     app->model_mgr.load_model(std::string{formated_path});
 
-    zip_source_free(data_src);
-    delete[] data;
+    abstract_memory_free(&memory);
   }
 
   return true;
