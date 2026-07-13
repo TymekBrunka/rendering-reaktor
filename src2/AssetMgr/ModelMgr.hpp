@@ -36,6 +36,7 @@ public:
 
 class ModelMgr {
 private:
+  bool owns_data = true;
   Texture2D placeholder_texture;
 
 public:
@@ -43,6 +44,8 @@ public:
 
   ModelMgr() = default;
   ~ModelMgr();
+  ModelMgr(ModelMgr &&other) noexcept;
+  ModelMgr &operator=(ModelMgr &&other) noexcept;
 
   void setup();
 

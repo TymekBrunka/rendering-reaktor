@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <yyjson.h>
 #include <zip.h>
 
 struct abstract_file {
@@ -33,7 +34,7 @@ abstract_memory abstract_file_read(abstract_file *afile);
 abstract_memory abstract_file_open_and_read(abstract_file *afile, const char *path);
 bool abstract_file_close(abstract_file *afile);
 bool abstract_file_write(abstract_file *afile, abstract_memory);
-bool abstract_file_make_real(abstract_file *afile);
+bool abstract_file_make_real(abstract_file *afile, abstract_memory *memory);
 
 #ifdef _WIN32
 #define SEP "\\"

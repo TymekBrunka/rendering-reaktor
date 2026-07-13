@@ -47,11 +47,15 @@ static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
 static bool useSnap(false);
 
 void App::select(int idx) {
-  selected_object = idx;
+  state.selected_object = idx;
   if (idx <= -1)
     return;
-  glm::mat4x4 rltransform = *(glm::mat4x4 *)&objects[selected_object].model_ref.model.transform;
+  glm::mat4x4 rltransform = *(glm::mat4x4 *)&state.objects[state.selected_object].model_ref.model.transform;
   selected_object_transform = glm::transpose(rltransform);
+}
+
+void SavableState::setup() {
+  model_mgr.setup();
 }
 
 bool App::initialise() {
@@ -71,7 +75,7 @@ bool App::initialise() {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(800, 600, "reaktory");
 
-  model_mgr.setup();
+  state.setup();
 
   char rootdir[1024] = {0};
   snprintf(rootdir, 1024,
@@ -188,7 +192,7 @@ void App::run() {
 
       if (models_to_load.size() > 0) {
         for (const auto &model : models_to_load) {
-          model_mgr.load_model(model);
+          state.model_mgr.load_model(model);
         }
         models_to_load.clear();
       }
@@ -299,7 +303,7 @@ void App::handle_object_selection() {
     return;
 
   if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-    std::cerr << "currently selected object #" << selected_object << "\n";
+    std::cerr << "currently selected object #" << state.selected_object << "\n";
     render_color_scene();
     Image pixels = LoadImageFromTexture(color_target.texture);
     unsigned char *pixel = &((unsigned char *)pixels.data)[(((pixels.height - GetMouseY()) * pixels.width) + GetMouseX()) * 4];
@@ -314,9 +318,9 @@ void App::handle_object_selection() {
     // clang-format on
 
     // change selected object if gizmo is not selected or no object is currently selected (so selecting ghost gizmo doesnt disallow selection)
-    if (selected_object == -1 || (!ImGuizmo::IsOver() && selected_object != -1))
+    if (state.selected_object == -1 || (!ImGuizmo::IsOver() && state.selected_object != -1))
       select(id - 1);
-    std::cerr << "currently selected object #" << selected_object << "\n";
+    std::cerr << "currently selected object #" << state.selected_object << "\n";
     std::cerr << "selected object #" << id - 1 << "\n";
     std::cerr << "\n";
     UnloadImage(pixels);
@@ -445,23 +449,23 @@ void App::panel_ui() {
     ImGui::PushFont(font1);
     int i = 0;
     float width_sum = 0;
-    for (const auto &[name, model] : model_mgr.models) {
+    for (const auto &[name, model] : state.model_mgr.models) {
       ImGui::BeginGroup();
       ImGui::PushID(i);
       if (ImGui::ImageButton("##preview", (ImTextureID)model.target.texture.id, ImVec2(75, 75), ImVec2(0, 1), ImVec2(1, 0))) {
-        ModelRef modelRef = model_mgr.take_model(name, objects.size());
-        objects.push_back({Transform{Vector3{0, 0, 0}, Quaternion{0, 0, 0, 0}, Vector3{1, 1, 1}}, std::move(modelRef)});
+        ModelRef modelRef = state.model_mgr.take_model(name, state.objects.size());
+        state.objects.push_back({Transform{Vector3{0, 0, 0}, Quaternion{0, 0, 0, 0}, Vector3{1, 1, 1}}, std::move(modelRef)});
       }
 
       ImGui::SetNextItemWidth(80);
       ImGui::LabelText("##name", name.c_str());
 
       if (ImGui::Button("usuń")) {
-        std::unordered_set<int> &objects_using_deleted_model = model_mgr.models[name].refs;
+        std::unordered_set<int> &objects_using_deleted_model = state.model_mgr.models[name].refs;
         for (int idx : objects_using_deleted_model) {
-          objects[idx] = {Transform{Vector3{0, 0, 0}, Quaternion{0, 0, 0, 0}, Vector3{1, 1, 1}}, model_mgr.take_model("default", idx)};
+          state.objects[idx] = {Transform{Vector3{0, 0, 0}, Quaternion{0, 0, 0, 0}, Vector3{1, 1, 1}}, state.model_mgr.take_model("default", idx)};
         }
-        model_mgr.unload_model(name);
+        state.model_mgr.unload_model(name);
 
         ImGui::PopID();
         ImGui::EndGroup();
@@ -493,8 +497,8 @@ void App::panel_ui() {
 
     int i = 0;
     ImGui::PushStyleColor(ImGuiCol_Button, ImU32(0x00000000));
-    for (const auto &object : objects) {
-      if (i == selected_object) {
+    for (const auto &object : state.objects) {
+      if (i == state.selected_object) {
         ImGui::PopStyleColor(1);
         ImGui::PushStyleColor(ImGuiCol_Button, active_button_bg);
       }
@@ -507,7 +511,7 @@ void App::panel_ui() {
       drawlist->AddImage((ImTextureRef)object.model_ref.texture_id, ImVec2(pos.x + 1, pos.y + 1), ImVec2(pos.x + 29, pos.y + 29), ImVec2(0, 1), ImVec2(1, 0));
       drawlist->AddText(ImVec2(pos.x + 30, pos.y + 5), IM_COL32_WHITE, formatted_text);
       ImGui::PopID();
-      if (i == selected_object) {
+      if (i == state.selected_object) {
         ImGui::PopStyleColor(1);
         ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
       }
@@ -518,8 +522,8 @@ void App::panel_ui() {
   ImGui::End();
 
   if (ImGui::Begin("Właściwości")) {
-    if (selected_object != -1) {
-      WorldObject &object = objects[selected_object];
+    if (state.selected_object != -1) {
+      WorldObject &object = state.objects[state.selected_object];
       ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(selected_object_transform), (float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale);
 
       float width = ImGui::GetWindowSize().x - (2 * ImGui::GetStyle().WindowPadding.x);
@@ -544,7 +548,7 @@ void App::render_color_scene() {
   BeginMode3D(camera);
   ClearBackground(BLANK);
   size_t i = 0;
-  for (const auto &object : objects) {
+  for (const auto &object : state.objects) {
     // clang-format off
     Vector4 id
     {
@@ -578,13 +582,13 @@ void App::render_scene() {
   rlEnableDepthMask();
 
   // DrawCube({-10, -15, -20}, 20, 30, 40, RED);
-  for (const auto &object : objects) {
+  for (const auto &object : state.objects) {
     DrawModel(object.model_ref.model, Vector3{0, 0, 0}, 1, WHITE);
   }
   EndMode3D();
 
-  if (selected_object != -1) {
-    WorldObject &object = objects[selected_object];
+  if (state.selected_object != -1) {
+    WorldObject &object = state.objects[state.selected_object];
     BoundingBox bb = object.model_ref.bounding_box;
     Vector3 size = Vector3{fabsf(bb.max.x - bb.min.x), fabsf(bb.max.y - bb.min.y), fabsf(bb.max.z - bb.min.z)};
     // clang-format off

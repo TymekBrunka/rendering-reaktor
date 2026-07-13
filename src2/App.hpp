@@ -1,12 +1,12 @@
 #pragma once
 #include "raylib.h"
 #include <cstdint>
+#include <glm/mat4x4.hpp>
 #include <imgui.h>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
-#include <glm/mat4x4.hpp>
 
 #include <AssetMgr/ModelMgr.hpp>
 
@@ -32,6 +32,15 @@ struct AppMetadata {
   int format_major, format_minor, format_patch;
 };
 
+struct SavableState {
+  int selected_object = -1;
+  // int new_obj_id = 0;
+  std::vector<WorldObject> objects;
+  ModelMgr model_mgr;
+
+  void setup();
+};
+
 #define MAX_SPEED 75.0f
 #define MAX_ACCEL 90.0f
 // Grounded drag
@@ -50,7 +59,6 @@ public:
 #endif
   bool use_snaping = false;
   bool is_local_space = true;
-  int selected_object = -1;
   int location_id = 0;
   float snap = 0.5;
 
@@ -60,7 +68,7 @@ public:
   Vector2 orientation = {0};
   Vector2 lean = {0};
 
-  Vector3 snapping = {0}; 
+  Vector3 snapping = {0};
   Camera camera = {0};
   struct {
     Texture2D icon;
@@ -81,19 +89,16 @@ public:
     Vector3 velocity = {0};
     Vector3 dir = {0};
   } body;
-  // std::vector<uint16_t> sparse_texture_list;
-  std::vector<Texture2D> static_textures;
-  std::vector<Gif> dynamic_textures;
-  std::vector<WorldObject> objects;
-  ModelMgr model_mgr;
-  // std::vector<Model> objects;
-  int new_obj_id = 0;
+  // std::vector<Texture2D> static_textures;
+  // std::vector<Gif> dynamic_textures;
 
   Model skybox;
   Model preview_box;
   std::vector<std::string> models_to_load;
 
   AppMetadata metadata;
+
+  SavableState state;
 
   App() = default;
   bool initialise();
@@ -112,10 +117,10 @@ public:
 private:
   void handle_object_selection();
   void render_color_scene();
-  bool read_data_txt(char* data_txt, size_t data_txt_len, AppMetadata* meta);
+  bool read_data_txt(char *data_txt, size_t data_txt_len, AppMetadata *meta);
 
 public:
-  bool load_app(bool from_zip, const char* root);
+  bool load_app(bool from_zip, const char *root);
   bool import_scene_zip(const char *fielpath);
   bool save();
 };

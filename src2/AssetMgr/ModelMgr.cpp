@@ -12,6 +12,10 @@ ModelRef::~ModelRef() {
     delete[] model.currentPose;
   if (model.boneMatrices != nullptr)
     delete[] model.boneMatrices;
+  if (model.materials != nullptr)
+    delete[] model.materials;
+  if (model.meshMaterial != nullptr)
+    delete[] model.meshMaterial;
 }
 
 ModelRef::ModelRef(const AnimatedModel &model_, const std::string &name) {
@@ -24,8 +28,12 @@ ModelRef::ModelRef(const AnimatedModel &model_, const std::string &name) {
   if (model.skeleton.boneCount > 0) {
     model.currentPose = new Transform[model_.model.skeleton.boneCount];
     model.boneMatrices = new Matrix[model_.model.skeleton.boneCount];
+    model.materials = new Material[model_.model.materialCount];
+    model.meshMaterial = new int[model_.model.meshCount];
     memcpy(model.currentPose, model_.model.currentPose, sizeof(Transform) * model_.model.skeleton.boneCount);
     memcpy(model.boneMatrices, model_.model.boneMatrices, sizeof(Matrix) * model_.model.skeleton.boneCount);
+    memcpy(model.materials, model_.model.materials, sizeof(Material) * model_.model.materialCount);
+    memcpy(model.meshMaterial, model_.model.meshMaterial, sizeof(int) * model_.model.meshCount);
   }
 }
 
@@ -39,8 +47,12 @@ ModelRef::ModelRef(const ModelRef &other) {
   if (other.model.skeleton.boneCount > 0) {
     model.currentPose = new Transform[other.model.skeleton.boneCount];
     model.boneMatrices = new Matrix[other.model.skeleton.boneCount];
+    model.materials = new Material[other.model.materialCount];
+    model.meshMaterial = new int[other.model.meshCount];
     memcpy(model.currentPose, other.model.currentPose, sizeof(Transform) * other.model.skeleton.boneCount);
     memcpy(model.boneMatrices, other.model.boneMatrices, sizeof(Matrix) * other.model.skeleton.boneCount);
+    memcpy(model.materials, other.model.materials, sizeof(Material) * other.model.materialCount);
+    memcpy(model.meshMaterial, other.model.meshMaterial, sizeof(int) * other.model.meshCount);
   }
 }
 
@@ -55,8 +67,12 @@ ModelRef &ModelRef::operator=(const ModelRef &other) {
     if (other.model.skeleton.boneCount > 0) {
       model.currentPose = new Transform[other.model.skeleton.boneCount];
       model.boneMatrices = new Matrix[other.model.skeleton.boneCount];
+      model.materials = new Material[other.model.materialCount];
+      model.meshMaterial = new int[other.model.meshCount];
       memcpy(model.currentPose, other.model.currentPose, sizeof(Transform) * other.model.skeleton.boneCount);
       memcpy(model.boneMatrices, other.model.boneMatrices, sizeof(Matrix) * other.model.skeleton.boneCount);
+      memcpy(model.materials, other.model.materials, sizeof(Material) * other.model.materialCount);
+      memcpy(model.meshMaterial, other.model.meshMaterial, sizeof(int) * other.model.meshCount);
     }
   }
   return *this;
@@ -71,8 +87,12 @@ ModelRef::ModelRef(ModelRef &&other) noexcept {
   name = other.name;
   model.currentPose = other.model.currentPose;
   model.boneMatrices = other.model.boneMatrices;
+  model.materials = other.model.materials;
+  model.meshMaterial = other.model.meshMaterial;
   other.model.currentPose = nullptr;
   other.model.boneMatrices = nullptr;
+  other.model.materials = nullptr;
+  other.model.meshMaterial = nullptr;
 }
 
 ModelRef &ModelRef::operator=(ModelRef &&other) noexcept {
@@ -85,8 +105,12 @@ ModelRef &ModelRef::operator=(ModelRef &&other) noexcept {
     name = other.name;
     model.currentPose = other.model.currentPose;
     model.boneMatrices = other.model.boneMatrices;
+    model.materials = other.model.materials;
+    model.meshMaterial = other.model.meshMaterial;
     other.model.currentPose = nullptr;
     other.model.boneMatrices = nullptr;
+    other.model.materials = nullptr;
+    other.model.meshMaterial = nullptr;
   }
   return *this;
 }
@@ -96,8 +120,9 @@ ModelRef &ModelRef::operator=(ModelRef &&other) noexcept {
 // }
 
 void ModelMgr::setup() {
+  owns_data = true;
   Image placeholder_ = {
-      .data = (void*)placeholder_png_pixels,
+      .data = (void *)placeholder_png_pixels,
       .width = placeholder_png_width,
       .height = placeholder_png_height,
       .mipmaps = 1,
@@ -114,12 +139,32 @@ void ModelMgr::setup() {
 }
 
 ModelMgr::~ModelMgr() {
+  if (!owns_data)
+    return;
+
   for (auto &[name, model] : models) {
     UnloadModelAnimations(model.animations, model.animations_count);
     UnloadModel(model.model);
   }
   // UnloadShader(shader);
   UnloadTexture(placeholder_texture);
+}
+
+ModelMgr::ModelMgr(ModelMgr &&other) noexcept {
+  placeholder_texture = other.placeholder_texture;
+  models = other.models;
+  owns_data = other.owns_data;
+  other.owns_data = false;
+}
+
+ModelMgr &ModelMgr::operator=(ModelMgr &&other) noexcept {
+  if (this != &other) {
+    placeholder_texture = other.placeholder_texture;
+    models = other.models;
+    owns_data = other.owns_data;
+    other.owns_data = false;
+  }
+  return *this;
 }
 
 void ModelMgr::unload_model(const std::string &name) {

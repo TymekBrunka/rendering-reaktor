@@ -1,9 +1,11 @@
 #include "zipconf.h"
 #include <App.hpp>
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <stdio.h>
+#include <yyjson.h>
 #include <zip.h>
 
 #include <dirent.h>
@@ -68,8 +70,9 @@ abstract_memory abstract_memory_create(bool is_raw, void *data, size_t size) {
 }
 
 bool abstract_memory_read_data(abstract_memory *memory) {
-  if (memory->data != NULL)
+  if (memory->data != NULL) {
     return true;
+  }
 
   if (memory->source == NULL)
     return false;
@@ -109,30 +112,18 @@ abstract_memory abstract_file_read(abstract_file *afile) {
   abstract_memory memory{0, NULL, NULL};
 
   if (afile->is_file) {
-    snprintf(formated_path_2, 1024, "%s" SEP "%s", cwd_path, afile->path);
-#ifdef _WIN32
-    for (char *c = formated_path_2; c != nullptr; c++)
-      if (*c == '/')
-        *c = '\\';
-#endif
-    FILE *input = fopen(formated_path_2, "rb");
-
-    if (!input) {
-      fprintf(stderr, "Couldn't open file %s\n", formated_path_2);
-      return memory;
-    }
-
-    if (fseek(input, 0, SEEK_END)) {
+    if (fseek(afile->u.file, 0, SEEK_END)) {
       fprintf(stderr, "fseek failed on file %s\n", formated_path_2);
       return memory;
     }
 
-    size_t filesize = ftell(input);
-    fseek(input, 0, SEEK_SET);
+    size_t filesize = ftell(afile->u.file);
+    fseek(afile->u.file, 0, SEEK_SET);
 
-    char *blob = new char[filesize];
-    fread(blob, filesize, 1, input);
-    fclose(input);
+    char *blob = new char[filesize + 1];
+    fread(blob, filesize, 1, afile->u.file);
+    blob[filesize] = '\0';
+    // fclose(input);
 
     memory = abstract_memory_create(true, blob, filesize);
     return memory;
@@ -140,13 +131,13 @@ abstract_memory abstract_file_read(abstract_file *afile) {
     zip_source_t *src = zip_source_zip_file(open_archive, open_archive, afile->u.stat.index, 0, 0, -1, NULL);
 
     if (src == NULL) {
-      // fprintf(stderr, "Cannot create source for 'data.txt' from zip archive\n");
+      // fprintf(stderr, "Cannot create source for '%s' from zip archive\n", afile->path);
       return memory;
     }
 
     if (afile->u.stat.name == NULL)
       if (zip_source_stat(src, &afile->u.stat) < 0) {
-        // fprintf(stderr, "Can't stat file 'data.txt' in zip archive : %s\n", zip_error_strerror(zip_source_error(src)));
+        // fprintf(stderr, "Can't stat file '%s' in zip archive : %s\n", afile->path, zip_error_strerror(zip_source_error(src)));
         zip_source_free(src);
         return memory;
       }
@@ -161,14 +152,32 @@ abstract_memory abstract_file_open_and_read(abstract_file *afile, const char *pa
   afile->path = (char *)path;
   abstract_memory memory{0, NULL, NULL};
 
-  if (!afile->is_file) {
+  if (afile->is_file) {
+    snprintf(formated_path_2, 1024, "%s" SEP "%s", cwd_path, afile->path);
+    fprintf(stderr, "%s\n", formated_path_2);
+#ifdef _WIN32
+    for (char *c = formated_path_2; *c != '\0'; c++)
+      if (*c == '/')
+        *c = '\\';
+#endif
+
+    FILE *input = fopen(formated_path_2, "rb");
+
+    if (!input) {
+      fprintf(stderr, "Couldn't open file %s for reading\n", formated_path_2);
+      return memory;
+    }
+    afile->u.file = input;
+
+  } else {
+
     zip_stat_t stat;
     zip_stat_init(&stat);
 
     zip_int64_t idx = zip_name_locate(open_archive, path, 0);
-    // fprintf(stderr, "data.txt found at idx == %lld\n", idx);
+    // fprintf(stderr, "%s found at idx == %lld\n", afile->path, idx);
     if (idx == -1) {
-      // fprintf(stderr, "Zip archive doesnt contain '%s'\n", path);;
+      // fprintf(stderr, "Zip archive doesnt contain '%s'\n", afile->path);;
       return memory;
     }
 
@@ -187,43 +196,38 @@ bool abstract_file_close(abstract_file *afile) {
   return true;
 }
 
-// bool alloc_read_file_from_zip(zip_t *za, zip_int64_t idx, char **data, zip_source_t *src, zip_stat_t *stat) {
-//   src = zip_source_zip_file(za, za, idx, 0, 0, -1, NULL);
-//   if (src == NULL) {
-//     fprintf(stderr, "Cannot create source for 'data.txt' from zip archive\n");
-//     return false;
-//   }
-//
-//   zip_stat_t stat_; // local variable to stat to when provided stat is NULL
-//   if (stat == NULL) {
-//     zip_stat_init(&stat_);
-//     stat = &stat_;
-//   }
-//
-//   if (stat->name == NULL)
-//     if (zip_source_stat(src, stat) < 0) {
-//       fprintf(stderr, "Can't stat file 'data.txt' in zip archive : %s\n", zip_error_strerror(zip_source_error(src)));
-//       zip_source_free(src);
-//       return false;
-//     }
-//
-//   if (zip_source_open(src) == -1) {
-//     fprintf(stderr, "Cannot open source for 'data.txt' from zip archive : %s\n", zip_error_strerror(zip_source_error(src)));
-//     zip_source_free(src);
-//     return false;
-//   }
-//
-//   *data = new char[stat->size + 1];
-//   if (zip_source_read(src, *data, stat->size) <= 0) {
-//     fprintf(stderr, "Cannot read contents of 'data.txt' from zip archive : %s\n", zip_error_strerror(zip_source_error(src)));
-//     zip_source_free(src);
-//     delete[] *data;
-//     return false;
-//   }
-//   (*data)[stat->size] = '\0';
-//
-//   return true;
-// }
+bool abstract_file_make_real(abstract_file *afile, abstract_memory *memory) {
+  snprintf(formated_path_2, 1024, "%s" SEP "%s", cwd_path, afile->path);
+#ifdef _WIN32
+  for (char *c = formated_path_2; *c != '\0'; c++)
+    if (*c == '/')
+      *c = '\\';
+#endif
+
+  if (afile->is_file) {
+    FILE *output = fopen(formated_path_2, "rb");
+    if (output) {
+      fclose(output);
+      return true;
+    }
+  }
+
+  if (!abstract_memory_read_data(memory)) {
+    // fprintf(stderr, "Couldnt read data from abstract memory\n");
+    return false;
+  }
+
+  FILE *output = fopen(formated_path_2, "wb");
+
+  if (!output) {
+    // fprintf(stderr, "Couldn't open file %s for writing\n", formated_path_2);
+    return false;
+  }
+
+  fwrite(memory->data, 1, memory->size, output);
+  fclose(output);
+  return true;
+}
 
 static bool parse_version(const char *reader, size_t line_length, int *major, int *minor, int *patch) {
   // if (line_length < 5) {
@@ -366,66 +370,7 @@ bool App::import_scene_zip(const char *filepath) {
   zerror = &error;
   snprintf(cwd_path, 1024, "%s" ROOTDIR TMPDIR, home_dir);
 
-  zip_stat_t stat;
-  zip_stat_init(&stat);
-
-  AppMetadata meta;
-  SCOPE("reading contents of data.txt") {
-
-    abstract_file data_txt_afile{false};
-    abstract_memory data_txt_mem = abstract_file_open_and_read(&data_txt_afile, "data.txt");
-    abstract_memory_read_data(&data_txt_mem);
-
-    if (!read_data_txt(data_txt_mem.data, data_txt_mem.size, &meta)) {
-      fprintf(stderr, "i need free\n");
-      abstract_memory_free(&data_txt_mem);
-      endzip();
-    }
-
-    abstract_memory_free(&data_txt_mem);
-  }
-
-  bool (*loader)(App *, abstract_file *) = NULL;
-
-  SCOPE("selecting proper loader") {
-
-    if (meta.format_major == 0) {
-      if (meta.format_minor == 0 && meta.format_patch == 1) {
-        loader = zip_loader_0_0_1;
-      }
-    }
-
-    if (loader == NULL) {
-      fprintf(stderr, "Couldnt find loader for format version %d.%d.%d\n", meta.format_major, meta.format_minor, meta.format_patch);
-      endzip();
-    }
-  }
-
-  SCOPE("reading from zip archive") {
-
-    num_of_entries = zip_get_num_entries(za, 0);
-    fprintf(stderr, "-- NUMBER OF ENTRIES: %llu\n", num_of_entries);
-    for (size_t i = 0; i < num_of_entries; i++) {
-
-      abstract_file afile{false};
-      if (zip_stat_index(za, i, 0, &afile.u.stat) < 0) {
-        fprintf(stderr, "Can't stat file %llu in zip archive : %s\n", i, zip_strerror(za));
-        continue;
-      }
-      afile.path = (char *)afile.u.stat.name;
-
-      if (!strcmp(afile.path, "data.txt"))
-        continue;
-
-      fprintf(stderr, "file: %s\n", stat.name);
-
-      if (!loader(this, &afile)) {
-        endzip();
-      }
-    }
-  }
-
-  metadata = meta;
+  load_app(true, cwd_path);
 
   zip_source_free(src);
   // delete[] blob;
@@ -447,12 +392,27 @@ bool App::import_scene_zip(const char *filepath) {
     fclose(tmpf);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     \
   }
 
+char *wstr2cstr(const void *wstr) {
+#ifdef _WIN32
+  size_t len = wcstombs(nullptr, (const wchar_t *)wstr, 0) + 1;
+  char *buffer = new char[len];
+  wcstombs(buffer, (const wchar_t *)wstr, len);
+#else
+  size_t len = strlen(wstr);
+  char *buffer = new char[len + 1];
+  memcpy(buffer, wstr, len);
+  buffer[len] = '\0';
+#endif
+  return buffer;
+}
+
 bool App::load_app(bool from_zip, const char *root) {
+  if (root != cwd_path)
+    snprintf(cwd_path, 1024, "%s", root);
+
   SCOPE("handle first launch / missing files") {
 
-    snprintf(cwd_path, 1024, "%s", root);
     bool is_first_time = false;
-
     is_first_time = mkdirIfNotExists("");
     mkdirIfNotExists("/models/");
     mkdirIfNotExists("/tmp/");
@@ -467,86 +427,185 @@ bool App::load_app(bool from_zip, const char *root) {
   zip_stat_t stat;
   zip_stat_init(&stat);
 
+  SavableState tmp_state;
+  tmp_state.setup();
+
   AppMetadata meta;
   SCOPE("reading contents of data.txt") {
 
     abstract_file data_txt_afile{!from_zip};
     abstract_memory data_txt_mem = abstract_file_open_and_read(&data_txt_afile, "data.txt");
-    abstract_memory_read_data(&data_txt_mem);
+    if (data_txt_mem.data == NULL && data_txt_mem.source == NULL) {
+      fprintf(stderr, "Couldn't open (abstract)file data.txt for reading\n");
+      return false;
+    }
+
+    if (!abstract_memory_read_data(&data_txt_mem)) {
+      fprintf(stderr, "Couldn't read data of (abstract)file data.txt\n");
+      abstract_memory_free(&data_txt_mem);
+      return false;
+    }
 
     if (!read_data_txt(data_txt_mem.data, data_txt_mem.size, &meta)) {
-      fprintf(stderr, "i need free\n");
       abstract_memory_free(&data_txt_mem);
-      endzip();
+      // endzip();
+      return false;
     }
 
     abstract_memory_free(&data_txt_mem);
   }
 
-  bool (*loader)(App *, abstract_file *) = NULL;
+  bool (*loader)(SavableState *, abstract_file *) = NULL;
 
   SCOPE("selecting proper loader") {
 
     if (meta.format_major == 0) {
       if (meta.format_minor == 0 && meta.format_patch == 1) {
-        loader = zip_loader_0_0_1;
+        loader = loader_0_0_1;
       }
     }
 
     if (loader == NULL) {
       fprintf(stderr, "Couldnt find loader for format version %d.%d.%d\n", meta.format_major, meta.format_minor, meta.format_patch);
-      endzip();
+      // endzip();
+      return false;
     }
+  }
+
+  bool (*scene_loader)(SavableState *, yyjson_val *) = NULL;
+
+  SCOPE("selecting proper scene loader") {
+
+    if (meta.format_major == 0) {
+      if (meta.format_minor == 0 && meta.format_patch == 1) {
+        scene_loader = scene_loader_0_0_1;
+      }
+    }
+
+    if (scene_loader == NULL) {
+      fprintf(stderr, "Couldnt find scene loader for format version %d.%d.%d\n", meta.format_major, meta.format_minor, meta.format_patch);
+      // endzip();
+      return false;
+    }
+  }
+  abstract_memory scene_json_mem;
+
+  SCOPE("reading contents of scene.json") {
+
+    abstract_file scene_json_afile{!from_zip};
+    scene_json_mem = abstract_file_open_and_read(&scene_json_afile, "scene.json");
+    if (scene_json_mem.data == NULL && scene_json_mem.source == NULL) {
+      fprintf(stderr, "Couldn't open (abstract)file scene.json for reading\n");
+      return false;
+    }
+
+    if (!abstract_memory_read_data(&scene_json_mem)) {
+      fprintf(stderr, "Couldn't read data of (abstract)file scene.json\n");
+      abstract_memory_free(&scene_json_mem);
+      return false;
+    }
+
+    fprintf(stderr, "Contents of 'scene.json':\n>>>>\n%s\n<<<<\n", scene_json_mem.data);
   }
 
   SCOPE("reading files") {
 
     if (from_zip) {
       // from zip
-      num_of_entries = zip_get_num_entries(open_archive, 0);
+      size_t num_of_entries = zip_get_num_entries(open_archive, 0);
       fprintf(stderr, "-- NUMBER OF ENTRIES: %llu\n", num_of_entries);
       for (size_t i = 0; i < num_of_entries; i++) {
 
         abstract_file afile{false};
-        if (zip_stat_index(za, i, 0, &afile.u.stat) < 0) {
-          fprintf(stderr, "Can't stat file %llu in zip archive : %s\n", i, zip_strerror(za));
+        if (zip_stat_index(open_archive, i, 0, &afile.u.stat) < 0) {
+          fprintf(stderr, "Can't stat file %llu in zip archive : %s\n", i, zip_strerror(open_archive));
           continue;
         }
         afile.path = (char *)afile.u.stat.name;
 
-        if (!strcmp(afile.path, "data.txt"))
+        if (!strcmp(afile.path, "data.txt") || !strcmp(afile.path, "scene.json") || !strcmp(afile.path, "data.xlsx"))
           continue;
 
-        fprintf(stderr, "file: %s\n", stat.name);
+        // fprintf(stderr, "file: %s\n", stat.name);
 
-        if (!loader(this, &afile)) {
-          endzip();
+        if (!loader(&tmp_state, &afile)) {
+          // endzip();
+          abstract_memory_free(&scene_json_mem);
+          return false;
         }
       }
     } else {
       // from files
+      size_t cwd_path_len = strlen(cwd_path);
       for (const auto &ent : std::filesystem::recursive_directory_iterator(cwd_path)) {
-        if (std::filesystem::is_regular_file(ent)) {
-          abstract_file afile{true, ent.c_str()};
-          if (!loader(this, &afile)) {
-            return false;
-          }
-        } else if (std::filesystem::is_symlink(ent)) {
-          auto path = ent;
-          while (std::filesystem::is_symlink(path)) {
-            path = std::filesystem::read_symlink(path);
-          }
-
-          abstract_file afile{true, path.c_str()};
-          if (!loader(this, &afile)) {
-            return false;
-          }
+        auto path = ent.path();
+        while (std::filesystem::is_symlink(path)) {
+          path = std::filesystem::read_symlink(path);
         }
+
+        char *c_path = wstr2cstr(ent.path().c_str()); // ent.path().c_str() doesnt return c string but os-specific type so on windows i have to convert it to regular c string
+
+        abstract_file afile{true, &c_path[cwd_path_len + 1]};
+        FILE *file = fopen(c_path, "rb");
+        if (file) {
+          fprintf(stderr, "Couldnt open file %s for reading\n", c_path);
+        }
+        // fix path for integrity with libzip
+#ifdef _WIN32
+        for (char *c = c_path; *c != '\0'; c++)
+          if (*c == '\\')
+            *c = '/';
+#endif
+
+        if (!strcmp(afile.path, "data.txt") || !strcmp(afile.path, "scene.json") || !strcmp(afile.path, "data.xlsx")) {
+          delete[] c_path;
+          continue;
+        }
+
+        // fprintf(stderr, "file: %s\n", &c_path[cwd_path_len+1]);
+
+        if (!loader(&tmp_state, &afile)) {
+          abstract_memory_free(&scene_json_mem);
+          delete[] c_path;
+          return false;
+        }
+        delete[] c_path;
       }
     }
   }
 
+  SCOPE("importing scene") {
+    yyjson_read_err err;
+    yyjson_doc *doc = yyjson_read_opts(scene_json_mem.data, scene_json_mem.size, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, 0, &err);
+    if (!doc) {
+      fprintf(stderr, "read error: %s, code: %u at byte position: %llu\n", err.msg, err.code, err.pos);
+      yyjson_doc_free(doc);
+      abstract_memory_free(&scene_json_mem);
+      return false;
+    }
+
+    yyjson_val* root_val = yyjson_doc_get_root(doc);
+    if (!root_val) {
+      fprintf(stderr, "failed to load scene data\n");
+      yyjson_doc_free(doc);
+      abstract_memory_free(&scene_json_mem);
+      return false;
+    }
+
+    if (!scene_loader(&tmp_state, root_val)) {
+      fprintf(stderr, "failed to load scene data\n");
+      yyjson_doc_free(doc);
+      abstract_memory_free(&scene_json_mem);
+      return false;
+    }
+
+    yyjson_doc_free(doc);
+  }
+
+  abstract_memory_free(&scene_json_mem);
+
   metadata = meta;
+  state = std::move(tmp_state);
 
   return true;
 }
