@@ -70,6 +70,9 @@ imgpack_(
     assets/images/icon.png
 )
 
+add_library(pch pch.hpp pch.cpp)
+target_precompile_headers(pch PUBLIC pch.hpp)
+
 add_library(imgui_assets src2/embeded/imgui_assets.cpp)
 target_include_directories(imgui_assets PRIVATE src2 PUBLIC src2/embeded)
 
@@ -79,6 +82,7 @@ add_library(ModelMgr
 )
 target_include_directories(ModelMgr PRIVATE src2/AssetMgr)
 target_link_libraries(ModelMgr PUBLIC raylib PRIVATE images)
+target_precompile_headers(ModelMgr REUSE_FROM pch)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
   add_executable(main WIN32 src2/main.cpp src2/App.cpp src2/App.hpp src2/SaveLoad/SaveMod.cpp)
@@ -133,6 +137,7 @@ target_link_libraries(main
 
   ModelMgr
 )
+target_precompile_headers(main REUSE_FROM pch)
 
 target_include_directories(main PRIVATE src2)
 

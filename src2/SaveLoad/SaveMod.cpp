@@ -398,7 +398,7 @@ char *wstr2cstr(const void *wstr) {
   char *buffer = new char[len];
   wcstombs(buffer, (const wchar_t *)wstr, len);
 #else
-  size_t len = strlen(wstr);
+  size_t len = strlen((const char *)wstr);
   char *buffer = new char[len + 1];
   memcpy(buffer, wstr, len);
   buffer[len] = '\0';
@@ -584,7 +584,7 @@ bool App::load_app(bool from_zip, const char *root) {
       return false;
     }
 
-    yyjson_val* root_val = yyjson_doc_get_root(doc);
+    yyjson_val *root_val = yyjson_doc_get_root(doc);
     if (!root_val) {
       fprintf(stderr, "failed to load scene data\n");
       yyjson_doc_free(doc);
