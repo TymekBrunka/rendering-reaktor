@@ -54,9 +54,7 @@ void App::select(int idx) {
   selected_object_transform = glm::transpose(rltransform);
 }
 
-void SavableState::setup() {
-  model_mgr.setup();
-}
+void SavableState::setup() { model_mgr.setup(); }
 
 bool App::initialise() {
 #ifdef _WIN32
@@ -85,10 +83,18 @@ bool App::initialise() {
 #else
            "/"
 #endif
-           "%s",
+           "%s"
+#ifdef _WIN32
+           "\\"
+#else
+           "/"
+#endif
+           ,
            home_dir, ".reaktory");
-  if (!load_app(false, rootdir))
+  if (!load_app(false, rootdir)) {
+    std::cerr << "failed to load app\n";
     return false;
+  }
 
   Image icon_ = {
       .data = (void *)icon_png_pixels,
@@ -368,7 +374,12 @@ PanelIcon panel_icons[] = {
        SDL_ShowOpenFileDialog(load_zip_callback, NULL, nullptr, ofd_filters, 2, NULL, false);
      }},
 
-    {3, "zapisz", [](App *app) {}},
+    {3, "zapisz",
+     [](App *app) {
+       if (!app->save_app()) {
+         std::cerr << "failed to save app\n";
+       }
+     }},
 
     {5, "model",
      [](App *app) {

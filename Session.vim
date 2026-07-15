@@ -12,15 +12,18 @@ set shortmess+=aoO
 badd +115 ~/Documents/rendering-reaktor/src2/BuildTools/bytepack.c
 badd +101 ~/Documents/rendering-reaktor/src2/BuildTools/imgpack.c
 badd +586 ~/Documents/rendering-reaktor/src2/App.cpp
-badd +16 ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
+badd +122 ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
 badd +14 ~/Documents/rendering-reaktor/src2/App.hpp
 badd +58 ~/Documents/rendering-reaktor/CMakeLists.txt
-badd +521 ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
+badd +588 ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
 badd +1 ~/Documents/rendering-reaktor/assets/images/skybox.png
-badd +17 ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
-badd +36 ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
+badd +25 ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
+badd +37 ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
 badd +16 ~/Documents/rendering-reaktor/src2/main.cpp
-badd +3935 ~/cacheCPM/raylib/c846/src/rmodels.c
+badd +3934 ~/cacheCPM/raylib/c846/src/rmodels.c
+badd +1 [dap-repl-153]
+badd +0 [dap-terminal]\ LLDB:\ Launch
+badd +39 ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
 argglobal
 %argdel
 tabnew +setlocal\ bufhidden=wipe
@@ -28,34 +31,9 @@ tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabrewind
-edit ~/cacheCPM/raylib/c846/src/rmodels.c
-let s:save_splitbelow = &splitbelow
-let s:save_splitright = &splitright
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd _ | wincmd |
-vsplit
-1wincmd h
-wincmd w
-let &splitbelow = s:save_splitbelow
-let &splitright = s:save_splitright
-wincmd t
-let s:save_winminheight = &winminheight
-let s:save_winminwidth = &winminwidth
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe '1resize ' . ((&lines * 48 + 31) / 62)
-exe '2resize ' . ((&lines * 10 + 31) / 62)
-exe 'vert 2resize ' . ((&columns * 181 + 120) / 240)
-exe '3resize ' . ((&lines * 10 + 31) / 62)
-exe 'vert 3resize ' . ((&columns * 58 + 120) / 240)
+edit ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
 argglobal
-balt ~/Documents/rendering-reaktor/src2/App.cpp
+balt ~/cacheCPM/raylib/c846/src/rmodels.c
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -66,51 +44,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 3934 - ((22 * winheight(0) + 24) / 48)
+let s:l = 175 - ((53 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 3934
-normal! 018|
-wincmd w
-argglobal
-enew
-file [dap-repl-153]
-balt ~/Documents/rendering-reaktor/src2/App.hpp
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-wincmd w
-argglobal
-if bufexists(fnamemodify("[dap-terminal]\ LLDB:\ Launch", ":p")) | buffer [dap-terminal]\ LLDB:\ Launch | else | edit [dap-terminal]\ LLDB:\ Launch | endif
-if &buftype ==# 'terminal'
-  silent file [dap-terminal]\ LLDB:\ Launch
-endif
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-let s:l = 1 - ((0 * winheight(0) + 5) / 10)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 1
-normal! 0
-wincmd w
-exe '1resize ' . ((&lines * 48 + 31) / 62)
-exe '2resize ' . ((&lines * 10 + 31) / 62)
-exe 'vert 2resize ' . ((&columns * 181 + 120) / 240)
-exe '3resize ' . ((&lines * 10 + 31) / 62)
-exe 'vert 3resize ' . ((&columns * 58 + 120) / 240)
+keepjumps 175
+normal! 03|
 tabnext
 edit ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
 argglobal
@@ -125,16 +64,16 @@ setlocal foldnestmax=20
 setlocal nofoldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 521 - ((55 * winheight(0) + 29) / 59)
+let s:l = 550 - ((0 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 521
+keepjumps 550
 normal! 019|
 tabnext
-edit ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
+edit ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
 argglobal
-balt ~/cacheCPM/raylib/c846/src/rmodels.c
+balt ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -145,16 +84,43 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 29) / 59)
+let s:l = 39 - ((38 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 1
-normal! 019|
+keepjumps 39
+normal! 023|
+tabnext
+edit ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
+argglobal
+balt ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 4 - ((3 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 4
+normal! 016|
 tabnext
 edit ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
+wincmd t
+let s:save_winminheight = &winminheight
+let s:save_winminwidth = &winminwidth
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 argglobal
-balt ~/Documents/rendering-reaktor/src2/App.hpp
+balt ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -165,33 +131,13 @@ setlocal foldnestmax=20
 setlocal nofoldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 17 - ((16 * winheight(0) + 29) / 59)
+let s:l = 25 - ((24 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 17
-normal! 017|
-tabnext
-edit ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
-argglobal
-balt ~/Documents/rendering-reaktor/src2/main.cpp
-setlocal foldmethod=manual
-setlocal foldexpr=0
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 110 - ((15 * winheight(0) + 29) / 59)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 110
-normal! 0
-tabnext 1
+keepjumps 25
+normal! 055|
+tabnext 5
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif

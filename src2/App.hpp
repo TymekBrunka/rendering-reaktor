@@ -35,8 +35,8 @@ struct AppMetadata {
 struct SavableState {
   int selected_object = -1;
   // int new_obj_id = 0;
-  std::vector<WorldObject> objects;
   ModelMgr model_mgr;
+  std::vector<WorldObject> objects;
 
   void setup();
 };
@@ -122,5 +122,5 @@ private:
 public:
   bool load_app(bool from_zip, const char *root);
   bool import_scene_zip(const char *fielpath);
-  bool save();
+  bool save_app();
 };

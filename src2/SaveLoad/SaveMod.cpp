@@ -19,33 +19,32 @@ char *home_dir = NULL;
 char cwd_path[1024] = {0};
 char formated_path[1024] = {0};
 char formated_path_2[1024] = {0}; // updates more frequently, used internally in abstract_file functions
+char c_path[1024] = {0};
 
 zip_t *open_archive;
 zip_error_t *zerror;
 
 #include "Format_0_0_1.cpp"
 
-#define SCOPE(__VA_ARGS__)
+#define SCOPE(...)
 
-#define endzip()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      \
-  zip_source_free(src);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               \
-  delete[] blob;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      \
-  zip_error_fini(&error);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             \
-  return false;
-
-#define if_field_is(x)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                \
-  if (reader + sizeof((x)) - 1 <= reader_end + 1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     \
-    if (!strncmp(reader, (x), sizeof((x)) - 1))
-
-bool mkdirIfNotExists(const char *x) {
-  snprintf(formated_path, 1024, "%s/%s", cwd_path, (x));
-  DIR *dir = opendir(formated_path);
-  if (dir)
-    closedir(dir);
-  else if (errno == ENOENT) {
-    std::filesystem::create_directory(formated_path);
+bool json_get_vector3(yyjson_val *val, float *x, float *y, float *z) {
+  if (!yyjson_is_arr(val))
     return false;
-  }
+
+  if (yyjson_arr_size(val) != 3)
+    return false;
+
+  yyjson_val *x_val = yyjson_arr_get(val, 0);
+  yyjson_val *y_val = yyjson_arr_get(val, 1);
+  yyjson_val *z_val = yyjson_arr_get(val, 2);
+
+  if (!yyjson_is_num(x_val) || !yyjson_is_num(y_val) || !yyjson_is_num(z_val))
+    return false;
+
+  *x = (float)yyjson_get_num(x_val);
+  *y = (float)yyjson_get_num(y_val);
+  *z = (float)yyjson_get_num(z_val);
   return true;
 }
 
@@ -255,6 +254,10 @@ static bool parse_version(const char *reader, size_t line_length, int *major, in
   return true;
 }
 
+#define if_field_is(x)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                \
+  if (reader + sizeof((x)) - 1 <= reader_end + 1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     \
+    if (!strncmp(reader, (x), sizeof((x)) - 1))
+
 bool App::read_data_txt(char *data_txt, size_t data_txt_len, AppMetadata *meta) {
   bool possibly_had_lost_its_files = false;
 
@@ -309,6 +312,12 @@ bool App::read_data_txt(char *data_txt, size_t data_txt_len, AppMetadata *meta) 
 
   return true;
 }
+
+#define endzip()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      \
+  zip_source_free(src);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               \
+  delete[] blob;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      \
+  zip_error_fini(&error);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             \
+  return false;
 
 bool App::import_scene_zip(const char *filepath) {
   FILE *input;
@@ -392,18 +401,30 @@ bool App::import_scene_zip(const char *filepath) {
     fclose(tmpf);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     \
   }
 
-char *wstr2cstr(const void *wstr) {
+bool mkdirIfNotExists(const char *x) {
+  snprintf(formated_path, 1024, "%s/%s", cwd_path, (x));
+  DIR *dir = opendir(formated_path);
+  if (dir)
+    closedir(dir);
+  else if (errno == ENOENT) {
+    std::filesystem::create_directory(formated_path);
+    return false;
+  }
+  return true;
+}
+
+void wstr2cstr(const void *wstr) {
 #ifdef _WIN32
   size_t len = wcstombs(nullptr, (const wchar_t *)wstr, 0) + 1;
-  char *buffer = new char[len];
-  wcstombs(buffer, (const wchar_t *)wstr, len);
+  // char *buffer = new char[len];
+  memset(c_path, 0, 1024);
+  wcstombs(c_path, (const wchar_t *)wstr, len);
 #else
   size_t len = strlen((const char *)wstr);
-  char *buffer = new char[len + 1];
-  memcpy(buffer, wstr, len);
-  buffer[len] = '\0';
+  // char *buffer = new char[len + 1];
+  memcpy(c_path, wstr, len);
+  c_path[len] = '\0';
 #endif
-  return buffer;
 }
 
 bool App::load_app(bool from_zip, const char *root) {
@@ -455,7 +476,7 @@ bool App::load_app(bool from_zip, const char *root) {
     abstract_memory_free(&data_txt_mem);
   }
 
-  bool (*loader)(SavableState *, abstract_file *) = NULL;
+  bool (*loader)(SavableState *, AppMetadata *, abstract_file *) = NULL;
 
   SCOPE("selecting proper loader") {
 
@@ -472,7 +493,7 @@ bool App::load_app(bool from_zip, const char *root) {
     }
   }
 
-  bool (*scene_loader)(SavableState *, yyjson_val *) = NULL;
+  bool (*scene_loader)(SavableState *, AppMetadata *, yyjson_val *) = NULL;
 
   SCOPE("selecting proper scene loader") {
 
@@ -526,9 +547,9 @@ bool App::load_app(bool from_zip, const char *root) {
         if (!strcmp(afile.path, "data.txt") || !strcmp(afile.path, "scene.json") || !strcmp(afile.path, "data.xlsx"))
           continue;
 
-        // fprintf(stderr, "file: %s\n", stat.name);
+        fprintf(stderr, "file: %s\n", stat.name);
 
-        if (!loader(&tmp_state, &afile)) {
+        if (!loader(&tmp_state, &meta, &afile)) {
           // endzip();
           abstract_memory_free(&scene_json_mem);
           return false;
@@ -538,38 +559,36 @@ bool App::load_app(bool from_zip, const char *root) {
       // from files
       size_t cwd_path_len = strlen(cwd_path);
       for (const auto &ent : std::filesystem::recursive_directory_iterator(cwd_path)) {
-        auto path = ent.path();
-        while (std::filesystem::is_symlink(path)) {
-          path = std::filesystem::read_symlink(path);
-        }
+        if (std::filesystem::is_regular_file(ent.path())) {
+          wstr2cstr(ent.path().c_str()); // ent.path().c_str() doesnt return c string but os-specific type so on windows i have to convert it to regular c string
 
-        char *c_path = wstr2cstr(ent.path().c_str()); // ent.path().c_str() doesnt return c string but os-specific type so on windows i have to convert it to regular c string
-
-        abstract_file afile{true, &c_path[cwd_path_len + 1]};
-        FILE *file = fopen(c_path, "rb");
-        if (file) {
-          fprintf(stderr, "Couldnt open file %s for reading\n", c_path);
-        }
-        // fix path for integrity with libzip
+          abstract_file afile{true, &c_path[cwd_path_len]};
+          FILE *file = fopen(c_path, "rb");
+          if (!file) {
+            fprintf(stderr, "Couldnt open file %s for reading\n", c_path);
+            return false;
+          }
+          // fix path for integrity with libzip
 #ifdef _WIN32
-        for (char *c = c_path; *c != '\0'; c++)
-          if (*c == '\\')
-            *c = '/';
+          for (char *c = &c_path[cwd_path_len]; *c != '\0'; c++)
+            if (*c == '\\')
+              *c = '/';
 #endif
 
-        if (!strcmp(afile.path, "data.txt") || !strcmp(afile.path, "scene.json") || !strcmp(afile.path, "data.xlsx")) {
-          delete[] c_path;
-          continue;
-        }
+          if (!strcmp(afile.path, "data.txt") || !strcmp(afile.path, "scene.json") || !strcmp(afile.path, "data.xlsx")) {
+            // delete[] c_path;
+            continue;
+          }
 
-        // fprintf(stderr, "file: %s\n", &c_path[cwd_path_len+1]);
+          fprintf(stderr, "file: %s\n", &c_path[cwd_path_len]);
 
-        if (!loader(&tmp_state, &afile)) {
-          abstract_memory_free(&scene_json_mem);
-          delete[] c_path;
-          return false;
+          if (!loader(&tmp_state, &meta, &afile)) {
+            abstract_memory_free(&scene_json_mem);
+            // delete[] c_path;
+            return false;
+          }
+          // delete[] c_path;
         }
-        delete[] c_path;
       }
     }
   }
@@ -592,7 +611,7 @@ bool App::load_app(bool from_zip, const char *root) {
       return false;
     }
 
-    if (!scene_loader(&tmp_state, root_val)) {
+    if (!scene_loader(&tmp_state, &meta, root_val)) {
       fprintf(stderr, "failed to load scene data\n");
       yyjson_doc_free(doc);
       abstract_memory_free(&scene_json_mem);
@@ -606,6 +625,84 @@ bool App::load_app(bool from_zip, const char *root) {
 
   metadata = meta;
   state = std::move(tmp_state);
+
+  return true;
+}
+
+bool App::save_app() {
+  SCOPE("copy files to root") {
+    size_t cwd_path_len = strlen(cwd_path);
+    snprintf(formated_path, 1024, "%s" ROOTDIR, home_dir);
+    if (memcmp(cwd_path, formated_path, 1024)) {
+      for (const auto &ent : std::filesystem::recursive_directory_iterator(cwd_path)) { // cwd_path/tmp
+        wstr2cstr(ent.path().c_str()); // ent.path().c_str() doesnt return c string but os-specific type so on windows i have to convert it to regular c string
+        snprintf(formated_path, 1024, "%s" ROOTDIR "%s", home_dir, &c_path[cwd_path_len]);
+        fprintf(stderr, "fmt pth: %s\n", formated_path);
+        fprintf(stderr, "cwd_path: %s\n", cwd_path);
+        fprintf(stderr, "cpath pth: %s\n", &c_path[cwd_path_len]);
+        // std::filesystem::rename(ent.path(), formated_path);
+        if (std::filesystem::is_directory(ent.path())) {
+          DIR *dir = opendir(formated_path);
+          if (dir)
+            closedir(dir);
+          else if (errno == ENOENT) {
+            std::filesystem::create_directory(formated_path);
+          }
+        }
+        if (std::filesystem::is_regular_file(ent.path())) {
+          FILE* input = fopen(c_path, "rb");
+          
+          if (!input) {
+            fprintf(stderr, "Couldn't open file %s for reading\n", c_path);
+            return false;
+          }
+
+          if (fseek(input, 0, SEEK_END)) {
+            fprintf(stderr, "fseek failed on file %s\n", c_path);
+            return false;
+          }
+
+          size_t filesize = ftell(input);
+          fseek(input, 0, SEEK_SET);
+
+          char* blob = new char[filesize];
+          fread(blob, filesize, 1, input);
+          fclose(input);
+
+          FILE* output = fopen(formated_path, "wb");
+
+          if (!output) {
+            fprintf(stderr, "Couldn't open file %s for writing\n", formated_path);
+            return false;
+          }
+
+          fwrite(blob, 1, filesize, output);
+          fclose(output);
+        }
+      }
+    } 
+  }
+
+  snprintf(formated_path, 1024, "%s" ROOTDIR "data.txt", home_dir);
+  FILE* data_txt = fopen(formated_path, "wb");
+
+  if (!data_txt) {
+    fprintf(stderr, "Couldn't open file %s for writing\n", formated_path);
+  }
+  fwrite(data_txt_data, 1, data_txt_size, data_txt);
+  fclose(data_txt);
+
+  SCOPE("saving scene") {
+    yyjson_mut_doc *doc = yyjson_mut_doc_new(NULL);
+    yyjson_mut_val *root = yyjson_mut_obj(doc);
+    yyjson_mut_doc_set_root(doc, root);
+
+    yyjson_mut_val *objects_val = yyjson_mut_obj_add_arr(doc, root, "objects");
+    for (const auto& object : state.objects) {
+      yyjson_mut_val *object_val = yyjson_mut_arr_add_obj(doc, objects_val);
+      yyjson_mut_obj_add_str(doc, object_val, "model", object.model_ref.name.c_str());
+    }
+  }
 
   return true;
 }
