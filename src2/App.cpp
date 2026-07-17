@@ -51,7 +51,7 @@ void App::select(int idx) {
   if (idx <= -1)
     return;
   glm::mat4x4 rltransform = *(glm::mat4x4 *)&state.objects[state.selected_object].model_ref.model.transform;
-  selected_object_transform = glm::transpose(rltransform);
+  state.selected_object_transform = glm::transpose(rltransform);
 }
 
 void SavableState::setup() { model_mgr.setup(); }
@@ -554,7 +554,7 @@ void App::panel_ui() {
       WorldObject &object = state.objects[state.selected_object];
       ImGui::Text("Model: %s", object.model_ref.name.c_str());
 
-      ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(selected_object_transform), (float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale);
+      ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(state.selected_object_transform), (float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale);
 
       float width = ImGui::GetWindowSize().x - (2 * ImGui::GetStyle().WindowPadding.x);
       ImGui::TextUnformatted("pozycja");
@@ -567,7 +567,7 @@ void App::panel_ui() {
       ImGui::SetNextItemWidth(width);
       ImGui::DragFloat3("##scale", (float *)&object.transform.scale, snap, 0, 0, "%.2f");
 
-      ImGuizmo::RecomposeMatrixFromComponents((float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale, glm::value_ptr(selected_object_transform));
+      ImGuizmo::RecomposeMatrixFromComponents((float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale, glm::value_ptr(state.selected_object_transform));
     }
   }
   ImGui::End();
@@ -680,8 +680,8 @@ void App::render_scene() {
     // clang-format on
 
     // because of different matrix spec i transpose matrix back and forth (otherwise it skews instead of moving object)
-    ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(selected_object_transform), NULL, use_snaping ? (float *)&snapping : NULL);
-    glm::mat4x4 rltransform = glm::transpose(selected_object_transform);
+    ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(state.selected_object_transform), NULL, use_snaping ? (float *)&snapping : NULL);
+    glm::mat4x4 rltransform = glm::transpose(state.selected_object_transform);
     object.model_ref.model.transform = *(Matrix *)&rltransform;
   }
 

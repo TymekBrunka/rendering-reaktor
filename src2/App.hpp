@@ -35,6 +35,7 @@ struct AppMetadata {
 struct SavableState {
   int selected_object = -1;
   // int new_obj_id = 0;
+  glm::mat4x4 selected_object_transform;
   ModelMgr model_mgr;
   std::vector<WorldObject> objects;
 
@@ -83,7 +84,6 @@ private:
   RenderTexture object_selection_target;
 
 public:
-  glm::mat4x4 selected_object_transform;
   struct {
     Vector3 position = {0};
     Vector3 velocity = {0};
