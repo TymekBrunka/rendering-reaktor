@@ -145,6 +145,7 @@ ModelMgr::~ModelMgr() {
   for (auto &[name, model] : models) {
     UnloadModelAnimations(model.animations, model.animations_count);
     UnloadModel(model.model);
+    std::cerr << "Unloaded model: " << name << " (destruction)\n";
   }
   // UnloadShader(shader);
   UnloadTexture(placeholder_texture);
@@ -178,6 +179,7 @@ void ModelMgr::unload_model(const std::string &name) {
       UnloadModelAnimations(model.animations, model.animations_count);
     UnloadModel(model.model);
     UnloadRenderTexture(model.target);
+    std::cerr << "Unloaded model: " << name << "\n";
     models.erase(idx);
   }
 }
@@ -227,7 +229,8 @@ bool ModelMgr::load_model(const std::string &filepath) {
 
   char *name_ = new char[filepath.size() - start + 1];
   memcpy(name_, &filepath[start + 1], filepath.size() - start);
-  std::string name{(const char *)name_, size_t(filepath.size() - start)};
+  // std::string name{(const char *)name_, size_t(filepath.size() - start)};
+  std::string name{(const char *)name_};
   delete[] name_;
 
   AnimatedModel model{
@@ -236,7 +239,7 @@ bool ModelMgr::load_model(const std::string &filepath) {
       .model = LoadModel(filepath.c_str()),
   };
 
-  if (!IsModelValid(model.model) && strncmp(&name[name.size() - 5], ".m3d", 4)) // if model is invalid and is not m3d model (raylib flags fully loaded m3d model as invalid at the time of writing this)
+  if (!IsModelValid(model.model) && strncmp(&name[name.size() - 4], ".m3d", 4)) // if model is invalid and is not m3d model (raylib flags fully loaded m3d model as invalid at the time of writing this)
     return false;
 
   model.animations = LoadModelAnimations(filepath.c_str(), &model.animations_count);
@@ -250,6 +253,7 @@ bool ModelMgr::load_model(const std::string &filepath) {
   util_get_model_preview(model.model, model.target, &model.bounding_box);
 
   models[name] = model;
+  std::cerr << "Loaded new model: " << name << "\n";
   return true;
 }
 

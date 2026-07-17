@@ -1,3 +1,4 @@
+#include "raylib.h"
 #include "zipconf.h"
 #include <App.hpp>
 #include <cstddef>
@@ -46,6 +47,12 @@ bool json_get_vector3(yyjson_val *val, float *x, float *y, float *z) {
   *y = (float)yyjson_get_num(y_val);
   *z = (float)yyjson_get_num(z_val);
   return true;
+}
+
+void json_set_vector3(yyjson_mut_doc *doc, yyjson_mut_val *arr, float x, float y, float z) {
+  yyjson_mut_arr_add_float(doc, arr, x);
+  yyjson_mut_arr_add_float(doc, arr, y);
+  yyjson_mut_arr_add_float(doc, arr, z);
 }
 
 abstract_memory abstract_memory_create(bool is_raw, void *data, size_t size) {
@@ -152,7 +159,7 @@ abstract_memory abstract_file_open_and_read(abstract_file *afile, const char *pa
   abstract_memory memory{0, NULL, NULL};
 
   if (afile->is_file) {
-    snprintf(formated_path_2, 1024, "%s" SEP "%s", cwd_path, afile->path);
+    snprintf(formated_path_2, 1024, "%s%s", cwd_path, afile->path);
     fprintf(stderr, "%s\n", formated_path_2);
 #ifdef _WIN32
     for (char *c = formated_path_2; *c != '\0'; c++)
@@ -196,7 +203,7 @@ bool abstract_file_close(abstract_file *afile) {
 }
 
 bool abstract_file_make_real(abstract_file *afile, abstract_memory *memory) {
-  snprintf(formated_path_2, 1024, "%s" SEP "%s", cwd_path, afile->path);
+  snprintf(formated_path_2, 1024, "%s%s", cwd_path, afile->path);
 #ifdef _WIN32
   for (char *c = formated_path_2; *c != '\0'; c++)
     if (*c == '/')
@@ -443,6 +450,7 @@ bool App::load_app(bool from_zip, const char *root) {
     makeFileIfNotExists("scene.json", scene_json_data, scene_json_size);
     makeFileIfNotExists("data.txt", data_txt_data, data_txt_size);
     makeFileIfNotExists("data.xlsx", data_xlsx_data, data_xlsx_size);
+    makeFileIfNotExists("skybox.png", skybox_png_data, skybox_png_size);
   }
 
   zip_stat_t stat;
@@ -543,6 +551,7 @@ bool App::load_app(bool from_zip, const char *root) {
           continue;
         }
         afile.path = (char *)afile.u.stat.name;
+        afile.u.stat = stat;
 
         if (!strcmp(afile.path, "data.txt") || !strcmp(afile.path, "scene.json") || !strcmp(afile.path, "data.xlsx"))
           continue;
@@ -568,6 +577,8 @@ bool App::load_app(bool from_zip, const char *root) {
             fprintf(stderr, "Couldnt open file %s for reading\n", c_path);
             return false;
           }
+          afile.u.file = file;
+          snprintf(formated_path_2, 1024, "%s", c_path);
           // fix path for integrity with libzip
 #ifdef _WIN32
           for (char *c = &c_path[cwd_path_len]; *c != '\0'; c++)
@@ -631,11 +642,12 @@ bool App::load_app(bool from_zip, const char *root) {
 
 bool App::save_app() {
   SCOPE("copy files to root") {
+
     size_t cwd_path_len = strlen(cwd_path);
     snprintf(formated_path, 1024, "%s" ROOTDIR, home_dir);
     if (memcmp(cwd_path, formated_path, 1024)) {
       for (const auto &ent : std::filesystem::recursive_directory_iterator(cwd_path)) { // cwd_path/tmp
-        wstr2cstr(ent.path().c_str()); // ent.path().c_str() doesnt return c string but os-specific type so on windows i have to convert it to regular c string
+        wstr2cstr(ent.path().c_str());                                                  // ent.path().c_str() doesnt return c string but os-specific type so on windows i have to convert it to regular c string
         snprintf(formated_path, 1024, "%s" ROOTDIR "%s", home_dir, &c_path[cwd_path_len]);
         fprintf(stderr, "fmt pth: %s\n", formated_path);
         fprintf(stderr, "cwd_path: %s\n", cwd_path);
@@ -650,8 +662,8 @@ bool App::save_app() {
           }
         }
         if (std::filesystem::is_regular_file(ent.path())) {
-          FILE* input = fopen(c_path, "rb");
-          
+          FILE *input = fopen(c_path, "rb");
+
           if (!input) {
             fprintf(stderr, "Couldn't open file %s for reading\n", c_path);
             return false;
@@ -665,11 +677,11 @@ bool App::save_app() {
           size_t filesize = ftell(input);
           fseek(input, 0, SEEK_SET);
 
-          char* blob = new char[filesize];
+          char *blob = new char[filesize];
           fread(blob, filesize, 1, input);
           fclose(input);
 
-          FILE* output = fopen(formated_path, "wb");
+          FILE *output = fopen(formated_path, "wb");
 
           if (!output) {
             fprintf(stderr, "Couldn't open file %s for writing\n", formated_path);
@@ -680,11 +692,11 @@ bool App::save_app() {
           fclose(output);
         }
       }
-    } 
+    }
   }
 
   snprintf(formated_path, 1024, "%s" ROOTDIR "data.txt", home_dir);
-  FILE* data_txt = fopen(formated_path, "wb");
+  FILE *data_txt = fopen(formated_path, "wb");
 
   if (!data_txt) {
     fprintf(stderr, "Couldn't open file %s for writing\n", formated_path);
@@ -693,15 +705,35 @@ bool App::save_app() {
   fclose(data_txt);
 
   SCOPE("saving scene") {
+
     yyjson_mut_doc *doc = yyjson_mut_doc_new(NULL);
     yyjson_mut_val *root = yyjson_mut_obj(doc);
     yyjson_mut_doc_set_root(doc, root);
 
     yyjson_mut_val *objects_val = yyjson_mut_obj_add_arr(doc, root, "objects");
-    for (const auto& object : state.objects) {
+    for (const auto &object : state.objects) {
       yyjson_mut_val *object_val = yyjson_mut_arr_add_obj(doc, objects_val);
+      yyjson_mut_obj_add_str(doc, object_val, "name", "");
       yyjson_mut_obj_add_str(doc, object_val, "model", object.model_ref.name.c_str());
+      yyjson_mut_val *position_val = yyjson_mut_obj_add_arr(doc, object_val, "position");
+      yyjson_mut_val *rotation_val = yyjson_mut_obj_add_arr(doc, object_val, "rotation");
+      yyjson_mut_val *scale_val = yyjson_mut_obj_add_arr(doc, object_val, "scale");
+      json_set_vector3(doc, position_val, object.transform.translation.x, object.transform.translation.y, object.transform.translation.z);
+      json_set_vector3(doc, rotation_val, object.transform.rotation.x, object.transform.rotation.y, object.transform.rotation.z);
+      json_set_vector3(doc, scale_val, object.transform.scale.x, object.transform.scale.y, object.transform.scale.z);
     }
+
+    snprintf(formated_path, 1024, "%s" ROOTDIR "scene.json", home_dir);
+
+    yyjson_write_err err;
+    yyjson_mut_write_file(formated_path, doc, YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, &err);
+    if (err.code) {
+      fprintf(stderr, "Cannot save scene.json, error code: %d, message: %s\n", err.code, err.msg);
+      yyjson_mut_doc_free(doc);
+      return false;
+    }
+
+    yyjson_mut_doc_free(doc);
   }
 
   return true;

@@ -112,13 +112,30 @@ bool App::initialise() {
       .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
   };
 
-  Image skybox_ = {
-      .data = (void *)skybox_png_pixels,
-      .width = skybox_png_width,
-      .height = skybox_png_height,
-      .mipmaps = 1,
-      .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
-  };
+  // Image skybox_ = {
+  //     .data = (void *)skybox_png_pixels,
+  //     .width = skybox_png_width,
+  //     .height = skybox_png_height,
+  //     .mipmaps = 1,
+  //     .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+  // };
+  
+  snprintf(rootdir, 1024,
+           "%s"
+#ifdef _WIN32
+           "\\"
+#else
+           "/"
+#endif
+           "%s"
+#ifdef _WIN32
+           "\\"
+#else
+           "/"
+#endif
+          "skybox.png",
+           home_dir, ".reaktory");
+  Image skybox_ = LoadImage(rootdir);
 
   SetWindowIcon(icon_);
 
@@ -535,6 +552,8 @@ void App::panel_ui() {
   if (ImGui::Begin("Właściwości")) {
     if (state.selected_object != -1) {
       WorldObject &object = state.objects[state.selected_object];
+      ImGui::Text("Model: %s", object.model_ref.name.c_str());
+
       ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(selected_object_transform), (float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale);
 
       float width = ImGui::GetWindowSize().x - (2 * ImGui::GetStyle().WindowPadding.x);

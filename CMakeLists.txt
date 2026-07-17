@@ -50,6 +50,7 @@ bytepack_(
     assets/data.txt
     assets/data.xlsx
     assets/scene.json
+    assets/images/skybox.png
 )
 
 imgpack_(
@@ -59,7 +60,6 @@ imgpack_(
   SOURCES
     assets/images/icons.png
     assets/images/placeholder.png
-    assets/images/skybox.png
 )
 
 imgpack_(

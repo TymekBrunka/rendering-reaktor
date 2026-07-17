@@ -1,21 +1,25 @@
+#include <AssetMgr/ModelMgr.hpp>
+#include <raylib.h>
+#include <raymath.h>
 #include <App.hpp>
-#include <yyjson.h>
 #include <SaveLoad/Format.hpp>
 #include <stdio.h>
+#include <yyjson.h>
 #include <zip.h>
 
 bool loader_0_0_1(SavableState *state, AppMetadata *meta, abstract_file *afile) {
   char *data = NULL;
   zip_source_t *data_src = NULL;
 
-  if (!strncmp(afile->path, "models/", sizeof("models/") - 1)) {
+  if (!memcmp(afile->path, "models/", sizeof("models/") - 1)) {
     fprintf(stderr, "model -> %s\n", afile->path);
 
     abstract_memory memory = abstract_file_read(afile);
     abstract_memory_read_data(&memory);
     abstract_file_make_real(afile, &memory);
 
-    state->model_mgr.load_model(std::string{formated_path_2});
+    fprintf(stderr, "trying to load file: %s\n", formated_path_2);
+    state->model_mgr.load_model(formated_path_2);
 
     abstract_memory_free(&memory);
   }
@@ -23,13 +27,13 @@ bool loader_0_0_1(SavableState *state, AppMetadata *meta, abstract_file *afile) 
   return true;
 }
 
-bool scene_loader_0_0_1(SavableState *state, AppMetadata *meta, yyjson_val* root) {
+bool scene_loader_0_0_1(SavableState *state, AppMetadata *meta, yyjson_val *root) {
   json_assert(yyjson_is_obj(root), "scene.json doesnt start with object\n");
 
   yyjson_val *objects_val = yyjson_obj_get(root, "objects");
   json_assert(objects_val != NULL, "json field 'objects' not present in scene.json\n");
   json_assert(yyjson_is_arr(objects_val), "json field 'objects' is not an array\n");
-  
+
   json_iter_arr(objects_val, object_val, i) {
     json_assert(yyjson_is_obj(object_val), "json array 'objects' element #%lld not being json object\n", i);
 
@@ -57,19 +61,24 @@ bool scene_loader_0_0_1(SavableState *state, AppMetadata *meta, yyjson_val* root
     json_assert(json_get_vector3(position_val, &pos_x, &pos_y, &pos_z), "json array 'objects' element #%lld field 'position' doesn't qualify as vector3\n", i);
     json_assert(json_get_vector3(rotation_val, &rot_x, &rot_y, &rot_z), "json array 'objects' element #%lld field 'position' doesn't qualify as vector3\n", i);
     json_assert(json_get_vector3(scale_val, &scale_x, &scale_y, &scale_z), "json array 'objects' element #%lld field 'position' doesn't qualify as vector3\n", i);
+    ModelRef model_ref = state->model_mgr.take_model(yyjson_get_str(model_val), state->objects.size());
 
     // clang-format off
-    state->objects.push_back(
-      WorldObject{
-        .transform = {
-          .translation = Vector3{pos_x, pos_y, pos_z},
-          .rotation = Vector4{rot_x, rot_y, rot_z, 0},
-          .scale = Vector3{scale_x, scale_y, scale_z}
-        },
-        .model_ref = state->model_mgr.take_model(yyjson_get_str(model_val), state->objects.size())
-      }
-    );
+    Transform transform = Transform{
+      .translation = Vector3{pos_x, pos_y, pos_z},
+      .rotation = QuaternionFromEuler(DEG2RAD * rot_x, DEG2RAD * rot_y, DEG2RAD * rot_z),
+      .scale = Vector3{scale_x, scale_y, scale_z}
+    };
     // clang-format on
+    Matrix matTranslation = MatrixTranslate(transform.translation.x, transform.translation.y, transform.translation.z);
+    Matrix matRotation = QuaternionToMatrix(transform.rotation);
+    Matrix matScale = MatrixScale(transform.scale.x, transform.scale.y, transform.scale.z);
+
+    Matrix matTransform = MatrixMultiply(matScale, matRotation);
+    matTransform = MatrixMultiply(matTransform, matTranslation);
+    model_ref.model.transform = matTransform;
+
+    state->objects.push_back(WorldObject{.transform = transform, .model_ref = std::move(model_ref)});
   }
   json_iter_end();
 
