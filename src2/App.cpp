@@ -119,7 +119,7 @@ bool App::initialise() {
   //     .mipmaps = 1,
   //     .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
   // };
-  
+
   snprintf(rootdir, 1024,
            "%s"
 #ifdef _WIN32
@@ -133,7 +133,7 @@ bool App::initialise() {
 #else
            "/"
 #endif
-          "skybox.png",
+           "skybox.png",
            home_dir, ".reaktory");
   Image skybox_ = LoadImage(rootdir);
 
@@ -482,7 +482,12 @@ void App::panel_ui() {
       ImGui::PushID(i);
       if (ImGui::ImageButton("##preview", (ImTextureID)model.target.texture.id, ImVec2(75, 75), ImVec2(0, 1), ImVec2(1, 0))) {
         ModelRef modelRef = state.model_mgr.take_model(name, state.objects.size());
-        state.objects.push_back({Transform{Vector3{0, 0, 0}, Quaternion{0, 0, 0, 0}, Vector3{1, 1, 1}}, std::move(modelRef)});
+        // clang-format off
+        state.objects.push_back({
+          .transform = Transform{Vector3{0, 0, 0}, Quaternion{0, 0, 0, 0}, Vector3{1, 1, 1}},
+          .model_ref = std::move(modelRef)
+        });
+        // clang-format on
       }
 
       ImGui::SetNextItemWidth(80);
@@ -491,7 +496,7 @@ void App::panel_ui() {
       if (ImGui::Button("usuń")) {
         std::unordered_set<int> &objects_using_deleted_model = state.model_mgr.models[name].refs;
         for (int idx : objects_using_deleted_model) {
-          state.objects[idx] = {Transform{Vector3{0, 0, 0}, Quaternion{0, 0, 0, 0}, Vector3{1, 1, 1}}, state.model_mgr.take_model("default", idx)};
+          state.objects[idx].model_ref = state.model_mgr.take_model("default", idx);
         }
         state.model_mgr.unload_model(name);
 
@@ -552,10 +557,11 @@ void App::panel_ui() {
   if (ImGui::Begin("Właściwości")) {
     if (state.selected_object != -1) {
       WorldObject &object = state.objects[state.selected_object];
-      ImGui::Text("Model: %s", object.model_ref.name.c_str());
+      ImGui::Text("Objekt: %s", object.model_ref.name.c_str());
+      ImGui::Text("Kości w modelu: %d", object.model_ref.model.skeleton.boneCount);
+      ImGui::Separator();
 
       ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(state.selected_object_transform), (float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale);
-
       float width = ImGui::GetWindowSize().x - (2 * ImGui::GetStyle().WindowPadding.x);
       ImGui::TextUnformatted("pozycja");
       ImGui::SetNextItemWidth(width);
@@ -566,8 +572,37 @@ void App::panel_ui() {
       ImGui::TextUnformatted("skala");
       ImGui::SetNextItemWidth(width);
       ImGui::DragFloat3("##scale", (float *)&object.transform.scale, snap, 0, 0, "%.2f");
-
       ImGuizmo::RecomposeMatrixFromComponents((float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale, glm::value_ptr(state.selected_object_transform));
+
+      ImGui::Separator();
+      if (ImGui::BeginCombo("model", object.model_ref.name.c_str())) {
+        for (const auto &[model_name, model] : state.model_mgr.models) {
+          bool is_selected = model_name == object.model_ref.name;
+          if (ImGui::Selectable(model_name.c_str(), is_selected)) {
+            if (!is_selected) {
+              state.model_mgr.notify_model_got_returned(object.model_ref.name, state.selected_object);
+              object.model_ref = state.model_mgr.take_model(model_name, state.selected_object);
+              object.current_animation = -1;
+              object.current_animation_frame = 0;
+            }
+          }
+        }
+        ImGui::EndCombo();
+      }
+
+      if (ImGui::BeginCombo("animacja", object.current_animation == -1 ? "(żadna)" : object.model_ref.animations[object.current_animation].name)) {
+        if (ImGui::Selectable("(żadna)", object.current_animation == -1)) {
+          object.current_animation = -1;
+          object.current_animation_frame = 0;
+        }
+        for (int i = 0; i < object.model_ref.animations_count; i++) {
+          if (ImGui::Selectable(object.model_ref.animations[i].name, object.current_animation == 1)) {
+            object.current_animation = i;
+            object.current_animation_frame = 0;
+          }
+        }
+        ImGui::EndCombo();
+      }
     }
   }
   ImGui::End();
@@ -602,6 +637,20 @@ void App::render_color_scene() {
   EndTextureMode();
 }
 
+// Draw model skeleton
+static void DrawModelSkeleton(ModelSkeleton skeleton, ModelAnimPose pose, float scale, Color color) {
+  // Loop to (boneCount - 1) because the last one is a special "no bone" bone,
+  // needed to workaround buggy models without a -1, a cube is always drawn at the origin
+  for (int i = 0; i < skeleton.boneCount - 1; i++) {
+    // Display the frame-pose skeleton
+    DrawCube(pose[i].translation, scale * 0.05f, scale * 0.05f, scale * 0.05f, color);
+
+    if (skeleton.bones[i].parent >= 0) {
+      DrawLine3D(pose[i].translation, pose[skeleton.bones[i].parent].translation, color);
+    }
+  }
+}
+
 void App::render_scene() {
   rlSetBlendMode(BLEND_ALPHA);
   BeginMode3D(camera);
@@ -612,8 +661,15 @@ void App::render_scene() {
   rlEnableDepthMask();
 
   // DrawCube({-10, -15, -20}, 20, 30, 40, RED);
-  for (const auto &object : state.objects) {
+  for (auto &object : state.objects) {
+    if (object.current_animation != -1) {
+      object.current_animation_frame += 1;
+      if (object.current_animation_frame >= object.model_ref.animations[object.current_animation].keyframeCount)
+        object.current_animation_frame = 0;
+      UpdateModelAnimation(object.model_ref.model, object.model_ref.animations[object.current_animation], object.current_animation_frame);
+    }
     DrawModel(object.model_ref.model, Vector3{0, 0, 0}, 1, WHITE);
+    DrawModelSkeleton(object.model_ref.model.skeleton, object.model_ref.model.currentPose, 1, RED);
   }
   EndMode3D();
 

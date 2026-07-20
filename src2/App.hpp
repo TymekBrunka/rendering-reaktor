@@ -14,6 +14,8 @@ extern std::mutex global_lock;
 extern std::string imported_zip_file;
 
 struct WorldObject {
+  int current_animation = -1;
+  float current_animation_frame = 0;
   Transform transform;
   ModelRef model_ref;
 };

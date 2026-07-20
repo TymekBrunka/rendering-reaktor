@@ -8,6 +8,10 @@
 #include <images.h>
 
 ModelRef::~ModelRef() {
+  // if (model.skeleton.bindPose != nullptr)
+  //   delete[] model.skeleton.bindPose;
+  // if (model.skeleton.bones != nullptr)
+  //   delete[] model.skeleton.bones;
   if (model.currentPose != nullptr)
     delete[] model.currentPose;
   if (model.boneMatrices != nullptr)
@@ -26,10 +30,14 @@ ModelRef::ModelRef(const AnimatedModel &model_, const std::string &name) {
   bounding_box = model_.bounding_box;
   this->name = name;
   if (model.skeleton.boneCount > 0) {
+    // model.skeleton.bindPose = new Transform[model_.model.skeleton.boneCount];
+    // model.skeleton.bones = new BoneInfo[model_.model.skeleton.boneCount];
     model.currentPose = new Transform[model_.model.skeleton.boneCount];
     model.boneMatrices = new Matrix[model_.model.skeleton.boneCount];
     model.materials = new Material[model_.model.materialCount];
     model.meshMaterial = new int[model_.model.meshCount];
+    // memcpy(model.skeleton.bindPose, model_.model.skeleton.bindPose, sizeof(Transform) * model_.model.skeleton.boneCount);
+    // memcpy(model.skeleton.bones, model_.model.skeleton.bones, sizeof(BoneInfo) * model_.model.skeleton.boneCount);
     memcpy(model.currentPose, model_.model.currentPose, sizeof(Transform) * model_.model.skeleton.boneCount);
     memcpy(model.boneMatrices, model_.model.boneMatrices, sizeof(Matrix) * model_.model.skeleton.boneCount);
     memcpy(model.materials, model_.model.materials, sizeof(Material) * model_.model.materialCount);
@@ -45,10 +53,14 @@ ModelRef::ModelRef(const ModelRef &other) {
   animations = other.animations;
   name = other.name;
   if (other.model.skeleton.boneCount > 0) {
+    // model.skeleton.bindPose = new Transform[other.model.skeleton.boneCount];
+    // model.skeleton.bones = new BoneInfo[other.model.skeleton.boneCount];
     model.currentPose = new Transform[other.model.skeleton.boneCount];
     model.boneMatrices = new Matrix[other.model.skeleton.boneCount];
     model.materials = new Material[other.model.materialCount];
     model.meshMaterial = new int[other.model.meshCount];
+    // memcpy(model.skeleton.bindPose, other.model.skeleton.bindPose, sizeof(Transform) * other.model.skeleton.boneCount);
+    // memcpy(model.skeleton.bones, other.model.skeleton.bones, sizeof(BoneInfo) * other.model.skeleton.boneCount);
     memcpy(model.currentPose, other.model.currentPose, sizeof(Transform) * other.model.skeleton.boneCount);
     memcpy(model.boneMatrices, other.model.boneMatrices, sizeof(Matrix) * other.model.skeleton.boneCount);
     memcpy(model.materials, other.model.materials, sizeof(Material) * other.model.materialCount);
@@ -65,10 +77,14 @@ ModelRef &ModelRef::operator=(const ModelRef &other) {
     animations = other.animations;
     name = other.name;
     if (other.model.skeleton.boneCount > 0) {
+      // model.skeleton.bindPose = new Transform[other.model.skeleton.boneCount];
+      // model.skeleton.bones = new BoneInfo[other.model.skeleton.boneCount];
       model.currentPose = new Transform[other.model.skeleton.boneCount];
       model.boneMatrices = new Matrix[other.model.skeleton.boneCount];
       model.materials = new Material[other.model.materialCount];
       model.meshMaterial = new int[other.model.meshCount];
+      // memcpy(model.skeleton.bindPose, other.model.skeleton.bindPose, sizeof(Transform) * other.model.skeleton.boneCount);
+      // memcpy(model.skeleton.bones, other.model.skeleton.bones, sizeof(BoneInfo) * other.model.skeleton.boneCount);
       memcpy(model.currentPose, other.model.currentPose, sizeof(Transform) * other.model.skeleton.boneCount);
       memcpy(model.boneMatrices, other.model.boneMatrices, sizeof(Matrix) * other.model.skeleton.boneCount);
       memcpy(model.materials, other.model.materials, sizeof(Material) * other.model.materialCount);
@@ -85,10 +101,14 @@ ModelRef::ModelRef(ModelRef &&other) noexcept {
   bounding_box = other.bounding_box;
   animations = other.animations;
   name = other.name;
+  // model.skeleton.bindPose = other.model.skeleton.bindPose;
+  // model.skeleton.bones = other.model.skeleton.bones;
   model.currentPose = other.model.currentPose;
   model.boneMatrices = other.model.boneMatrices;
   model.materials = other.model.materials;
   model.meshMaterial = other.model.meshMaterial;
+  // other.model.skeleton.bindPose = nullptr;
+  // other.model.skeleton.bones = nullptr;
   other.model.currentPose = nullptr;
   other.model.boneMatrices = nullptr;
   other.model.materials = nullptr;
@@ -103,10 +123,14 @@ ModelRef &ModelRef::operator=(ModelRef &&other) noexcept {
     bounding_box = other.bounding_box;
     animations = other.animations;
     name = other.name;
+    // model.skeleton.bindPose = other.model.skeleton.bindPose;
+    // model.skeleton.bones = other.model.skeleton.bones;
     model.currentPose = other.model.currentPose;
     model.boneMatrices = other.model.boneMatrices;
     model.materials = other.model.materials;
     model.meshMaterial = other.model.meshMaterial;
+    // other.model.skeleton.bindPose = nullptr;
+    // other.model.skeleton.bones = nullptr;
     other.model.currentPose = nullptr;
     other.model.boneMatrices = nullptr;
     other.model.materials = nullptr;
@@ -239,8 +263,12 @@ bool ModelMgr::load_model(const std::string &filepath) {
       .model = LoadModel(filepath.c_str()),
   };
 
-  if (!IsModelValid(model.model) && strncmp(&name[name.size() - 4], ".m3d", 4)) // if model is invalid and is not m3d model (raylib flags fully loaded m3d model as invalid at the time of writing this)
+  bool is_valid = IsModelValid(model.model);
+  if (!is_valid && strncmp(&name[name.size() - 4], ".m3d", 4)) { // if model is invalid and is not m3d model (raylib flags fully loaded m3d model as invalid at the time of writing this)
+    UnloadModel(model.model);
+    std::cerr << "Failed to load model (is invalid: " << !is_valid << ")\n";
     return false;
+  }
 
   model.animations = LoadModelAnimations(filepath.c_str(), &model.animations_count);
   for (int i = 0; i < model.model.materialCount; i++) {

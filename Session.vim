@@ -11,14 +11,14 @@ let s:shortmess_save = &shortmess
 set shortmess+=aoO
 badd +115 ~/Documents/rendering-reaktor/src2/BuildTools/bytepack.c
 badd +101 ~/Documents/rendering-reaktor/src2/BuildTools/imgpack.c
-badd +592 ~/Documents/rendering-reaktor/src2/App.cpp
+badd +383 ~/Documents/rendering-reaktor/src2/App.cpp
 badd +256 ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
-badd +16 ~/Documents/rendering-reaktor/src2/App.hpp
+badd +37 ~/Documents/rendering-reaktor/src2/App.hpp
 badd +1 ~/Documents/rendering-reaktor/CMakeLists.txt
 badd +453 ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
 badd +1 ~/Documents/rendering-reaktor/assets/images/skybox.png
 badd +69 ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
-badd +76 ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
+badd +77 ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
 badd +16 ~/Documents/rendering-reaktor/src2/main.cpp
 badd +3934 ~/cacheCPM/raylib/c846/src/rmodels.c
 badd +1 [dap-repl-153]
@@ -35,13 +35,6 @@ tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabrewind
 edit ~/Documents/rendering-reaktor/src2/App.cpp
-wincmd t
-let s:save_winminheight = &winminheight
-let s:save_winminwidth = &winminwidth
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
 argglobal
 balt ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
 setlocal foldmethod=manual
@@ -54,12 +47,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 592 - ((29 * winheight(0) + 29) / 59)
+let s:l = 383 - ((29 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 592
-normal! 0
+keepjumps 383
+normal! 020|
 tabnext
 edit ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
 argglobal
@@ -101,9 +94,16 @@ normal! zt
 keepjumps 254
 normal! 0
 tabnext
-edit ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
+edit ~/Documents/rendering-reaktor/src2/App.hpp
+wincmd t
+let s:save_winminheight = &winminheight
+let s:save_winminwidth = &winminwidth
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 argglobal
-balt ~/Documents/rendering-reaktor/src2/App.hpp
+balt ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -114,12 +114,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 77 - ((57 * winheight(0) + 29) / 59)
+let s:l = 37 - ((29 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 77
-normal! $
+keepjumps 37
+normal! 0
 tabnext
 edit ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
 argglobal
@@ -159,7 +159,7 @@ keepjumps exe s:l
 normal! zt
 keepjumps 53
 normal! 05|
-tabnext 1
+tabnext 4
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif
