@@ -596,7 +596,10 @@ void App::panel_ui() {
           object.current_animation_frame = 0;
         }
         for (int i = 0; i < object.model_ref.animations_count; i++) {
-          if (ImGui::Selectable(object.model_ref.animations[i].name, object.current_animation == 1)) {
+          const char* name = object.model_ref.animations[i].name;
+          if (name == nullptr || strlen(name) == 0)
+            name = "(bez nazwy)";
+          if (ImGui::Selectable(name, object.current_animation == 1)) {
             object.current_animation = i;
             object.current_animation_frame = 0;
           }

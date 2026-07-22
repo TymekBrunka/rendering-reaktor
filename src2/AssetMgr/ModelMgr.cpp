@@ -263,12 +263,12 @@ bool ModelMgr::load_model(const std::string &filepath) {
       .model = LoadModel(filepath.c_str()),
   };
 
-  bool is_valid = IsModelValid(model.model);
-  if (!is_valid && strncmp(&name[name.size() - 4], ".m3d", 4)) { // if model is invalid and is not m3d model (raylib flags fully loaded m3d model as invalid at the time of writing this)
-    UnloadModel(model.model);
-    std::cerr << "Failed to load model (is invalid: " << !is_valid << ")\n";
-    return false;
-  }
+  // bool is_valid = IsModelValid(model.model);
+  // if (!is_valid && strncmp(&name[name.size() - 4], ".m3d", 4)) { // if model is invalid and is not m3d model (raylib flags fully loaded m3d model as invalid at the time of writing this)
+  //   UnloadModel(model.model);
+  //   std::cerr << "Failed to load model (is invalid: " << !is_valid << ")\n";
+  //   return false;
+  // }
 
   model.animations = LoadModelAnimations(filepath.c_str(), &model.animations_count);
   for (int i = 0; i < model.model.materialCount; i++) {
