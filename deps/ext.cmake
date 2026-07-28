@@ -86,6 +86,7 @@ CPMAddPackage(
   GITHUB_REPOSITORY raysan5/raylib
   # GIT_TAG c4d733e86482408cb6b6c3fa5d8770c769fd1c9d # 5.5 - raylib-gizmo
   GIT_TAG 970531d112fd535c13b45442468dded784b9779e
+  # GIT_TAG 935f3da3ffd4b2e3eb4af1ee9826f45ae241a68c
   # GIT_TAG 6.0
   OPTIONS
     # "PLATFORM SDL"
@@ -96,6 +97,21 @@ CPMAddPackage(
     "GLFW_BUILD_X11 ON"
     "BUILD_SHARED_LIBS OFF"
 )
+
+message(rlModelLib)
+CPMAddPackage(
+  NAME rlModelLib
+  GITHUB_REPOSITORY JeffM2501/rlModelLib
+  GIT_TAG fa7a09dd96c2b3b4f32a3e6c086c90c2929e5858
+  DOWNLOAD_ONLY
+)
+
+add_library(rlmodellib
+  ${rlModelLib_SOURCE_DIR}/rlModels/src/rlModels.c
+  ${rlModelLib_SOURCE_DIR}/rlModels/src/rlModels_IO.c
+)
+target_include_directories(rlmodellib PUBLIC ${rlModelLib_SOURCE_DIR}/rlModels/include)
+target_link_libraries(rlmodellib PUBLIC raylib)
 
 file(GLOB imgui_SRC
   deps/imgui/*.h

@@ -81,7 +81,7 @@ add_library(ModelMgr
   src2/AssetMgr/ModelMgr.hpp
 )
 target_include_directories(ModelMgr PRIVATE src2/AssetMgr)
-target_link_libraries(ModelMgr PUBLIC raylib PRIVATE images)
+target_link_libraries(ModelMgr PUBLIC raylib rlmodellib PRIVATE images)
 target_precompile_headers(ModelMgr REUSE_FROM pch)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")

@@ -28,6 +28,7 @@
 #include "glm/matrix.hpp"
 #include "glm/trigonometric.hpp"
 #include "raymath.h"
+#include "rlModels.h"
 
 #include <Renderdoc.cpp>
 
@@ -595,8 +596,8 @@ void App::panel_ui() {
           object.current_animation = -1;
           object.current_animation_frame = 0;
         }
-        for (int i = 0; i < object.model_ref.animations_count; i++) {
-          const char* name = object.model_ref.animations[i].name;
+        for (int i = 0; i < object.model_ref.anim_inst.sequences->sequenceCount; i++) {
+          const char* name = object.model_ref.anim_inst.sequences->sequences[i].name;
           if (name == nullptr || strlen(name) == 0)
             name = "(bez nazwy)";
           if (ImGui::Selectable(name, object.current_animation == 1)) {
@@ -627,10 +628,11 @@ void App::render_color_scene() {
     };
     // clang-format on
     SetShaderValue(assets.colorpicker_shader, location_id, &id, SHADER_UNIFORM_VEC4);
-    for (int j = 0; j < object.model_ref.model.materialCount; j++) {
-      object.model_ref.model.materials[j].shader = assets.colorpicker_shader;
+    for (int j = 0; j < object.model_ref.model.groupCount; j++) {
+      // object.model_ref.model.materials[j].shader = assets.colorpicker_shader;
     }
-    DrawModel(object.model_ref.model, Vector3{0, 0, 0}, 1, WHITE);
+    // DrawModel(object.model_ref.model, Vector3{0, 0, 0}, 1, WHITE);
+    rlmDrawModelWithPose(object.model_ref.model, rlmPQSIdentity(), object.model_ref.anim_inst.currentPose);
     for (int j = 0; j < object.model_ref.model.materialCount; j++) {
       object.model_ref.model.materials[j].shader = assets.skinning_shader;
     }

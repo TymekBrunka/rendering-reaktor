@@ -1,5 +1,7 @@
 #include "raylib.h"
 #include "raymath.h"
+#include "rlModels.h"
+#include "rlModels_IO.h"
 #include <ModelMgr.hpp>
 #include <cstddef>
 #include <cstring>
@@ -7,134 +9,61 @@
 
 #include <images.h>
 
-ModelRef::~ModelRef() {
-  // if (model.skeleton.bindPose != nullptr)
-  //   delete[] model.skeleton.bindPose;
-  // if (model.skeleton.bones != nullptr)
-  //   delete[] model.skeleton.bones;
-  if (model.currentPose != nullptr)
-    delete[] model.currentPose;
-  if (model.boneMatrices != nullptr)
-    delete[] model.boneMatrices;
-  if (model.materials != nullptr)
-    delete[] model.materials;
-  if (model.meshMaterial != nullptr)
-    delete[] model.meshMaterial;
-}
-
-ModelRef::ModelRef(const AnimatedModel &model_, const std::string &name) {
-  model = model_.model;
+ModelRef::ModelRef(AnimatedModel &model_, const std::string &name) {
+  model = rlmCloneModel(model_.model);
+  owns_model = true;
   texture_id = model_.target.texture.id;
-  animations = model_.animations;
-  animations_count = model_.animations_count;
+  anim_inst.sequences = &model_.animations;
+  anim_inst.interpolate = true;
+  anim_inst.currentFrame = 0;
+  anim_inst.currentPose = rlmLoadPoseFromModel(model_.model);
   bounding_box = model_.bounding_box;
   this->name = name;
-  if (model.skeleton.boneCount > 0) {
-    // model.skeleton.bindPose = new Transform[model_.model.skeleton.boneCount];
-    // model.skeleton.bones = new BoneInfo[model_.model.skeleton.boneCount];
-    model.currentPose = new Transform[model_.model.skeleton.boneCount];
-    model.boneMatrices = new Matrix[model_.model.skeleton.boneCount];
-    model.materials = new Material[model_.model.materialCount];
-    model.meshMaterial = new int[model_.model.meshCount];
-    // memcpy(model.skeleton.bindPose, model_.model.skeleton.bindPose, sizeof(Transform) * model_.model.skeleton.boneCount);
-    // memcpy(model.skeleton.bones, model_.model.skeleton.bones, sizeof(BoneInfo) * model_.model.skeleton.boneCount);
-    memcpy(model.currentPose, model_.model.currentPose, sizeof(Transform) * model_.model.skeleton.boneCount);
-    memcpy(model.boneMatrices, model_.model.boneMatrices, sizeof(Matrix) * model_.model.skeleton.boneCount);
-    memcpy(model.materials, model_.model.materials, sizeof(Material) * model_.model.materialCount);
-    memcpy(model.meshMaterial, model_.model.meshMaterial, sizeof(int) * model_.model.meshCount);
-  }
 }
 
-ModelRef::ModelRef(const ModelRef &other) {
-  model = other.model;
+ModelRef::ModelRef(ModelRef &other) {
+  model = rlmCloneModel(other.model);
+  owns_model = true;
   texture_id = other.texture_id;
-  animations_count = other.animations_count;
   bounding_box = other.bounding_box;
-  animations = other.animations;
+  anim_inst = other.anim_inst;
+  anim_inst.currentPose = rlmLoadPoseFromModel(other.model);
   name = other.name;
-  if (other.model.skeleton.boneCount > 0) {
-    // model.skeleton.bindPose = new Transform[other.model.skeleton.boneCount];
-    // model.skeleton.bones = new BoneInfo[other.model.skeleton.boneCount];
-    model.currentPose = new Transform[other.model.skeleton.boneCount];
-    model.boneMatrices = new Matrix[other.model.skeleton.boneCount];
-    model.materials = new Material[other.model.materialCount];
-    model.meshMaterial = new int[other.model.meshCount];
-    // memcpy(model.skeleton.bindPose, other.model.skeleton.bindPose, sizeof(Transform) * other.model.skeleton.boneCount);
-    // memcpy(model.skeleton.bones, other.model.skeleton.bones, sizeof(BoneInfo) * other.model.skeleton.boneCount);
-    memcpy(model.currentPose, other.model.currentPose, sizeof(Transform) * other.model.skeleton.boneCount);
-    memcpy(model.boneMatrices, other.model.boneMatrices, sizeof(Matrix) * other.model.skeleton.boneCount);
-    memcpy(model.materials, other.model.materials, sizeof(Material) * other.model.materialCount);
-    memcpy(model.meshMaterial, other.model.meshMaterial, sizeof(int) * other.model.meshCount);
-  }
 }
 
-ModelRef &ModelRef::operator=(const ModelRef &other) {
+ModelRef &ModelRef::operator=(ModelRef &other) {
   if (this != &other) {
-    model = other.model;
+    model = rlmCloneModel(other.model);
+    owns_model = true;
     texture_id = other.texture_id;
-    animations_count = other.animations_count;
     bounding_box = other.bounding_box;
-    animations = other.animations;
+    anim_inst = other.anim_inst;
+    anim_inst.currentPose = rlmLoadPoseFromModel(other.model);
     name = other.name;
-    if (other.model.skeleton.boneCount > 0) {
-      // model.skeleton.bindPose = new Transform[other.model.skeleton.boneCount];
-      // model.skeleton.bones = new BoneInfo[other.model.skeleton.boneCount];
-      model.currentPose = new Transform[other.model.skeleton.boneCount];
-      model.boneMatrices = new Matrix[other.model.skeleton.boneCount];
-      model.materials = new Material[other.model.materialCount];
-      model.meshMaterial = new int[other.model.meshCount];
-      // memcpy(model.skeleton.bindPose, other.model.skeleton.bindPose, sizeof(Transform) * other.model.skeleton.boneCount);
-      // memcpy(model.skeleton.bones, other.model.skeleton.bones, sizeof(BoneInfo) * other.model.skeleton.boneCount);
-      memcpy(model.currentPose, other.model.currentPose, sizeof(Transform) * other.model.skeleton.boneCount);
-      memcpy(model.boneMatrices, other.model.boneMatrices, sizeof(Matrix) * other.model.skeleton.boneCount);
-      memcpy(model.materials, other.model.materials, sizeof(Material) * other.model.materialCount);
-      memcpy(model.meshMaterial, other.model.meshMaterial, sizeof(int) * other.model.meshCount);
-    }
   }
   return *this;
 }
 
 ModelRef::ModelRef(ModelRef &&other) noexcept {
   model = other.model;
+  owns_model = true;
   texture_id = other.texture_id;
-  animations_count = other.animations_count;
   bounding_box = other.bounding_box;
-  animations = other.animations;
-  name = other.name;
-  // model.skeleton.bindPose = other.model.skeleton.bindPose;
-  // model.skeleton.bones = other.model.skeleton.bones;
-  model.currentPose = other.model.currentPose;
-  model.boneMatrices = other.model.boneMatrices;
-  model.materials = other.model.materials;
-  model.meshMaterial = other.model.meshMaterial;
-  // other.model.skeleton.bindPose = nullptr;
-  // other.model.skeleton.bones = nullptr;
-  other.model.currentPose = nullptr;
-  other.model.boneMatrices = nullptr;
-  other.model.materials = nullptr;
-  other.model.meshMaterial = nullptr;
+  anim_inst = other.anim_inst;
+  name = std::move(other.name);
+  other.owns_model = false;
 }
 
 ModelRef &ModelRef::operator=(ModelRef &&other) noexcept {
   if (this != &other) {
     model = other.model;
+    owns_model = true;
     texture_id = other.texture_id;
-    animations_count = other.animations_count;
     bounding_box = other.bounding_box;
-    animations = other.animations;
+    anim_inst = other.anim_inst;
     name = other.name;
-    // model.skeleton.bindPose = other.model.skeleton.bindPose;
-    // model.skeleton.bones = other.model.skeleton.bones;
-    model.currentPose = other.model.currentPose;
-    model.boneMatrices = other.model.boneMatrices;
-    model.materials = other.model.materials;
-    model.meshMaterial = other.model.meshMaterial;
-    // other.model.skeleton.bindPose = nullptr;
-    // other.model.skeleton.bones = nullptr;
-    other.model.currentPose = nullptr;
-    other.model.boneMatrices = nullptr;
-    other.model.materials = nullptr;
-    other.model.meshMaterial = nullptr;
+    name = std::move(other.name);
+    other.owns_model = false;
   }
   return *this;
 }
@@ -153,11 +82,24 @@ void ModelMgr::setup() {
       .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
   };
 
-  AnimatedModel default_{.animations_count = 0, .animations = nullptr, .bounding_box = {Vector3{-0.5, -0.5, -0.5}, Vector3{0.5, 0.5, 0.5}}, .target = LoadRenderTexture(100, 100), .model = LoadModelFromMesh(GenMeshCube(1, 1, 1))};
-  default_.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = placeholder_texture;
+  Model immodel = LoadModelFromMesh(GenMeshCube(1, 1, 1));
+  immodel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = placeholder_texture;
+
+  // clang-format off
+  AnimatedModel default_{
+    .bounding_box = {
+      Vector3{-0.5, -0.5, -0.5},
+      Vector3{0.5, 0.5, 0.5}
+    },
+    .target = LoadRenderTexture(100, 100),
+    .animations = {
+      0, nullptr
+    },
+    .model = rlmLoadFromModel(immodel)};
+  // clang-format on
 
   models["default"] = default_;
-  util_get_model_preview(default_.model, default_.target);
+  util_get_model_preview(immodel, default_.target);
 
   placeholder_texture = LoadTextureFromImage(placeholder_);
 }
@@ -167,8 +109,8 @@ ModelMgr::~ModelMgr() {
     return;
 
   for (auto &[name, model] : models) {
-    UnloadModelAnimations(model.animations, model.animations_count);
-    UnloadModel(model.model);
+    rlmUnloadAnimationSet(&model.animations);
+    rlmUnloadModel(&model.model);
     std::cerr << "Unloaded model: " << name << " (destruction)\n";
   }
   // UnloadShader(shader);
@@ -199,9 +141,9 @@ void ModelMgr::unload_model(const std::string &name) {
   auto idx = models.find(name);
   if (idx != models.end()) {
     AnimatedModel &model = models[name];
-    if (model.animations)
-      UnloadModelAnimations(model.animations, model.animations_count);
-    UnloadModel(model.model);
+    if (model.animations.sequenceCount)
+      rlmUnloadAnimationSet(&model.animations);
+    rlmUnloadModel(&model.model);
     UnloadRenderTexture(model.target);
     std::cerr << "Unloaded model: " << name << "\n";
     models.erase(idx);
@@ -257,10 +199,15 @@ bool ModelMgr::load_model(const std::string &filepath) {
   std::string name{(const char *)name_};
   delete[] name_;
 
+  Model immodel = LoadModel(filepath.c_str());
+
+  for (int i = 0; i < immodel.materialCount; i++) {
+    // model.model.materials[i].shader = shader;
+    immodel.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = placeholder_texture;
+  }
+
   AnimatedModel model{
-      .animations_count = 0,
-      .animations = nullptr,
-      .model = LoadModel(filepath.c_str()),
+      .model = rlmLoadFromModel(immodel),
   };
 
   // bool is_valid = IsModelValid(model.model);
@@ -270,15 +217,12 @@ bool ModelMgr::load_model(const std::string &filepath) {
   //   return false;
   // }
 
-  model.animations = LoadModelAnimations(filepath.c_str(), &model.animations_count);
-  for (int i = 0; i < model.model.materialCount; i++) {
-    // model.model.materials[i].shader = shader;
-    model.model.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = placeholder_texture;
-  }
+  ModelAnimation *animations = LoadModelAnimations(filepath.c_str(), &model.animations.sequenceCount);
+  model.animations.sequences = rlmLoadModelAnimations(model.model.skeleton, animations, model.animations.sequenceCount);
 
   model.target = LoadRenderTexture(100, 100);
   SetTextureFilter(model.target.texture, TEXTURE_FILTER_BILINEAR); // blurry instead of pixelated
-  util_get_model_preview(model.model, model.target, &model.bounding_box);
+  util_get_model_preview(immodel, model.target, &model.bounding_box);
 
   models[name] = model;
   std::cerr << "Loaded new model: " << name << "\n";

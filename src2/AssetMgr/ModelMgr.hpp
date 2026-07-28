@@ -1,34 +1,34 @@
 #pragma once
 #include <cstddef>
 #include <raylib.h>
+#include <rlModels.h>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 
 struct AnimatedModel {
-  int animations_count;
-  ModelAnimation *animations;
   BoundingBox bounding_box;
   RenderTexture target;
 
+  rlmModelAnimationSet animations;
   std::unordered_set<int> refs;
-  Model model;
+  rlmModel model = {0};
 };
 
 class ModelRef {
 public:
   int texture_id; // for model preview inside objects panel
-  int animations_count = 0;
-  Model model;
+  bool owns_model = true;
   BoundingBox bounding_box;
-  ModelAnimation *animations;
   std::string name;
+  rlmModel model = {0};
+  rlmAnimatedModelInstance anim_inst;
 
   ModelRef() = default;
-  ~ModelRef();
-  ModelRef(const AnimatedModel &model_, const std::string &name);
-  ModelRef(const ModelRef &other);
-  ModelRef &operator=(const ModelRef &other);
+  // ~ModelRef();
+  ModelRef(AnimatedModel &model_, const std::string &name);
+  ModelRef(ModelRef &other);
+  ModelRef &operator=(ModelRef &other);
   ModelRef(ModelRef &&other) noexcept;
   ModelRef &operator=(ModelRef &&other) noexcept;
   // operator Model();

@@ -11,16 +11,21 @@ endif
 let s:shortmess_save = &shortmess
 set shortmess+=aoO
 badd +6 ~/Documents/kody/rendering-reaktor/.gitignore
-badd +88 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
-badd +269 ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
+badd +106 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+badd +82 ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
 badd +1593 ~/.cache/CPM/raylib/c846/src/raylib.h
+badd +494 ~/Documents/kody/rendering-reaktor/src2/App.cpp
+badd +25 ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
+badd +124 ~/Documents/kody/rendering-reaktor/CMakeLists.txt
 argglobal
 %argdel
 tabnew +setlocal\ bufhidden=wipe
+tabnew +setlocal\ bufhidden=wipe
+tabnew +setlocal\ bufhidden=wipe
 tabrewind
-edit ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+edit ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
 argglobal
-balt ~/Documents/kody/rendering-reaktor/.gitignore
+balt ~/Documents/kody/rendering-reaktor/deps/ext.cmake
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -31,12 +36,12 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 88 - ((48 * winheight(0) + 27) / 55)
+let s:l = 25 - ((22 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 88
-normal! 09|
+keepjumps 25
+normal! 037|
 tabnext
 edit ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
 argglobal
@@ -51,13 +56,53 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 269 - ((25 * winheight(0) + 27) / 55)
+let s:l = 15 - ((14 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 269
-normal! 017|
-tabnext 2
+keepjumps 15
+normal! 02|
+tabnext
+edit ~/Documents/kody/rendering-reaktor/src2/App.cpp
+argglobal
+balt ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 602 - ((39 * winheight(0) + 27) / 55)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 602
+normal! 035|
+tabnext
+edit ~/Documents/kody/rendering-reaktor/CMakeLists.txt
+argglobal
+balt ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 124 - ((24 * winheight(0) + 27) / 55)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 124
+normal! 07|
+tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif
