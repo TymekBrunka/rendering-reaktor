@@ -1,5 +1,6 @@
 #pragma once
 #include "raylib.h"
+#include "rlModels.h"
 #include <cstdint>
 #include <glm/mat4x4.hpp>
 #include <imgui.h>
@@ -16,7 +17,7 @@ extern std::string imported_zip_file;
 struct WorldObject {
   int current_animation = -1;
   float current_animation_frame = 0;
-  Transform transform;
+  rlmPQSTransorm transform;
   ModelRef model_ref;
 };
 

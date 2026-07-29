@@ -1,31 +1,45 @@
 let SessionLoad = 1
 let s:so_save = &g:so | let s:siso_save = &g:siso | setg so=0 siso=0 | setl so=-1 siso=-1
 let v:this_session=expand("<sfile>:p")
-doautoall SessionLoadPre
 silent only
 silent tabonly
-cd ~/Documents/kody/rendering-reaktor
+cd ~/Documents/rendering-reaktor
 if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 let s:shortmess_save = &shortmess
 set shortmess+=aoO
-badd +6 ~/Documents/kody/rendering-reaktor/.gitignore
-badd +106 ~/Documents/kody/rendering-reaktor/deps/ext.cmake
-badd +82 ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
-badd +1593 ~/.cache/CPM/raylib/c846/src/raylib.h
-badd +494 ~/Documents/kody/rendering-reaktor/src2/App.cpp
-badd +25 ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
-badd +124 ~/Documents/kody/rendering-reaktor/CMakeLists.txt
+badd +94 dap-src://2/1000/
+badd +115 ~/Documents/rendering-reaktor/src2/BuildTools/bytepack.c
+badd +101 ~/Documents/rendering-reaktor/src2/BuildTools/imgpack.c
+badd +604 ~/Documents/rendering-reaktor/src2/App.cpp
+badd +43 ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
+badd +20 ~/Documents/rendering-reaktor/src2/App.hpp
+badd +126 ~/Documents/rendering-reaktor/CMakeLists.txt
+badd +721 ~/Documents/rendering-reaktor/src2/SaveLoad/SaveMod.cpp
+badd +1 ~/Documents/rendering-reaktor/assets/images/skybox.png
+badd +75 ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
+badd +77 ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
+badd +16 ~/Documents/rendering-reaktor/src2/main.cpp
+badd +3934 ~/cacheCPM/raylib/c846/src/rmodels.c
+badd +1 [dap-repl-153]
+badd +13 ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
+badd +1 ~/Documents/rendering-reaktor/assets/scene.json
+badd +94 dap-src://3/1018/
+badd +89 ~/Documents/rendering-reaktor/deps/ext.cmake
+badd +10 ~/Documents/rendering-reaktor/.gitignore
+badd +1 ~/Documents/rendering-reaktor/assets/shaders/skinning.vs
+badd +1 ~/Documents/rendering-reaktor/assets/shaders/skinning.fs
 argglobal
 %argdel
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
+tabnew +setlocal\ bufhidden=wipe
 tabrewind
-edit ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
+edit ~/Documents/rendering-reaktor/src2/App.cpp
 argglobal
-balt ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+balt ~/Documents/rendering-reaktor/src2/SaveLoad/Format_0_0_1.cpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -36,16 +50,16 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 25 - ((22 * winheight(0) + 27) / 55)
+let s:l = 604 - ((44 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 25
-normal! 037|
+keepjumps 604
+normal! 045|
 tabnext
-edit ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
+edit ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
 argglobal
-balt ~/Documents/kody/rendering-reaktor/.gitignore
+balt ~/Documents/rendering-reaktor/src2/AssetMgr/ModelMgr.hpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -56,16 +70,16 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 15 - ((14 * winheight(0) + 27) / 55)
+let s:l = 44 - ((24 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 15
-normal! 02|
+keepjumps 44
+normal! 023|
 tabnext
-edit ~/Documents/kody/rendering-reaktor/src2/App.cpp
+edit ~/Documents/rendering-reaktor/assets/shaders/skinning.fs
 argglobal
-balt ~/Documents/kody/rendering-reaktor/src2/AssetMgr/ModelMgr.cpp
+balt ~/Documents/rendering-reaktor/assets/shaders/skinning.vs
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -73,19 +87,19 @@ setlocal foldignore=#
 setlocal foldlevel=0
 setlocal foldminlines=1
 setlocal foldnestmax=20
-setlocal foldenable
+setlocal nofoldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 602 - ((39 * winheight(0) + 27) / 55)
+let s:l = 1 - ((0 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 602
-normal! 035|
+keepjumps 1
+normal! 0
 tabnext
-edit ~/Documents/kody/rendering-reaktor/CMakeLists.txt
+edit ~/Documents/rendering-reaktor/src2/App.hpp
 argglobal
-balt ~/Documents/kody/rendering-reaktor/deps/ext.cmake
+balt ~/Documents/rendering-reaktor/src2/SaveLoad/Format.hpp
 setlocal foldmethod=manual
 setlocal foldexpr=0
 setlocal foldmarker={{{,}}}
@@ -96,12 +110,32 @@ setlocal foldnestmax=20
 setlocal foldenable
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 124 - ((24 * winheight(0) + 27) / 55)
+let s:l = 20 - ((19 * winheight(0) + 29) / 59)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 124
-normal! 07|
+keepjumps 20
+normal! 016|
+tabnext
+edit ~/Documents/rendering-reaktor/CMakeLists.txt
+argglobal
+balt ~/Documents/rendering-reaktor/deps/ext.cmake
+setlocal foldmethod=manual
+setlocal foldexpr=0
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 126 - ((31 * winheight(0) + 29) / 59)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 126
+normal! 03|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

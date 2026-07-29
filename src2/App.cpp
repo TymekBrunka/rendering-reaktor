@@ -51,8 +51,6 @@ void App::select(int idx) {
   state.selected_object = idx;
   if (idx <= -1)
     return;
-  glm::mat4x4 rltransform = *(glm::mat4x4 *)&state.objects[state.selected_object].model_ref.model.transform;
-  state.selected_object_transform = glm::transpose(rltransform);
 }
 
 void SavableState::setup() { model_mgr.setup(); }
@@ -485,7 +483,7 @@ void App::panel_ui() {
         ModelRef modelRef = state.model_mgr.take_model(name, state.objects.size());
         // clang-format off
         state.objects.push_back({
-          .transform = Transform{Vector3{0, 0, 0}, Quaternion{0, 0, 0, 0}, Vector3{1, 1, 1}},
+          .transform = rlmPQSTransorm{Vector3{0, 0, 0}, Quaternion{0, 0, 0, 0}, Vector3{1, 1, 1}},
           .model_ref = std::move(modelRef)
         });
         // clang-format on
@@ -559,21 +557,21 @@ void App::panel_ui() {
     if (state.selected_object != -1) {
       WorldObject &object = state.objects[state.selected_object];
       ImGui::Text("Objekt: %s", object.model_ref.name.c_str());
-      ImGui::Text("Kości w modelu: %d", object.model_ref.model.skeleton.boneCount);
+      ImGui::Text("Kości w modelu: %d", (object.model_ref.model.skeleton) ? object.model_ref.model.skeleton->boneCount : 0);
       ImGui::Separator();
 
-      ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(state.selected_object_transform), (float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale);
+      // ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(state.selected_object_transform), (float *)&object.transform.position, (float *)&object.transform.rotation, (float *)&object.transform.scale);
       float width = ImGui::GetWindowSize().x - (2 * ImGui::GetStyle().WindowPadding.x);
       ImGui::TextUnformatted("pozycja");
       ImGui::SetNextItemWidth(width);
-      ImGui::DragFloat3("##position", (float *)&object.transform.translation, snap, 0, 0, "%.2f");
+      ImGui::DragFloat3("##position", (float *)&object.transform.position, snap, 0, 0, "%.2f");
       ImGui::TextUnformatted("obrót");
       ImGui::SetNextItemWidth(width);
       ImGui::DragFloat3("##rotation", (float *)&object.transform.rotation, 15, 0, 0, "%.1f");
       ImGui::TextUnformatted("skala");
       ImGui::SetNextItemWidth(width);
       ImGui::DragFloat3("##scale", (float *)&object.transform.scale, snap, 0, 0, "%.2f");
-      ImGuizmo::RecomposeMatrixFromComponents((float *)&object.transform.translation, (float *)&object.transform.rotation, (float *)&object.transform.scale, glm::value_ptr(state.selected_object_transform));
+      // ImGuizmo::RecomposeMatrixFromComponents((float *)&object.transform.position, (float *)&object.transform.rotation, (float *)&object.transform.scale, glm::value_ptr(state.selected_object_transform));
 
       ImGui::Separator();
       if (ImGui::BeginCombo("model", object.model_ref.name.c_str())) {
@@ -591,18 +589,19 @@ void App::panel_ui() {
         ImGui::EndCombo();
       }
 
-      if (ImGui::BeginCombo("animacja", object.current_animation == -1 ? "(żadna)" : object.model_ref.animations[object.current_animation].name)) {
+      if (ImGui::BeginCombo("animacja", object.current_animation == -1 ? "(żadna)" : object.model_ref.anim_inst.sequences->sequences[object.current_animation].name)) {
         if (ImGui::Selectable("(żadna)", object.current_animation == -1)) {
           object.current_animation = -1;
           object.current_animation_frame = 0;
         }
         for (int i = 0; i < object.model_ref.anim_inst.sequences->sequenceCount; i++) {
-          const char* name = object.model_ref.anim_inst.sequences->sequences[i].name;
+          const char *name = object.model_ref.anim_inst.sequences->sequences[i].name;
           if (name == nullptr || strlen(name) == 0)
             name = "(bez nazwy)";
           if (ImGui::Selectable(name, object.current_animation == 1)) {
             object.current_animation = i;
             object.current_animation_frame = 0;
+            rlmSetAnimationInstanceSequence(&object.model_ref.anim_inst, i);
           }
         }
         ImGui::EndCombo();
@@ -617,7 +616,7 @@ void App::render_color_scene() {
   BeginMode3D(camera);
   ClearBackground(BLANK);
   size_t i = 0;
-  for (const auto &object : state.objects) {
+  for (auto &object : state.objects) {
     // clang-format off
     Vector4 id
     {
@@ -632,9 +631,9 @@ void App::render_color_scene() {
       // object.model_ref.model.materials[j].shader = assets.colorpicker_shader;
     }
     // DrawModel(object.model_ref.model, Vector3{0, 0, 0}, 1, WHITE);
-    rlmDrawModelWithPose(object.model_ref.model, rlmPQSIdentity(), object.model_ref.anim_inst.currentPose);
-    for (int j = 0; j < object.model_ref.model.materialCount; j++) {
-      object.model_ref.model.materials[j].shader = assets.skinning_shader;
+    rlmDrawModelWithPose(object.model_ref.model, rlmPQSIdentity(), &object.model_ref.anim_inst.currentPose);
+    for (int j = 0; j < object.model_ref.model.groupCount; j++) {
+      rlmSetMaterialDefShader(&object.model_ref.model.groups[j].material, assets.colorpicker_shader);
     }
     i++;
   }
@@ -642,19 +641,19 @@ void App::render_color_scene() {
   EndTextureMode();
 }
 
-// Draw model skeleton
-static void DrawModelSkeleton(ModelSkeleton skeleton, ModelAnimPose pose, float scale, Color color) {
-  // Loop to (boneCount - 1) because the last one is a special "no bone" bone,
-  // needed to workaround buggy models without a -1, a cube is always drawn at the origin
-  for (int i = 0; i < skeleton.boneCount - 1; i++) {
-    // Display the frame-pose skeleton
-    DrawCube(pose[i].translation, scale * 0.05f, scale * 0.05f, scale * 0.05f, color);
-
-    if (skeleton.bones[i].parent >= 0) {
-      DrawLine3D(pose[i].translation, pose[skeleton.bones[i].parent].translation, color);
-    }
-  }
-}
+// // Draw model skeleton
+// static void DrawModelSkeleton(ModelSkeleton skeleton, ModelAnimPose pose, float scale, Color color) {
+//   // Loop to (boneCount - 1) because the last one is a special "no bone" bone,
+//   // needed to workaround buggy models without a -1, a cube is always drawn at the origin
+//   for (int i = 0; i < skeleton.boneCount - 1; i++) {
+//     // Display the frame-pose skeleton
+//     DrawCube(pose[i].position, scale * 0.05f, scale * 0.05f, scale * 0.05f, color);
+//
+//     if (skeleton.bones[i].parent >= 0) {
+//       DrawLine3D(pose[i].position, pose[skeleton.bones[i].parent].position, color);
+//     }
+//   }
+// }
 
 void App::render_scene() {
   rlSetBlendMode(BLEND_ALPHA);
@@ -667,14 +666,19 @@ void App::render_scene() {
 
   // DrawCube({-10, -15, -20}, 20, 30, 40, RED);
   for (auto &object : state.objects) {
+
+    for (int j = 0; j < object.model_ref.model.groupCount; j++) {
+      rlmSetMaterialDefShader(&object.model_ref.model.groups[j].material, assets.skinning_shader);
+    }
+
     if (object.current_animation != -1) {
       object.current_animation_frame += 1;
-      if (object.current_animation_frame >= object.model_ref.animations[object.current_animation].keyframeCount)
+      if (object.current_animation_frame >= object.model_ref.anim_inst.sequences->sequences[object.current_animation].keyframeCount)
         object.current_animation_frame = 0;
-      UpdateModelAnimation(object.model_ref.model, object.model_ref.animations[object.current_animation], object.current_animation_frame);
+      // UpdateModelAnimation(object.model_ref.model, object.model_ref.anim_inst.sequences[object.current_animation], object.current_animation_frame);
+      rlmAdvanceAnimationInstance(&object.model_ref.anim_inst, GetFrameTime());
     }
-    DrawModel(object.model_ref.model, Vector3{0, 0, 0}, 1, WHITE);
-    DrawModelSkeleton(object.model_ref.model.skeleton, object.model_ref.model.currentPose, 1, RED);
+    rlmDrawModelWithPose(object.model_ref.model, rlmPQSIdentity(), &object.model_ref.anim_inst.currentPose);
   }
   EndMode3D();
 
@@ -682,13 +686,14 @@ void App::render_scene() {
     WorldObject &object = state.objects[state.selected_object];
     BoundingBox bb = object.model_ref.bounding_box;
     Vector3 size = Vector3{fabsf(bb.max.x - bb.min.x), fabsf(bb.max.y - bb.min.y), fabsf(bb.max.z - bb.min.z)};
+    Matrix transform = rlmPQSToMatrix(&object.model_ref.model.orientationTransform);
     // clang-format off
     preview_box.transform = MatrixMultiply(
       MatrixMultiply(
         MatrixScale(size.x, size.y, size.z),
         MatrixTranslate(bb.min.x + size.x/2.0f, bb.min.y + size.y/2.0f, bb.min.z + size.z/2.0f)
       ),
-      object.model_ref.model.transform
+      transform
     );
     // clang-format on
     // preview_box.transform = MatrixScale(bb.max.x + bb.min.x, bb.max.y, bb.max.z);
@@ -740,13 +745,17 @@ void App::render_scene() {
     );
     // clang-format on
 
+    Matrix matTransform = rlmPQSToMatrix(&object.model_ref.model.orientationTransform);
     // because of different matrix spec i transpose matrix back and forth (otherwise it skews instead of moving object)
-    ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(state.selected_object_transform), NULL, use_snaping ? (float *)&snapping : NULL);
-    glm::mat4x4 rltransform = glm::transpose(state.selected_object_transform);
-    object.model_ref.model.transform = *(Matrix *)&rltransform;
+    glm::mat4x4 rltransform = *(glm::mat4x4 *)&matTransform;
+    rltransform = glm::transpose(rltransform);
+    ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(rltransform), NULL, use_snaping ? (float *)&snapping : NULL);
+    rltransform = glm::transpose(rltransform);
+    matTransform = *(Matrix *)&rltransform;
+    object.model_ref.model.orientationTransform = rlmPQSFromMatrix(matTransform);
   }
 
-  handle_object_selection();
+  // handle_object_selection();
 
 #ifndef NDEBUG
   if (debug_mode) {

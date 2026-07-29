@@ -718,7 +718,7 @@ bool App::save_app() {
       yyjson_mut_val *position_val = yyjson_mut_obj_add_arr(doc, object_val, "position");
       yyjson_mut_val *rotation_val = yyjson_mut_obj_add_arr(doc, object_val, "rotation");
       yyjson_mut_val *scale_val = yyjson_mut_obj_add_arr(doc, object_val, "scale");
-      json_set_vector3(doc, position_val, object.transform.translation.x, object.transform.translation.y, object.transform.translation.z);
+      json_set_vector3(doc, position_val, object.transform.position.x, object.transform.position.y, object.transform.position.z);
       json_set_vector3(doc, rotation_val, object.transform.rotation.x, object.transform.rotation.y, object.transform.rotation.z);
       json_set_vector3(doc, scale_val, object.transform.scale.x, object.transform.scale.y, object.transform.scale.z);
     }

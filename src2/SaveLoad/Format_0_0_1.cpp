@@ -1,8 +1,9 @@
+#include "rlModels.h"
+#include <App.hpp>
 #include <AssetMgr/ModelMgr.hpp>
+#include <SaveLoad/Format.hpp>
 #include <raylib.h>
 #include <raymath.h>
-#include <App.hpp>
-#include <SaveLoad/Format.hpp>
 #include <stdio.h>
 #include <yyjson.h>
 #include <zip.h>
@@ -64,20 +65,13 @@ bool scene_loader_0_0_1(SavableState *state, AppMetadata *meta, yyjson_val *root
     ModelRef model_ref = state->model_mgr.take_model(yyjson_get_str(model_val), state->objects.size());
 
     // clang-format off
-    Transform transform = Transform{
-      .translation = Vector3{pos_x, pos_y, pos_z},
+    rlmPQSTransorm transform{
+      .position = Vector3{pos_x, pos_y, pos_z},
       .rotation = QuaternionFromEuler(DEG2RAD * rot_x, DEG2RAD * rot_y, DEG2RAD * rot_z),
       .scale = Vector3{scale_x, scale_y, scale_z}
     };
     // clang-format on
-    Matrix matTranslation = MatrixTranslate(transform.translation.x, transform.translation.y, transform.translation.z);
-    Matrix matRotation = QuaternionToMatrix(transform.rotation);
-    Matrix matScale = MatrixScale(transform.scale.x, transform.scale.y, transform.scale.z);
-
-    Matrix matTransform = MatrixMultiply(matScale, matRotation);
-    matTransform = MatrixMultiply(matTransform, matTranslation);
-    model_ref.model.transform = matTransform;
-
+    model_ref.model.orientationTransform = transform;
     state->objects.push_back(WorldObject{.transform = transform, .model_ref = std::move(model_ref)});
   }
   json_iter_end();

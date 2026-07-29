@@ -10,7 +10,7 @@ struct AnimatedModel {
   BoundingBox bounding_box;
   RenderTexture target;
 
-  rlmModelAnimationSet animations;
+  rlmModelAnimationSet *animations;
   std::unordered_set<int> refs;
   rlmModel model = {0};
 };
@@ -22,7 +22,7 @@ public:
   BoundingBox bounding_box;
   std::string name;
   rlmModel model = {0};
-  rlmAnimatedModelInstance anim_inst;
+  rlmAnimatedModelInstance anim_inst = {0};
 
   ModelRef() = default;
   // ~ModelRef();

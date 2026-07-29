@@ -13,10 +13,11 @@ ModelRef::ModelRef(AnimatedModel &model_, const std::string &name) {
   model = rlmCloneModel(model_.model);
   owns_model = true;
   texture_id = model_.target.texture.id;
-  anim_inst.sequences = &model_.animations;
+  anim_inst.sequences = model_.animations;
   anim_inst.interpolate = true;
   anim_inst.currentFrame = 0;
-  anim_inst.currentPose = rlmLoadPoseFromModel(model_.model);
+  anim_inst.currentPose = rlmLoadPoseFromModel(model);
+  anim_inst.model = &model;
   bounding_box = model_.bounding_box;
   this->name = name;
 }
@@ -27,7 +28,8 @@ ModelRef::ModelRef(ModelRef &other) {
   texture_id = other.texture_id;
   bounding_box = other.bounding_box;
   anim_inst = other.anim_inst;
-  anim_inst.currentPose = rlmLoadPoseFromModel(other.model);
+  anim_inst.currentPose = rlmLoadPoseFromModel(model);
+  anim_inst.model = &model;
   name = other.name;
 }
 
@@ -38,7 +40,8 @@ ModelRef &ModelRef::operator=(ModelRef &other) {
     texture_id = other.texture_id;
     bounding_box = other.bounding_box;
     anim_inst = other.anim_inst;
-    anim_inst.currentPose = rlmLoadPoseFromModel(other.model);
+    anim_inst.currentPose = rlmLoadPoseFromModel(model);
+    anim_inst.model = &model;
     name = other.name;
   }
   return *this;
@@ -50,6 +53,7 @@ ModelRef::ModelRef(ModelRef &&other) noexcept {
   texture_id = other.texture_id;
   bounding_box = other.bounding_box;
   anim_inst = other.anim_inst;
+  anim_inst.model = &model;
   name = std::move(other.name);
   other.owns_model = false;
 }
@@ -61,7 +65,7 @@ ModelRef &ModelRef::operator=(ModelRef &&other) noexcept {
     texture_id = other.texture_id;
     bounding_box = other.bounding_box;
     anim_inst = other.anim_inst;
-    name = other.name;
+    anim_inst.model = &model;
     name = std::move(other.name);
     other.owns_model = false;
   }
@@ -84,6 +88,10 @@ void ModelMgr::setup() {
 
   Model immodel = LoadModelFromMesh(GenMeshCube(1, 1, 1));
   immodel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = placeholder_texture;
+  RenderTexture target = LoadRenderTexture(100, 100);
+  util_get_model_preview(immodel, target);
+
+  rlmModelAnimationSet *animations = new rlmModelAnimationSet;
 
   // clang-format off
   AnimatedModel default_{
@@ -91,15 +99,12 @@ void ModelMgr::setup() {
       Vector3{-0.5, -0.5, -0.5},
       Vector3{0.5, 0.5, 0.5}
     },
-    .target = LoadRenderTexture(100, 100),
-    .animations = {
-      0, nullptr
-    },
+    .target = target,
+    .animations = animations,
     .model = rlmLoadFromModel(immodel)};
   // clang-format on
 
   models["default"] = default_;
-  util_get_model_preview(immodel, default_.target);
 
   placeholder_texture = LoadTextureFromImage(placeholder_);
 }
@@ -109,7 +114,7 @@ ModelMgr::~ModelMgr() {
     return;
 
   for (auto &[name, model] : models) {
-    rlmUnloadAnimationSet(&model.animations);
+    rlmUnloadAnimationSet(model.animations);
     rlmUnloadModel(&model.model);
     std::cerr << "Unloaded model: " << name << " (destruction)\n";
   }
@@ -141,8 +146,8 @@ void ModelMgr::unload_model(const std::string &name) {
   auto idx = models.find(name);
   if (idx != models.end()) {
     AnimatedModel &model = models[name];
-    if (model.animations.sequenceCount)
-      rlmUnloadAnimationSet(&model.animations);
+    if (model.animations->sequenceCount)
+      rlmUnloadAnimationSet(model.animations);
     rlmUnloadModel(&model.model);
     UnloadRenderTexture(model.target);
     std::cerr << "Unloaded model: " << name << "\n";
@@ -206,7 +211,18 @@ bool ModelMgr::load_model(const std::string &filepath) {
     immodel.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = placeholder_texture;
   }
 
+  RenderTexture target;
+  BoundingBox bb;
+  target = LoadRenderTexture(100, 100);
+  SetTextureFilter(target.texture, TEXTURE_FILTER_BILINEAR); // blurry instead of pixelated
+  util_get_model_preview(immodel, target, &bb);
+
+  rlmModelAnimationSet *animations_ = new rlmModelAnimationSet;
+
   AnimatedModel model{
+      .bounding_box = bb,
+      .target = target,
+      .animations = animations_,
       .model = rlmLoadFromModel(immodel),
   };
 
@@ -217,12 +233,8 @@ bool ModelMgr::load_model(const std::string &filepath) {
   //   return false;
   // }
 
-  ModelAnimation *animations = LoadModelAnimations(filepath.c_str(), &model.animations.sequenceCount);
-  model.animations.sequences = rlmLoadModelAnimations(model.model.skeleton, animations, model.animations.sequenceCount);
-
-  model.target = LoadRenderTexture(100, 100);
-  SetTextureFilter(model.target.texture, TEXTURE_FILTER_BILINEAR); // blurry instead of pixelated
-  util_get_model_preview(immodel, model.target, &model.bounding_box);
+  ModelAnimation *animations = LoadModelAnimations(filepath.c_str(), &model.animations->sequenceCount);
+  model.animations->sequences = rlmLoadModelAnimations(model.model.skeleton, animations, model.animations->sequenceCount);
 
   models[name] = model;
   std::cerr << "Loaded new model: " << name << "\n";
